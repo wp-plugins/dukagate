@@ -1,10 +1,10 @@
 === Dukagate ===
 Contributors: rixed
-Tags: shopping cart, web shop, cart, shop,Paypal,paypal, e-commerce, ecommerce
+Tags: shopping cart, web shop, cart, shop,Paypal,paypal,Pesapal, e-commerce, ecommerce
 
 Requires at least: 3.0
 Tested up to: 3.3.1
-Stable tag: 1.0.0
+Stable tag: 1.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -31,10 +31,17 @@ Main Features:
 * Easy to translate into your own language
 
 == Installation ==
+Please bear with us as we do better documentation. As for now, this is what we have for version 1. Thank you
 
 1. Upload the Dukagate folder to the `/wp-content/plugins/` directory
-1. Activate the plugin through the 'Plugins' menu in WordPress
-
+2. Activate the plugin through the 'Plugins' menu in WordPress
+3. Once ethe plugin is activated there will be an admin section where you can configure your cart and also a section to set up your products. 
+4. Displaying products
+	* Normal List. Use the shortcode [dg_display_products] to display your products on a page. Parameters are total (number to display), top (number to appear on the top), order (Product order), image_width (Product image width), image_height (product image height)
+	* Grouped Products. Use the shortcode [dg_group_display] to display grouped products on a page as a list and [dg_group_grid] to display them as a grid. Parameters are : parent (parent ids to include), child (child ids to include)
+5. Cart checkout page shortcode is [dg_display_cart_checkout]
+6. Checkout link shortcode [dg_display_checkout_link] to just show a link to the checkout page
+7. Thank you page shortcode is [dg_display_thankyou]
 
 == Frequently Asked Questions ==
 
@@ -56,5 +63,8 @@ We test Dukagate on a large number of different server set-ups and envrionments 
 
 == Changelog ==
 
-= 1.0.0 =
+= 1.0 =
 Dukagate is brand new.  As such you won't be upgrading but joining our handsomely awesome family. We will be upgrading and fixes bugs as we improve the plugin
+
+= 1.1 =
+Some documenation on the shortcodes and set up. Still working on it
