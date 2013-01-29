@@ -1,0 +1,539 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: Kelvin Jayanoris <duka@dukapress.org>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:42
+#: dukagate/dukagate/dukagate-admin.php:53
+msgid "Actions"
+msgstr "Actions"
+
+#. Text in function
+#: dukagate/dukagate/dukagate-init.php:1
+msgid "Add New Product"
+msgstr "Ajouter un Nouveau Produit"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:492
+msgid "Address"
+msgstr "Votre Adresse"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:386
+msgid "Admin Mail"
+msgstr "Email de l'Administrateur"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-init.php:173
+msgid "Affiliate URL:"
+msgstr "Url d'Affiliation"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:39
+#: dukagate/dukagate/dukagate-admin.php:50
+msgid "Amount"
+msgstr "Montant"
+
+#. Text in function
+#: dukagate/dukagate/dukagate-admin.php:1
+msgid "Check Out Settings"
+msgstr ""
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:546
+msgid "Checkout Page"
+msgstr "Page de Paiement"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:504
+msgid "City / Town"
+msgstr "Ville"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:360
+msgid "Click to show/hide"
+msgstr "Cliquez pour montrer/cacher"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:219
+msgid "Click to show/hide settings"
+msgstr "Cliquez pour montrer/cacher les réglages"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:508
+msgid "Country "
+msgstr "Pays"
+
+#. Text in function
+#: dukagate/dukagate/dukagate-init.php:1
+msgid "Create New Product"
+msgstr "Créer un Nouveau Produit"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:524
+msgid "Currency "
+msgstr "Devise"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:538
+msgid "Currency Symbol"
+msgstr "Symbole de la Devise"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:38
+#: dukagate/dukagate/dukagate-admin.php:49
+msgid "Date"
+msgstr "Date"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:103
+msgid "Date Created"
+msgstr "Date de Création"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:69
+msgid "Delete"
+msgstr "Supprimer"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-init.php:169
+msgid "Digital File:"
+msgstr "Fichier Numérique"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-product-widget.php:66
+msgid "Discount:"
+msgstr "Remise"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:269
+msgid "Dukagate Check Out Page Settings"
+msgstr "Page de Paiement de DukaGate"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:349
+msgid "Dukagate Mail Settings"
+msgstr "Options d'Email de DukaGate"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:31
+msgid "Dukagate Order Log"
+msgstr "Archives des commandes passées"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:211
+msgid "Dukagate Payment Plugins"
+msgstr "Plugin de Paiement DukaGate"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:483
+msgid "Dukagate Settings"
+msgstr "Réglages de DukaGate"
+
+#. Text in function
+#: dukagate/dukagate/dukagate-init.php:1
+msgid "Edit Product"
+msgstr "Créez le produit"
+
+#. Text in function
+#: dukagate/dukagate/dukagate-init.php:1
+msgid "Edit Products"
+msgstr "Créez vos Produits"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:163
+#: dukagate/dukagate/dukagate-init.php:177
+msgid "Email"
+msgstr "Email"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:377
+msgid "Email Subject"
+msgstr "Intitulé du Mail"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:368
+msgid "Email To"
+msgstr "Adresse d'envoi du Mail"
+
+#. Text in echo
+#: dukagate/dukagate/plugins-gateway/paypal.php:184
+msgid "Enable"
+msgstr "Choisir"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:274
+msgid "First Name and Email are already mandatory checkout fields "
+msgstr "Les champs Prénom et Email sont déjà inclus et marqués obligatoire"
+
+#. Text in function
+#: dukagate/dukagate/dukagate-init.php:177
+msgid "Full Names "
+msgstr "Nom Complet"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-product-widget.php:78
+msgid "Image Height:"
+msgstr "Hauteur de l'image "
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-product-widget.php:70
+msgid "Image URL:"
+msgstr "Url de l'image"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-product-widget.php:74
+msgid "Image Width:"
+msgstr "Largeur de l'image"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:282
+#: dukagate/dukagate/dukagate-admin.php:293
+msgid "Initial Value"
+msgstr "Valeur par défaut"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:37
+#: dukagate/dukagate/dukagate-admin.php:48
+#: dukagate/dukagate/dukagate-admin.php:95
+msgid "Invoice"
+msgstr "Facture"
+
+#. Text in function
+#: dukagate/dukagate/dukagate-admin.php:1
+msgid "Mail Settings"
+msgstr "Réglages Email"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-products.php:44
+msgid "Make Payment"
+msgstr "Procéder au Paiement"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:283
+#: dukagate/dukagate/dukagate-admin.php:294
+msgid "Mandatory"
+msgstr "Champ obligatoire"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:40
+#: dukagate/dukagate/dukagate-admin.php:51
+msgid "Mode"
+msgstr "Mode"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:279
+#: dukagate/dukagate/dukagate-admin.php:290
+msgid "Name"
+msgstr "Nom"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:488
+msgid "Name of shop"
+msgstr "Nom de la Boutique"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:159
+msgid "Names"
+msgstr "Noms"
+
+#. Text in function
+#: dukagate/dukagate/dukagate-init.php:1
+msgid "New Product"
+msgstr "Nouveau Produit"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:424
+msgid "No Mail Settings Found!!"
+msgstr "Il n'y a pas de réglages d'Email!"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:417
+msgid "No Payment Gateways Found!!"
+msgstr "Il n'y a pas de page de paiement!"
+
+#. Text in function
+#: dukagate/dukagate/dukagate-init.php:1
+msgid "No Products Found"
+msgstr "Il n'y a pas de produit"
+
+#. Text in function
+#: dukagate/dukagate/dukagate-init.php:1
+msgid "No Products found in Trash"
+msgstr "Il n'y a pas de produit dans la poubelle"
+
+#. Text in function
+#: dukagate/dukagate/dukagate-admin.php:77
+msgid "No Records found"
+msgstr "pas d'archives"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:155
+msgid "Order Info"
+msgstr "Informations de commande"
+
+#. Text in function
+#: dukagate/dukagate/dukagate-admin.php:1
+msgid "Order Log"
+msgstr "Archives de Commandes"
+
+#. Text in function
+#: dukagate/dukagate/dukagate-init.php:177
+msgid "Pay Using "
+msgstr "Payez en utilisant:"
+
+#. Text in function
+#: dukagate/dukagate/plugins-gateway/paypal.php:1
+msgid "PayPal"
+msgstr "Paypal"
+
+#. Text in echo
+#: dukagate/dukagate/plugins-gateway/paypal.php:162
+msgid "PayPal Credentials"
+msgstr "PayPal Credentials"
+
+#. Text in echo
+#: dukagate/dukagate/plugins-gateway/paypal.php:170
+msgid "PayPal Currency"
+msgstr "Devise du compte Paypal"
+
+#. Text in echo
+#: dukagate/dukagate/plugins-gateway/paypal.php:165
+msgid "PayPal ID"
+msgstr "Identifiant Paypal"
+
+#. Text in echo
+#: dukagate/dukagate/plugins-gateway/paypal.php:152
+msgid "PayPal Settings"
+msgstr "Réglages de Paypal"
+
+#. Text in function
+#: dukagate/dukagate/dukagate-admin.php:1
+msgid "Payment Options"
+msgstr "Option de Paiement"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:500
+msgid "Postal Code"
+msgstr "Code Postal"
+
+#. Text in function
+#: dukagate/dukagate/dukagate-cart.php:1
+#: dukagate/dukagate/dukagate-admin.php:166
+#: dukagate/dukagate/dukagate-products.php:41
+#: dukagate/dukagate/dukagate-shortcodes.php:1
+#: dukagate/dukagate/dukagate-init.php:177
+msgid "Price"
+msgstr "Prix"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-product-widget.php:62
+#: dukagate/dukagate/dukagate-init.php:161
+msgid "Price:"
+msgstr "Prix:"
+
+#. Text in function
+#: dukagate/dukagate/dukagate-init.php:177
+msgid "Process Payment"
+msgstr "Procédez au Paiement"
+
+#. Text in function
+#: dukagate/dukagate/dukagate-cart.php:1
+#: dukagate/dukagate/dukagate-admin.php:166
+#: dukagate/dukagate/dukagate-shortcodes.php:1
+#: dukagate/dukagate/dukagate-init.php:1
+#: dukagate/dukagate/dukagate-init.php:177
+msgid "Product"
+msgstr "Produit"
+
+#. Text in function
+#: dukagate/dukagate/dukagate-init.php:1
+msgid "Product Details"
+msgstr "Détails du Produit"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-product-widget.php:54
+msgid "Product Name:"
+msgstr "Nom du Produit"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:111
+#: dukagate/dukagate/dukagate-init.php:1
+msgid "Products"
+msgstr "Produits"
+
+#. Text in function
+#: dukagate/dukagate/dukagate-init.php:1
+msgid "Products for your Dukagate store."
+msgstr "Produits de votre boutique DukaGate"
+
+#. Text in function
+#: dukagate/dukagate/dukagate-cart.php:1
+#: dukagate/dukagate/dukagate-admin.php:166
+#: dukagate/dukagate/dukagate-shortcodes.php:1
+#: dukagate/dukagate/dukagate-init.php:177
+msgid "Quantity"
+msgstr "Quantité"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-product-widget.php:58
+#: dukagate/dukagate/dukagate-init.php:165
+msgid "SKU:"
+msgstr "ID classe Produit"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:273
+msgid "Save Options"
+msgstr "Sauvegarder les Options"
+
+#. Text in echo
+#: dukagate/dukagate/plugins-gateway/paypal.php:192
+msgid "Save Settings"
+msgstr "Sauvegarder les Réglages"
+
+#. Text in function
+#: dukagate/dukagate/dukagate-init.php:1
+msgid "Search Products"
+msgstr "Recherche de Produits"
+
+#. Text in echo
+#: dukagate/dukagate/plugins-gateway/paypal.php:187
+msgid "Select To enable or disable"
+msgstr "Cochez pour Activer ou Désactiver"
+
+#. Text in function
+#: dukagate/dukagate/dukagate-admin.php:1
+msgid "Settings"
+msgstr ""
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:496
+msgid "State / Province"
+msgstr "État / Département"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:41
+#: dukagate/dukagate/dukagate-admin.php:52
+#: dukagate/dukagate/dukagate-admin.php:99
+msgid "Status"
+msgstr "Status"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:566
+msgid "Thank You Page"
+msgstr "Page de Remerciement"
+
+#. Text in function
+#: dukagate/dukagate/dukagate-shortcodes.php:1
+msgid "Thank you for making the payment of"
+msgstr "Merci pour votre paiement de"
+
+#. Text in function
+#: dukagate/dukagate/dukagate-cart.php:1
+msgid "There are no items in your cart"
+msgstr "Il n'y a pas de produit"
+
+#. Text in function
+#: dukagate/dukagate/dukagate-shortcodes.php:1
+msgid "There was an error processing your payment"
+msgstr "Une erreurs est survenue durant le paiement"
+
+#. Text in function
+#: dukagate/dukagate/dukagate-cart.php:1
+#: dukagate/dukagate/dukagate-admin.php:107
+#: dukagate/dukagate/dukagate-admin.php:166
+#: dukagate/dukagate/dukagate-shortcodes.php:1
+#: dukagate/dukagate/dukagate-init.php:177
+msgid "Total"
+msgstr "Total"
+
+#. Text in function
+#: dukagate/dukagate/dukagate-cart.php:1
+msgid "Total Discount"
+msgstr "Discount Total"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:280
+#: dukagate/dukagate/dukagate-admin.php:291
+msgid "Type"
+msgstr "Type"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:281
+#: dukagate/dukagate/dukagate-admin.php:292
+msgid "Unique Name"
+msgstr "Nom Unique"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:421
+msgid "Update Email Settings"
+msgstr "Mettre à jour les réglages d'Email"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:542
+msgid "Use Custom Product Posts"
+msgstr "Mettre DukaGate dans les postes"
+
+#. Text in echo
+#: dukagate/dukagate/plugins-gateway/paypal.php:155
+msgid "Use PayPal Sandbox"
+msgstr "Utiliser Paypal Sandbox"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-product-widget.php:82
+msgid "Use as background image:"
+msgstr "Image de fond"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:398
+msgid "User Mail"
+msgstr "Mail d'utilisateur"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:69
+msgid "View"
+msgstr "Voir"
+
+#. Text in function
+#: dukagate/dukagate/dukagate-init.php:1
+msgid "View Product"
+msgstr "Voir le Produit"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:92
+msgid "Viewing order "
+msgstr "Vue de Commande"
+
+#. Text in echo
+#: dukagate/dukagate/dukagate-admin.php:284
+#: dukagate/dukagate/dukagate-admin.php:295
+msgid "Visible"
+msgstr "Visible"
+
+#. Text in function
+#: dukagate/dukagate/dukagate-shortcodes.php:1
+msgid "We will process your order soon."
+msgstr "Nous traiterons votre commande dans les meilleurs délais "
+
+#. Text in function
+#: dukagate/dukagate/plugins-gateway/paypal.php:1
+msgid "paypal"
+msgstr "paypal"
+
+#. Text in function
+#: dukagate/dukagate/dukagate-product-widget.php:1
+msgid "title"
+msgstr "titre"
+
+#. Text in function
+#: dukagate/dukagate/dukagate-shortcodes.php:1
+msgid "using"
+msgstr "Utilisant"
+
