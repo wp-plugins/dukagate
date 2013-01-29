@@ -34,16 +34,9 @@ Main Features:
 
 1. Upload the Dukagate folder to the `/wp-content/plugins/` directory
 1. Activate the plugin through the 'Plugins' menu in WordPress
-1. Make sure your web host allows scripts like timthumb.php to run on your site.  If they don't, your Dukagate images will be broken.
 
 
 == Frequently Asked Questions ==
-
-= What don't the images work? =
-
-
-Unfortunately, for security reasons, web hosts sometimes disable timthumb from working.  This is the script that handles images in Dukagate.  To fix this, kindly ask your webhost to allow timthumb to work.  All the good webhosts will do this for you in two minutes!
-
 
 = Why is the make payment button not working? =
 
