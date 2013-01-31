@@ -41,8 +41,8 @@ class DukaGate_GateWay_PesaPal extends DukaGate_GateWay_API{
 		//Set Pesapal transaction ID field
 		$this->add_column();
 		
-		require_once(DG_GATEWAYS.'libraries/pesapal/OAuth.php');
-		require_once(DG_GATEWAYS.'libraries/pesapal/class.XMLHttpRequest.php');
+		//require_once(DG_GATEWAYS.'libraries/pesapal/OAuth.php');
+		//require_once(DG_GATEWAYS.'libraries/pesapal/class.XMLHttpRequest.php');
 		
 		add_action( 'pesapal_per_minute_event', array(&$this, 'cron'));
 		add_action( 'dg_pesapal', array(&$this, 'activation'));

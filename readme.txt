@@ -3,8 +3,8 @@ Contributors: rixed
 Tags: shopping cart, web shop, cart, shop,Paypal,paypal,Pesapal, e-commerce, ecommerce
 
 Requires at least: 3.0
-Tested up to: 3.3.1
-Stable tag: 1.1
+Tested up to: 3.3.2
+Stable tag: 1.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -16,6 +16,7 @@ Dukagate is open source software that can be used to build online shops quickly 
 
 Main Features:
 
+* Everything is customizable
 * You can sell tangible regular products;
 * You can sell tangible products with selectable options (size, colour, etc);
 * You can sell digital products;
@@ -29,6 +30,8 @@ Main Features:
 * A myriad of shipping processing options;
 * Custom GUI (Graphical User Interface) for product management;
 * Easy to translate into your own language
+
+There are still many more features we are working on that are yet to come
 
 == Installation ==
 Please bear with us as we do better documentation. As for now, this is what we have for version 1. Thank you
@@ -59,7 +62,14 @@ We test Dukagate on a large number of different server set-ups and envrionments 
 
 
 == Screenshots ==
-
+1. Order Log
+2. Payment plugins settings
+3. Settings Page
+4. Mail Settings (Mail content)
+5. Advanced Settings
+6. Check Out settings
+7. Product Management
+8. Sample product with a widget product
 
 == Changelog ==
 
@@ -68,3 +78,6 @@ Dukagate is brand new.  As such you won't be upgrading but joining our handsomel
 
 = 1.1 =
 Some documenation on the shortcodes and set up. Still working on it
+
+= 1.2 =
+Fixed Pesapal bugs, need to work on the shopping cart ajax and finalise some payment options

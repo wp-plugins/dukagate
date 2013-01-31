@@ -85,7 +85,7 @@ if(!class_exists('DukaGate')) {
 		//Load up styles
 		function set_up_styles(){
 			if(is_admin()){
-				wp_enqueue_style('dg_admin_css', DG_DUKAGATE_URL.'/css/dukagate_admin.php');
+				wp_enqueue_style('dg_admin_css', DG_DUKAGATE_URL.'/css/dukagate_admin.css');
 			}else{
 				wp_enqueue_style('dukagate_css', DG_DUKAGATE_URL.'/css/dukagate.css');
 			}

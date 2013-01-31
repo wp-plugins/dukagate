@@ -387,56 +387,56 @@ function dg_dukagate_checkout(){
 							<td><?php _e("Text ","dg-lang"); ?></td>
 							<td><?php _e("dg_fullname","dg-lang"); ?></td>
 							<td><?php _e("None ","dg-lang"); ?></td>
-							<td><input type="checkbox" value="checked" name="dg_fullname_mandatory" <?php echo ($dg_form_elem['dg_fullname_mandatory'] == 'checked') ? "checked='checked'": ""; ?> /></td>
-							<td><input type="checkbox" value="checked" name="dg_fullname_visible" <?php echo ($dg_form_elem['dg_fullname_visible'] == 'checked') ? "checked='checked'": ""; ?> /></td>
+							<td><input type="checkbox" value="checked" name="dg_fullname_mandatory" <?php echo (@$dg_form_elem['dg_fullname_mandatory'] == 'checked') ? "checked='checked'": ""; ?> /></td>
+							<td><input type="checkbox" value="checked" name="dg_fullname_visible" <?php echo (@$dg_form_elem['dg_fullname_visible'] == 'checked') ? "checked='checked'": ""; ?> /></td>
 						</tr>
 						<tr>
 							<td><?php _e("First Name ","dg-lang"); ?></td>
 							<td><?php _e("Text ","dg-lang"); ?></td>
 							<td><?php _e("dg_firstname","dg-lang"); ?></td>
 							<td><?php _e("None ","dg-lang"); ?></td>
-							<td><input type="checkbox" value="checked" name="dg_firstname_mandatory" <?php echo ($dg_form_elem['dg_firstname_mandatory'] == 'checked') ? "checked='checked'": ""; ?> /></td>
-							<td><input type="checkbox" value="checked" name="dg_firstname_visible" <?php echo ($dg_form_elem['dg_firstname_visible']== 'checked') ? "checked='checked'": ""; ?> /></td>
+							<td><input type="checkbox" value="checked" name="dg_firstname_mandatory" <?php echo (@$dg_form_elem['dg_firstname_mandatory'] == 'checked') ? "checked='checked'": ""; ?> /></td>
+							<td><input type="checkbox" value="checked" name="dg_firstname_visible" <?php echo (@$dg_form_elem['dg_firstname_visible']== 'checked') ? "checked='checked'": ""; ?> /></td>
 						</tr>
 						<tr>
 							<td><?php _e("Last Name ","dg-lang"); ?></td>
 							<td><?php _e("Text ","dg-lang"); ?></td>
 							<td><?php _e("dg_lastname","dg-lang"); ?></td>
 							<td><?php _e("None ","dg-lang"); ?></td>
-							<td><input type="checkbox" value="checked" name="dg_lastname_mandatory" <?php echo ($dg_form_elem['dg_lastname_mandatory'] == 'checked') ? "checked='checked'": ""; ?> /></td>
-							<td><input type="checkbox" value="checked" name="dg_lastname_visible" <?php echo ($dg_form_elem['dg_lastname_visible']== 'checked') ? "checked='checked'": ""; ?> /></td>
+							<td><input type="checkbox" value="checked" name="dg_lastname_mandatory" <?php echo (@$dg_form_elem['dg_lastname_mandatory'] == 'checked') ? "checked='checked'": ""; ?> /></td>
+							<td><input type="checkbox" value="checked" name="dg_lastname_visible" <?php echo (@$dg_form_elem['dg_lastname_visible']== 'checked') ? "checked='checked'": ""; ?> /></td>
 						</tr>
 						<tr>
 							<td><?php _e("Email ","dg-lang"); ?></td>
 							<td><?php _e("Text ","dg-lang"); ?></td>
 							<td><?php _e("dg_email","dg-lang"); ?></td>
 							<td><?php _e("None ","dg-lang"); ?></td>
-							<td><input type="checkbox" value="checked" name="dg_email_mandatory" <?php echo ($dg_form_elem['dg_email_mandatory'] == 'checked') ? "checked='checked'": ""; ?> /></td>
-							<td><input type="checkbox" value="checked" name="dg_email_visible" <?php echo ($dg_form_elem['dg_email_visible']== 'checked') ? "checked='checked'": ""; ?> /></td>
+							<td><input type="checkbox" value="checked" name="dg_email_mandatory" <?php echo (@$dg_form_elem['dg_email_mandatory'] == 'checked') ? "checked='checked'": ""; ?> /></td>
+							<td><input type="checkbox" value="checked" name="dg_email_visible" <?php echo (@$dg_form_elem['dg_email_visible']== 'checked') ? "checked='checked'": ""; ?> /></td>
 						</tr>
 						<tr>
 							<td><?php _e("Phone ","dg-lang"); ?></td>
 							<td><?php _e("Text ","dg-lang"); ?></td>
 							<td><?php _e("dg_phone","dg-lang"); ?></td>
 							<td><?php _e("None ","dg-lang"); ?></td>
-							<td><input type="checkbox" value="checked" name="dg_phone_mandatory" <?php echo ($dg_form_elem['dg_phone_mandatory'] == 'checked') ? "checked='checked'": ""; ?> /></td>
-							<td><input type="checkbox" value="checked" name="dg_phone_visible" <?php echo ($dg_form_elem['dg_phone_visible']== 'checked') ? "checked='checked'": ""; ?> /></td>
+							<td><input type="checkbox" value="checked" name="dg_phone_mandatory" <?php echo (@$dg_form_elem['dg_phone_mandatory'] == 'checked') ? "checked='checked'": ""; ?> /></td>
+							<td><input type="checkbox" value="checked" name="dg_phone_visible" <?php echo (@$dg_form_elem['dg_phone_visible']== 'checked') ? "checked='checked'": ""; ?> /></td>
 						</tr>
 						<tr>
 							<td><?php _e("Country ","dg-lang"); ?></td>
 							<td><?php _e("Select ","dg-lang"); ?></td>
 							<td><?php _e("dg_country","dg-lang"); ?></td>
 							<td>--<?php _e("Country ","dg-lang"); ?>--</td>
-							<td><input type="checkbox" value="checked" name="dg_country_mandatory" <?php echo ($dg_form_elem['dg_country_mandatory'] == 'checked') ? "checked='checked'": ""; ?> /></td>
-							<td><input type="checkbox" value="checked" name="dg_country_visible" <?php echo ($dg_form_elem['dg_country_visible']== 'checked') ? "checked='checked'": ""; ?> /></td>
+							<td><input type="checkbox" value="checked" name="dg_country_mandatory" <?php echo (@$dg_form_elem['dg_country_mandatory'] == 'checked') ? "checked='checked'": ""; ?> /></td>
+							<td><input type="checkbox" value="checked" name="dg_country_visible" <?php echo (@$dg_form_elem['dg_country_visible']== 'checked') ? "checked='checked'": ""; ?> /></td>
 						</tr>
 						<tr>
 							<td><?php _e("State ","dg-lang"); ?></td>
 							<td><?php _e("Text ","dg-lang"); ?></td>
 							<td><?php _e("dg_state","dg-lang"); ?></td>
 							<td><?php _e("None ","dg-lang"); ?></td>
-							<td><input type="checkbox" value="checked" name="dg_state_mandatory" <?php echo ($dg_form_elem['dg_state_mandatory'] == 'checked') ? "checked='checked'": ""; ?> /></td>
-							<td><input type="checkbox" value="checked" name="dg_state_visible" <?php echo ($dg_form_elem['dg_state_visible']== 'checked') ? "checked='checked'": ""; ?> /></td>
+							<td><input type="checkbox" value="checked" name="dg_state_mandatory" <?php echo (@$dg_form_elem['dg_state_mandatory'] == 'checked') ? "checked='checked'": ""; ?> /></td>
+							<td><input type="checkbox" value="checked" name="dg_state_visible" <?php echo (@$dg_form_elem['dg_state_visible']== 'checked') ? "checked='checked'": ""; ?> /></td>
 						</tr>
 						<?php
 							$total = 20;
@@ -748,7 +748,7 @@ function dg_dukagate_settings(){
 						<tr valign="top">
 							<th scope="row"><label for="discounts"><?php _e("Enable Discounts","dg-lang"); ?>: </label></th>
 							<td>
-								<input type="checkbox" value="checked" name="discounts" <?php echo ($dg_shop_settings['discounts'] == 'true') ? "checked='checked'": ""; ?>/>
+								<input type="checkbox" value="checked" name="discounts" <?php echo (@$dg_shop_settings['discounts'] == 'true') ? "checked='checked'": ""; ?>/>
 							</td>
 						</tr>
 					</tbody>
