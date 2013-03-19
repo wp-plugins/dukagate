@@ -63,7 +63,8 @@ if(!class_exists('DukaGate')) {
 						'tempfiles' => $wpdb->prefix . "dkgt_temp_file_log",
 						'payment' => $wpdb->prefix . "dkgt_payment_options",
 						'mail' => $wpdb->prefix . "dkgt_mail_settings",
-						'meta' => $wpdb->prefix . "dkgt_taxonomymeta"
+						'meta' => $wpdb->prefix . "dkgt_taxonomymeta",
+						'shipping' => $wpdb->prefix . "dkgt_shipping"
 						);
 		}
 		
@@ -834,7 +835,7 @@ if(!class_exists('DukaGate')) {
 			}
 			closedir( $dh );
 			sort( $plugins );
-			
+						
 			//include them suppressing errors
 			foreach ($plugins as $file){
 				include_once( $file );
@@ -851,6 +852,7 @@ if(!class_exists('DukaGate')) {
 					}
 				}
 			}
+			
 
 			//Instantiate classes
 			foreach ($classes as $class){

@@ -2,7 +2,7 @@
 /*
 Plugin Name: DukaGate Shopping Cart
 Description: DukaGate Shopping Cart
-Version: 1.0
+Version: 2.0
 Author: Paul Kevin
 */
 
