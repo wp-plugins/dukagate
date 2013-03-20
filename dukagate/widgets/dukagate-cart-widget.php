@@ -15,7 +15,7 @@ if(!class_exists('DukaGate_Cart_Widget')) {
 		
 		function widget($args, $instance) {
 			extract($args);
-			$title = empty( $instance['title'] ) ? '' : __($instance['title'],"dg-lang");
+			$title = empty( $instance['title'] ) ? '' : __($instance['title']);
 			echo $before_widget;
 			echo $before_title.$title.$after_title;
 			//Show cart
@@ -36,7 +36,7 @@ if(!class_exists('DukaGate_Cart_Widget')) {
 			$title 	= apply_filters('widget_title', @$instance['title']); // Widget Title
 			?>
 			<p>
-				<label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Widget Title:',"dg-lang");?></label>
+				<label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Widget Title:');?></label>
 				<input type="text" value="<?php echo $title; ?>" name="<?php echo $this->get_field_name('title'); ?>" id="<?php echo $this->get_field_id('title'); ?>" class="widefat" />
 			</p>
 			<?php

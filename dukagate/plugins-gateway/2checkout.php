@@ -23,8 +23,8 @@ class DukaGate_GateWay_2Checkout extends DukaGate_GateWay_API{
 	
 	//Default method called on create
 	function on_create(){
-		$this->plugin_name = __('2Checkout', 'dg-lang');
-		$this->plugin_slug = __('2Checkout', 'dg-lang');
+		$this->plugin_name = __('2Checkout');
+		$this->plugin_slug = __('2Checkout');
 		$this->required_fields = array(
 										'currency' => '',
 										'username' => '',
@@ -85,25 +85,25 @@ class DukaGate_GateWay_2Checkout extends DukaGate_GateWay_API{
 		<form method="POST" action="">
 			<table class="form-table">
 				<tr>
-				    <th scope="row"><?php _e('2Checkout Credentials', 'dg-lang') ?></th>
+				    <th scope="row"><?php _e('2Checkout Credentials') ?></th>
 				    <td>
 						<span class="description"><?php print sprintf(__('You must login to 2Checkout vendor dashboard to obtain the seller ID and secret word. <a target="_blank" href="%s">Instructions &raquo;</a>', 'mp'), "http://www.2checkout.com/community/blog/knowledge-base/suppliers/tech-support/3rd-party-carts/md5-hash-checking/where-do-i-set-up-the-secret-word"); ?></span>
 						<p>
-							<label><?php _e('Seller ID', 'dg-lang') ?><br />
+							<label><?php _e('Seller ID') ?><br />
 							  <input value="<?php echo $options['username']; ?>" size="30" name="<?php echo $plugin_slug; ?>_username" type="text" />
 							</label>
 						</p>
 						<p>
-							<label><?php _e('Secret word', 'dg-lang') ?><br />
+							<label><?php _e('Secret word') ?><br />
 							  <input value="<?php echo $options['password']; ?>" size="30" name="<?php echo $plugin_slug; ?>_password" type="text" />
 							</label>
 						</p>
 				    </td>
 				</tr>
 				<tr valign="top">
-					<th scope="row"><?php _e('2Checkout Currency', 'dg-lang') ?></th>
+					<th scope="row"><?php _e('2Checkout Currency') ?></th>
 					<td>
-						<span class="description"><?php _e('Selecting a currency other than that used for your store may cause problems at checkout.', 'dg-lang'); ?></span><br />
+						<span class="description"><?php _e('Selecting a currency other than that used for your store may cause problems at checkout.'); ?></span><br />
 						<select name="<?php echo $plugin_slug; ?>_currency">
 							<?php
 							$sel_currency = $options['currency'];
@@ -115,15 +115,15 @@ class DukaGate_GateWay_2Checkout extends DukaGate_GateWay_API{
 					</td>
 				</tr>
 				<tr>
-				    <th scope="row"><?php _e('Enable', 'dg-lang') ?></th>
+				    <th scope="row"><?php _e('Enable') ?></th>
 				    <td>
 						<p>
-							<label><?php _e('Select To enable or disable', 'dg-lang') ?><br />
+							<label><?php _e('Select To enable or disable') ?><br />
 							  <input value="checked" name="<?php echo $plugin_slug; ?>_enable" type="checkbox" <?php echo (intval($enabled) == 1) ? "checked='checked'": ""; ?> />
 							</label>
 						</p>
 						<p>
-							<input type="submit" name="<?php echo $plugin_slug; ?>" value="<?php _e('Save Settings', 'dg-lang') ?>" />
+							<input type="submit" name="<?php echo $plugin_slug; ?>" value="<?php _e('Save Settings') ?>" />
 						</p>
 				    </td>
 				</tr>

@@ -68,11 +68,11 @@ function dg_display_checkout_link($atts){
 		$home_url = get_page_link($shop);
 	$cnt = '<div class="dg_links">';
 	$cnt .= '<div class="dg_to_cart">';
-	$cnt .= '<a href="'.$url.'" class="dg_show_cart">'.__('Proceed to Checkout', 'dg-lang').'</a>';
+	$cnt .= '<a href="'.$url.'" class="dg_show_cart">'.__('Proceed to Checkout').'</a>';
 	$cnt .= '</div>';
 	$cnt .= '<div class="text_clear">|</div>';
 	$cnt .= '<div class="dg_to_shop">';
-	$cnt .= '<a href="'.$home_url.'" class="dg_show_home">'.__('Continue Shopping', 'dg-lang').'</a>';
+	$cnt .= '<a href="'.$home_url.'" class="dg_show_home">'.__('Continue Shopping').'</a>';
 	$cnt .= '</div>';
 	$cnt .= '</div>';
 	return $cnt;
@@ -111,10 +111,10 @@ function dg_thankyou_page(){
 			$info = 'Products<br/>';
 			$info .= '<table style="text-align:left">';
 			$info .= '<tr>';
-			$info .= '<th scope="col" width="30%">'.__("Product","dg-lang").'</th>';
-			$info .= '<th scope="col" width="10%">'.__("Quantity","dg-lang").'</th>';
-			$info .= '<th scope="col" width="30%">'.__("Price","dg-lang").'</th>';
-			$info .= '<th scope="col" width="30%">'.__("Total","dg-lang").'</th>';
+			$info .= '<th scope="col" width="30%">'.__("Product").'</th>';
+			$info .= '<th scope="col" width="10%">'.__("Quantity").'</th>';
+			$info .= '<th scope="col" width="30%">'.__("Price").'</th>';
+			$info .= '<th scope="col" width="30%">'.__("Total").'</th>';
 			$info .= '</tr>';
 			foreach ($products as $cart_items => $cart) {
 				$info .= '<tr>';
@@ -125,19 +125,19 @@ function dg_thankyou_page(){
 				$info .= '</tr>';
 			}
 			$info .= '<tr>';
-			$info .= '<td>'.__("Total Discount","dg-lang").'</td>';
+			$info .= '<td>'.__("Total Discount").'</td>';
 			$info .= '<td>&nbsp;</td>';
 			$info .= '<td>&nbsp;</td>';
 			$info .= '<td>'.$dg_shop_settings['currency_symbol'].' '.number_format($dg_order->discount,2).'</td>';
 			$info .= '</tr>';
 			$info .= '<tr>';
-			$info .= '<td>'.__("Total Shipping","dg-lang").'</td>';
+			$info .= '<td>'.__("Total Shipping").'</td>';
 			$info .= '<td>&nbsp;</td>';
 			$info .= '<td>&nbsp;</td>';
 			$info .= '<td>'.$dg_shop_settings['currency_symbol'].' '.number_format(($dg_order->shipping),2).'</td>';
 			$info .= '</tr>';
 			$info .= '<tr>';
-			$info .= '<td>'.__("Total","dg-lang").'</td>';
+			$info .= '<td>'.__("Total").'</td>';
 			$info .= '<td>&nbsp;</td>';
 			$info .= '<td>&nbsp;</td>';
 			$info .= '<td>'.$dg_shop_settings['currency_symbol'].' '.number_format(($dg_order->total),2).'</td>';

@@ -21,6 +21,7 @@ if(!class_exists('DukaGate')) {
 			require_once(DG_DUKAGATE_DIR.'/dukagate-settings.php');
 			require_once(DG_DUKAGATE_DIR.'/dukagate-mail.php');
 			require_once(DG_DUKAGATE_DIR.'/dukagate-gateways.php');
+			require_once(DG_DUKAGATE_DIR.'/dukagate-shipping.php');
 			require_once(DG_DUKAGATE_DIR.'/dukagate-admin.php');
 			require_once(DG_DUKAGATE_DIR.'/dukagate-products.php');
 			require_once(DG_DUKAGATE_DIR.'/dukagate-cart.php');
@@ -39,8 +40,7 @@ if(!class_exists('DukaGate')) {
 			add_action( 'save_post', array(&$this,'product_meta_save'));
 			add_action( 'init', array(&$this, 'set_up_styles'));
 			add_action( 'init', array(&$this, 'set_up_js'));
-			$this->load_gateway_plugins();
-			add_action ( 'plugins_loaded', array(&$this,'system_load_textdomain'), 7 );
+			$this->load_dukagate_plugins();
 		}
 		
 		
@@ -63,7 +63,8 @@ if(!class_exists('DukaGate')) {
 						'tempfiles' => $wpdb->prefix . "dkgt_temp_file_log",
 						'payment' => $wpdb->prefix . "dkgt_payment_options",
 						'mail' => $wpdb->prefix . "dkgt_mail_settings",
-						'meta' => $wpdb->prefix . "dkgt_taxonomymeta"
+						'meta' => $wpdb->prefix . "dkgt_taxonomymeta",
+						'shipping' => $wpdb->prefix . "dkgt_shipping"
 						);
 		}
 		
@@ -74,18 +75,11 @@ if(!class_exists('DukaGate')) {
 			
 		}
 		
-		function system_load_textdomain() {
-			$locale = apply_filters( 'wordpress_locale', get_locale() );
-			$mofile = DG_DUKAGATE_DIR . "/languages/dukagate-$locale.mo";
-
-			if ( file_exists( $mofile ) )
-				load_textdomain( 'dg-lang', $mofile );
-		}
 		
 		//Load up styles
 		function set_up_styles(){
 			if(is_admin()){
-				wp_enqueue_style('dg_admin_css', DG_DUKAGATE_URL.'/css/dukagate_admin.php');
+				wp_enqueue_style('dg_admin_css', DG_DUKAGATE_URL.'/css/dukagate_admin.css');
 			}else{
 				wp_enqueue_style('dukagate_css', DG_DUKAGATE_URL.'/css/dukagate.css');
 			}
@@ -138,20 +132,20 @@ if(!class_exists('DukaGate')) {
 			register_post_type( 'dg_product',
 				array(
 					'labels' => array(
-						'name' => __( 'Products', 'dg-lang' ),
-						'singular_name' => __( 'Product' , 'dg-lang'),
-						'add_new' => __('Add New Product', 'dg-lang'),
-						'add_new_item' => __('Create New Product', 'dg-lang'),
-						'edit_item' => __('Edit Products', 'dg-lang'),
-						'edit' => __('Edit Product', 'dg-lang'),
-						'new_item' => __('New Product', 'dg-lang'),
-						'view_item' => __('View Product', 'dg-lang'),
-						'search_items' => __('Search Products', 'dg-lang'),
-						'not_found' => __('No Products Found', 'dg-lang'),
-						'not_found_in_trash' => __('No Products found in Trash', 'dg-lang'),
-						'view' => __('View Product', 'dg-lang')
+						'name' => __( 'Products' ),
+						'singular_name' => __( 'Product' ),
+						'add_new' => __('Add New Product'),
+						'add_new_item' => __('Create New Product'),
+						'edit_item' => __('Edit Products'),
+						'edit' => __('Edit Product'),
+						'new_item' => __('New Product'),
+						'view_item' => __('View Product'),
+						'search_items' => __('Search Products'),
+						'not_found' => __('No Products Found'),
+						'not_found_in_trash' => __('No Products found in Trash'),
+						'view' => __('View Product')
 					),
-					'description' => __('Products for your Dukagate store.', 'dg-lang'),
+					'description' => __('Products for your Dukagate store.'),
 					'menu_icon' => DG_DUKAGATE_URL . '/images/dg_icon.png',
 					'public' => true,
 					'publicly_queryable' => true,
@@ -173,7 +167,7 @@ if(!class_exists('DukaGate')) {
 		public function set_up_product_meta_box(){
 			add_meta_box( 
 				'dukagate_sectionid',
-				__( 'Product Details', 'dg-lang' ),
+				__( 'Product Details' ),
 				array(&$this, 'product_inner_custom_box'),
 				'dg_product','side', 'high'
 			);
@@ -194,26 +188,26 @@ if(!class_exists('DukaGate')) {
 			?>
 			<table width="100%">
 				<tr>
-					<td><?php _e('Price:',"dg-lang");?> :</td>
+					<td><?php _e('Price:');?> :</td>
 					<td><input type="text" value="<?php echo $content_price; ?>" name="price" id="price"></td>
 				</tr>
 				<tr>
-					<td><?php _e('Distinct Price:',"dg-lang");?> :</td>
+					<td><?php _e('Distinct Price:');?> :</td>
 					<td><input type="checkbox" value="checked" name="fixed_price" <?php echo ($fixed_price == 'checked') ? "checked='checked'": ""; ?> /></td>
 				</tr>
 				<tr>
-					<td colspan="2">(<?php _e('if selected the grouped product will use this price ',"dg-lang");?>)</td>
+					<td colspan="2">(<?php _e('if selected the grouped product will use this price ');?>)</td>
 				</tr>
 				<tr>
-					<td><?php _e('SKU:',"dg-lang");?> :</td>
+					<td><?php _e('SKU:');?> :</td>
 					<td><input type="text" value="<?php echo $sku; ?>" name="sku" id="sku"></td>
 				</tr>
 				<tr>
-					<td><?php _e('Digital File:',"dg-lang");?> :</td>
+					<td><?php _e('Digital File:');?> :</td>
 					<td><input type="text" value="<?php echo $digital_file; ?>" name="digital_file" id="digital_file"></td>
 				</tr>
 				<tr>
-					<td><?php _e('Affiliate URL:',"dg-lang");?> :</td>
+					<td><?php _e('Affiliate URL:');?> :</td>
 					<td><input type="text" value="<?php echo $affiliate_url; ?>" name="affiliate_url" id="affiliate_url"></td>
 				</tr>
 			</table>
@@ -319,37 +313,37 @@ if(!class_exists('DukaGate')) {
 		 */
 		function grouped_product_metabox_add($tag) { ?>
 			<div class="form-field">
-				<label for="image-url"><?php _e('Image URL', 'dg-lang') ?></label>
+				<label for="image-url"><?php _e('Image URL') ?></label>
 				<input name="image-url" id="image-url" type="text" value="" size="40" />
-				<p class="description"><?php _e('This image will be the thumbnail shown on the group page.', 'dg-lang'); ?></p>
+				<p class="description"><?php _e('This image will be the thumbnail shown on the group page.'); ?></p>
 			</div>
 			<div class="form-field">
-				<label for="product_image_width"><?php _e('Product Image Width', 'dg-lang') ?></label>
+				<label for="product_image_width"><?php _e('Product Image Width') ?></label>
 				<input name="product_image_width" id="product_image_width" type="text" value="" size="40" />
-				<p class="description"><?php _e('This will be the width of the product images. If blank, it will use the default settings', 'dg-lang'); ?></p>
+				<p class="description"><?php _e('This will be the width of the product images. If blank, it will use the default settings'); ?></p>
 			</div>
 			<div class="form-field">
-				<label for="product_image_height"><?php _e('Product Image Height', 'dg-lang') ?></label>
+				<label for="product_image_height"><?php _e('Product Image Height') ?></label>
 				<input name="product_image_height" id="product_image_height" type="text" value="" size="40" />
-				<p class="description"><?php _e('This will be the height of the product images. If blank, it will use the default settings', 'dg-lang'); ?></p>
+				<p class="description"><?php _e('This will be the height of the product images. If blank, it will use the default settings'); ?></p>
 			</div>
 			<div class="form-field">
-				<label for="page-url"><?php _e('Page URL', 'dg-lang') ?></label>
+				<label for="page-url"><?php _e('Page URL') ?></label>
 				<input name="page-url" id="page-url" type="text" value="" size="40" />
-				<p class="description"><?php _e('This will be the group page url.', 'dg-lang'); ?></p>
+				<p class="description"><?php _e('This will be the group page url.'); ?></p>
 			</div>
 			<div class="form-field">
-				<label for="price"><?php _e('Price', 'dg-lang') ?></label>
+				<label for="price"><?php _e('Price') ?></label>
 				<input name="price" id="price" type="text" value="" size="10" />
-				<p class="description"><?php _e('This will be the group price.', 'dg-lang'); ?></p>
+				<p class="description"><?php _e('This will be the group price.'); ?></p>
 			</div>
 			<div class="form-field">
-				<label for="product_select"><?php _e('Product Select', 'dg-lang') ?></label>
+				<label for="product_select"><?php _e('Product Select') ?></label>
 				<select name="product_select" id="product_select">
 					<option value="checkbox" ><?php _e('Use CheckBox', "dg-lang"); ?></option>
 					<option value="radio" ><?php _e('Use Radio', "dg-lang"); ?></option>
 				</select>
-				<p class="description"><?php _e('This will be the select option for the product.', 'dg-lang'); ?></p>
+				<p class="description"><?php _e('This will be the select option for the product.'); ?></p>
 			</div>
 			<?php 
 		} 	
@@ -362,59 +356,59 @@ if(!class_exists('DukaGate')) {
 			?>
 			<tr class="form-field">
 				<th scope="row" valign="top">
-					<label for="image-url"><?php _e('Image URL', 'dg-lang'); ?></label>
+					<label for="image-url"><?php _e('Image URL'); ?></label>
 				</th>
 				<td>
 					<input name="image-url" id="image-url" type="text" value="<?php echo $this->grouped_product_crude($tag->term_id, 'image-url', '', 'get'); ?>" size="40" />
-					<p class="description"><?php _e('This image will be the thumbnail shown on the group page.', 'dg-lang'); ?></p>
+					<p class="description"><?php _e('This image will be the thumbnail shown on the group page.'); ?></p>
 				</td>
 			</tr>
 			<tr class="form-field">
 				<th scope="row" valign="top">
-					<label for="product_image_width"><?php _e('Product Image Width', 'dg-lang') ?></label>
+					<label for="product_image_width"><?php _e('Product Image Width') ?></label>
 				</th>
 				<td>
 					<input name="product_image_width" id="product_image_width" type="text" value="" size="40" />
-					<p class="description"><?php _e('This will be the width of the product images. If blank, it will use the default settings', 'dg-lang'); ?></p>
+					<p class="description"><?php _e('This will be the width of the product images. If blank, it will use the default settings'); ?></p>
 				</td>
 			</tr>
 			<tr class="form-field">
 				<th scope="row" valign="top">
-					<label for="product_image_height"><?php _e('Product Image Height', 'dg-lang') ?></label>
+					<label for="product_image_height"><?php _e('Product Image Height') ?></label>
 				</th>
 				<td>
 					<input name="product_image_height" id="product_image_height" type="text" value="" size="40" />
-					<p class="description"><?php _e('This will be the height of the product images. If blank, it will use the default settings', 'dg-lang'); ?></p>
+					<p class="description"><?php _e('This will be the height of the product images. If blank, it will use the default settings'); ?></p>
 				</td>
 			</tr>
 			<tr class="form-field">
 				<th scope="row" valign="top">
-					<label for="page-url"><?php _e('Page URL', 'dg-lang'); ?></label>
+					<label for="page-url"><?php _e('Page URL'); ?></label>
 				</th>
 				<td>
 					<input name="page-url" id="page-url" type="text" value="<?php echo $this->grouped_product_crude($tag->term_id, 'page-url', '', 'get'); ?>" size="40" />
-					<p class="description"><?php _e('This will be the group page url.', 'dg-lang'); ?></p>
+					<p class="description"><?php _e('This will be the group page url.'); ?></p>
 				</td>
 			</tr>
 			<tr class="form-field">
 				<th scope="row" valign="top">
-					<label for="price"><?php _e('Price', 'dg-lang'); ?></label>
+					<label for="price"><?php _e('Price'); ?></label>
 				</th>
 				<td>
 					<input name="price" id="price" type="text" value="<?php echo $this->grouped_product_crude($tag->term_id, 'price', '', 'get'); ?>" size="40" />
-					<p class="description"><?php _e('This will be the group price.', 'dg-lang'); ?></p>
+					<p class="description"><?php _e('This will be the group price.'); ?></p>
 				</td>
 			</tr>
 			<tr class="form-field">
 				<th scope="row" valign="top">
-					<label for="product_select"><?php _e('Product Select', 'dg-lang') ?></label>
+					<label for="product_select"><?php _e('Product Select') ?></label>
 				</th>
 				<td>
 					<select name="product_select" id="product_select">
 						<option value="checkbox" <?php selected( $product_select, 'checkbox' ); ?>><?php _e('Use CheckBox', "dg-lang"); ?></option>
 						<option value="radio" <?php selected( $product_select, 'radio' ); ?>><?php _e('Use Radio', "dg-lang"); ?></option>
 					</select>
-					<p class="description"><?php _e('This will be the select option for the product.', 'dg-lang'); ?></p>
+					<p class="description"><?php _e('This will be the select option for the product.'); ?></p>
 				</td>
 			</tr>
 			<?php 
@@ -742,7 +736,8 @@ if(!class_exists('DukaGate')) {
 							'currency_symbol' => '$',
 							'checkout_page' => '',
 							'thankyou_page' => '',
-							'discounts' => 'false');
+							'discounts' => 'false',
+							'shipping' => 'false');
 			update_option('dukagate_shop_settings', $opts);
 		}
 		
@@ -812,16 +807,69 @@ if(!class_exists('DukaGate')) {
 			}else{
 				$this->dg_delete_gateway($param); //Delete if payment gateway to prevent further errors
 				$this->dg_delete_shipping_gateway($param); //Delete if shipping gateway to prevent further errors
-				_e("$class_name not found!!","dg-lang");
+				_e("$class_name not found!!");
 			}
 		}
 		
+		/**
+		 * Load plugins
+		 */
+		private function load_dukagate_plugins(){
+			$this->load_gateway_plugins();
+			$this->load_shipping_plugins();
+		}
 		
 		//Load Gateay Plugins
 		private function load_gateway_plugins(){
 			$plugins = array();
 			$classes = array();
 			$dir = DG_GATEWAYS;
+			if ( !is_dir( $dir ) )
+				return;
+			if ( ! $dh = opendir( $dir ) )
+				return;
+				
+			while ( ( $plugin = readdir( $dh ) ) !== false ) {
+				if ( substr( $plugin, -4 ) == '.php' ){
+					$plugins[] = $dir . $plugin;
+				}
+			}
+			closedir( $dh );
+			sort( $plugins );
+						
+			//include them suppressing errors
+			foreach ($plugins as $file){
+				include_once( $file );
+				$fp = fopen($file, 'r');
+				$class = $buffer = '';
+				$i = 0;
+				while (!$class) {
+					if (feof($fp)) break;
+
+					$buffer .= fread($fp, 512);
+					if (preg_match('/class\s+(\w+)(.*)?\{/', $buffer, $matches)) {
+						$classes[]  = $matches[1];
+						break;
+					}
+				}
+			}
+			
+
+			//Instantiate classes
+			foreach ($classes as $class){
+				$c = new $class();
+				if(@$_REQUEST['dg_handle_payment_return_'.$c->get_plugin_slug()] === 'true'){
+					$c->process_ipn_return();
+				}
+			}
+			
+		}
+		
+		//Load shipping plugins
+		private function load_shipping_plugins(){
+			$plugins = array();
+			$classes = array();
+			$dir = DG_SHIPPING;
 			if ( !is_dir( $dir ) )
 				return;
 			if ( ! $dh = opendir( $dir ) )
@@ -855,11 +903,7 @@ if(!class_exists('DukaGate')) {
 			//Instantiate classes
 			foreach ($classes as $class){
 				$c = new $class();
-				if(@$_REQUEST['dg_handle_payment_return_'.$c->get_plugin_slug()] === 'true'){
-					$c->process_ipn_return();
-				}
 			}
-			
 		}
 		
 		/**
@@ -1001,10 +1045,10 @@ if(!class_exists('DukaGate')) {
 			$info = 'Products<br/>';
 			$info .= '<table style="text-align:left">';
 			$info .= '<tr>';
-			$info .= '<th scope="col" width="30%">'.__("Product","dg-lang").'</th>';
-			$info .= '<th scope="col" width="10%">'.__("Quantity","dg-lang").'</th>';
-			$info .= '<th scope="col" width="30%">'.__("Price","dg-lang").'</th>';
-			$info .= '<th scope="col" width="30%">'.__("Total","dg-lang").'</th>';
+			$info .= '<th scope="col" width="30%">'.__("Product").'</th>';
+			$info .= '<th scope="col" width="10%">'.__("Quantity").'</th>';
+			$info .= '<th scope="col" width="30%">'.__("Price").'</th>';
+			$info .= '<th scope="col" width="30%">'.__("Total").'</th>';
 			$info .= '</tr>';
 			$cart_products = $_SESSION['dg_cart'];
 			foreach ($cart_products as $cart_items => $cart) {
@@ -1023,7 +1067,7 @@ if(!class_exists('DukaGate')) {
 			$info .= '<td>'.number_format($discount,2).'</td>';
 			$info .= '</tr>';
 			$info .= '<tr>';
-			$info .= '<td class="total">'.__("Total Shipping","dg-lang").'</td>';
+			$info .= '<td class="total">'.__("Total Shipping").'</td>';
 			$info .= '<td>&nbsp;</td>';
 			$info .= '<td>&nbsp;</td>';
 			$info .= '<td class="total amount">'.$dg_shop_settings['currency_symbol'].' '.number_format($total_shipping,2).'</td>';
@@ -1212,7 +1256,123 @@ if(!class_exists('DukaGate')) {
 			return $wpdb->get_results($sql);
 		}
 
+		//Save Shipping Gateway
+		function dg_save_shipping_gateway($name, $slug, $class, $shipping_info, $enabled = true){
+			$databases = self::db_names();
+			global $wpdb;
+			
+			$dg_gateway = $this->dg_get_shipping_gateway($slug);
+			$table_name = $databases['shipping'];
+			$active = ($enabled) ? 1: 0;
+			if(empty($dg_gateway)){
+				$sql = "INSERT INTO `$table_name`(`name`,`slug`,`class`, `shipping_info`, `active`) 
+						VALUES('$name','$slug','$class','$shipping_info' ,$active)";
+			}else{
+				$sql = "UPDATE `$table_name` SET `active` = $active WHERE `slug` = '$slug'";
+			}
+			$wpdb->query($sql);
+			
+		}
+
+		//Delete Gateway
+		function dg_delete_shipping_gateway($gateway_slug){
+			$databases = self::db_names();
+			global $wpdb;
+			
+			$dg_gateway = $this->dg_get_shipping_gateway($gateway_slug);
+			$table_name = $databases['shipping'];
+			if($dg_gateway){
+				$sql = "DELETE FROM `$table_name` WHERE `slug` = '$gateway_slug'";
+				$wpdb->query($sql);
+			}
+		}
+
+		//Get Shipping Gateway
+		function dg_get_shipping_gateway($slug){
+			$databases = self::db_names();
+			global $wpdb;
+			$table_name = $databases['shipping'];
+			$sql = "SELECT * FROM `$table_name` WHERE `slug` = '$slug'";
+			return $wpdb->get_row($sql);
+		}
+
+		//Update Shipping Gateway options
+		function dg_save_shipping_info($slug, $shipping_info, $enabled){
+			$databases = self::db_names();
+			global $wpdb;
+			$table_name = $databases['shipping'];
+			$sql = "UPDATE `$table_name` SET `shipping_info` = '$shipping_info', `active` = $enabled WHERE `slug` = '$slug'";
+			$wpdb->query($sql);
+		}
 		
+		/**
+		 * Save Shipping info only
+		 */
+		function dg_save_shipping_info_only($slug, $shipping_info){
+			$databases = self::db_names();
+			global $wpdb;
+			$table_name = $databases['shipping'];
+			$sql = "UPDATE `$table_name` SET `shipping_info` = '$shipping_info' WHERE `slug` = '$slug'";
+			$wpdb->query($sql);
+		}
+		
+		/**
+		 * enable or disable Shipping gateway
+		 */
+		function dg_save_shipping_active($slug, $enabled){
+			$databases = self::db_names();
+			global $wpdb;
+			$table_name = $databases['shipping'];
+			$sql = "UPDATE `$table_name` SET `active` = $enabled WHERE `slug` = '$slug'";
+			$wpdb->query($sql);
+		}
+
+
+		//Get Shipping enabled status
+		function dg_get_enabled_shipping_status($slug){
+			$databases = self::db_names();
+			global $wpdb;
+			$table_name = $databases['shipping'];
+			$sql = "SELECT `active` FROM `$table_name` WHERE `slug` = '$slug'";
+			return $wpdb->get_var($sql);
+		}
+
+
+		//Get Shipping Gateway options
+		function dg_get_shipping_info($slug){
+			$databases = self::db_names();
+			global $wpdb;
+			$table_name = $databases['shipping'];
+			$sql = "SELECT `shipping_info` FROM `$table_name` WHERE `slug` = '$slug'";
+			return $wpdb->get_var($sql);
+		}
+
+		//Get Shipping Gateway class
+		function dg_get_shipping_class($slug){
+			$databases = self::db_names();
+			global $wpdb;
+			$table_name = $databases['shipping'];
+			$sql = "SELECT `class` FROM `$table_name` WHERE `slug` = '$slug'";
+			return $wpdb->get_var($sql);
+		}
+
+		//List all Shipping Gateways
+		function list_all_shipping_gateways(){
+			$databases = self::db_names();
+			global $wpdb;
+			$table_name = $databases['shipping'];
+			$sql = "SELECT * FROM `$table_name`";
+			return $wpdb->get_results($sql);
+		}
+		
+		//List all active Shipping options
+		function list_all_active_shipping_gateways(){
+			$databases = self::db_names();
+			global $wpdb;
+			$table_name = $databases['shipping'];
+			$sql = "SELECT * FROM `$table_name` where `active` = 1";
+			return $wpdb->get_results($sql);
+		}
 		
 		
 		//Generate the checkout form
@@ -1226,7 +1386,7 @@ if(!class_exists('DukaGate')) {
 				if(@$dg_form_elem['dg_fullname_visible'] == 'checked'){
 					$cnt .= '<tr>';
 					$cnt .= '<td>';
-					$cnt .= '<label for="dg_fullname" class="dg_fullname">'.__("Full Names ","dg-lang").'</label>';
+					$cnt .= '<label for="dg_fullname" class="dg_fullname">'.__("Full Names ").'</label>';
 					$cnt .= '</td>';
 					$cnt .= '<td>';
 					$mandatory = '';
@@ -1240,7 +1400,7 @@ if(!class_exists('DukaGate')) {
 				if(@$dg_form_elem['dg_firstname_visible'] == 'checked'){
 					$cnt .= '<tr>';
 					$cnt .= '<td>';
-					$cnt .= '<label for="dg_firstname" class="dg_firstname">'.__("First Name ","dg-lang").'</label>';
+					$cnt .= '<label for="dg_firstname" class="dg_firstname">'.__("First Name ").'</label>';
 					$cnt .= '</td>';
 					$cnt .= '<td>';
 					$mandatory = '';
@@ -1254,7 +1414,7 @@ if(!class_exists('DukaGate')) {
 				if(@$dg_form_elem['dg_lastname_visible'] == 'checked'){
 					$cnt .= '<tr>';
 					$cnt .= '<td>';
-					$cnt .= '<label for="dg_lastname" class="dg_lastname">'.__("Last Name ","dg-lang").'</label>';
+					$cnt .= '<label for="dg_lastname" class="dg_lastname">'.__("Last Name ").'</label>';
 					$cnt .= '</td>';
 					$cnt .= '<td>';
 					$mandatory = '';
@@ -1268,7 +1428,7 @@ if(!class_exists('DukaGate')) {
 				if(@$dg_form_elem['dg_email_visible'] == 'checked'){
 					$cnt .= '<tr>';
 					$cnt .= '<td>';
-					$cnt .= '<label for="dg_email" class="dg_email">'.__("Email","dg-lang").'</label>';
+					$cnt .= '<label for="dg_email" class="dg_email">'.__("Email").'</label>';
 					$cnt .= '</td>';
 					$cnt .= '<td>';
 					$mandatory = '';
@@ -1282,7 +1442,7 @@ if(!class_exists('DukaGate')) {
 				if(@$dg_form_elem['dg_phone_visible'] == 'checked'){
 					$cnt .= '<tr>';
 					$cnt .= '<td>';
-					$cnt .= '<label for="dg_phone" class="dg_phone">'.__("Phone","dg-lang").'</label>';
+					$cnt .= '<label for="dg_phone" class="dg_phone">'.__("Phone").'</label>';
 					$cnt .= '</td>';
 					$cnt .= '<td>';
 					$mandatory = '';
@@ -1296,7 +1456,7 @@ if(!class_exists('DukaGate')) {
 				if(@$dg_form_elem['dg_country_visible'] == 'checked'){
 					$cnt .= '<tr>';
 					$cnt .= '<td>';
-					$cnt .= '<label for="dg_country" class="dg_country">'.__("Country","dg-lang").'</label>';
+					$cnt .= '<label for="dg_country" class="dg_country">'.__("Country").'</label>';
 					$cnt .= '</td>';
 					$cnt .= '<td>';
 					$mandatory = '';
@@ -1306,7 +1466,7 @@ if(!class_exists('DukaGate')) {
 					$dg_country_code_name = $dg_dukagate_settings['country'];
 					$cnt .= '<select name="dg_country" id="dg_country" style="width: 240px;" class="'.$mandatory.' dg_country">';
 					foreach ($dg_country_code_name as $country_code => $country_name) {
-						$cnt .= '<option value="' . $country_code . '" >' . __($country_name,"dg-lang") . '</option>';
+						$cnt .= '<option value="' . $country_code . '" >' . __($country_name) . '</option>';
 					}
 					$cnt .= '</select>';
 					$cnt .= '</td>';
@@ -1315,7 +1475,7 @@ if(!class_exists('DukaGate')) {
 				if(@$dg_form_elem['dg_state_visible'] == 'checked'){
 					$cnt .= '<tr>';
 					$cnt .= '<td>';
-					$cnt .= '<label for="dg_state" class="dg_state">'.__("State","dg-lang").'</label>';
+					$cnt .= '<label for="dg_state" class="dg_state">'.__("State").'</label>';
 					$cnt .= '</td>';
 					$cnt .= '<td>';
 					$mandatory = '';
@@ -1362,7 +1522,7 @@ if(!class_exists('DukaGate')) {
 			}else{
 				$cnt .= '<div class="dg_user_info_form">';
 				if(@$dg_form_elem['dg_fullname_visible'] == 'checked'){
-					$cnt .= '<label for="dg_fullname" class="dg_fullname">'.__("Full Names ","dg-lang").'</label>';
+					$cnt .= '<label for="dg_fullname" class="dg_fullname">'.__("Full Names ").'</label>';
 					$mandatory = '';
 					if(@$dg_form_elem['dg_fullname_mandatory'] == 'checked'){
 						$mandatory = 'required';
@@ -1371,7 +1531,7 @@ if(!class_exists('DukaGate')) {
 					$cnt .= '<br/>';
 				}
 				if(@$dg_form_elem['dg_firstname_visible'] == 'checked'){
-					$cnt .= '<label for="dg_firstname" class="dg_firstname">'.__("First Name ","dg-lang").'</label>';
+					$cnt .= '<label for="dg_firstname" class="dg_firstname">'.__("First Name ").'</label>';
 					$mandatory = '';
 					if(@$dg_form_elem['dg_firstname_mandatory'] == 'checked'){
 						$mandatory = 'required';
@@ -1380,7 +1540,7 @@ if(!class_exists('DukaGate')) {
 					$cnt .= '<br/>';
 				}
 				if(@$dg_form_elem['dg_lastname_visible'] == 'checked'){
-					$cnt .= '<label for="dg_lastname" class="dg_lastname">'.__("Last Name ","dg-lang").'</label>';
+					$cnt .= '<label for="dg_lastname" class="dg_lastname">'.__("Last Name ").'</label>';
 					$mandatory = '';
 					if(@$dg_form_elem['dg_lastname_mandatory'] == 'checked'){
 						$mandatory = 'required';
@@ -1389,7 +1549,7 @@ if(!class_exists('DukaGate')) {
 					$cnt .= '<br/>';
 				}
 				if(@$dg_form_elem['dg_email_visible'] == 'checked'){
-					$cnt .= '<label for="dg_email" class="dg_email">'.__("Email","dg-lang").'</label>';
+					$cnt .= '<label for="dg_email" class="dg_email">'.__("Email").'</label>';
 					$mandatory = '';
 					if(@$dg_form_elem['dg_email_mandatory'] == 'checked'){
 						$mandatory = 'required';
@@ -1398,7 +1558,7 @@ if(!class_exists('DukaGate')) {
 					$cnt .= '<br/>';
 				}
 				if(@$dg_form_elem['dg_phone_visible'] == 'checked'){
-					$cnt .= '<label for="dg_phone" class="dg_phone">'.__("Phone","dg-lang").'</label>';
+					$cnt .= '<label for="dg_phone" class="dg_phone">'.__("Phone").'</label>';
 					$mandatory = '';
 					if(@$dg_form_elem['dg_phone_mandatory'] == 'checked'){
 						$mandatory = 'required';
@@ -1407,7 +1567,7 @@ if(!class_exists('DukaGate')) {
 					$cnt .= '<br/>';
 				}
 				if(@$dg_form_elem['dg_country_visible'] == 'checked'){
-					$cnt .= '<label for="dg_country" class="dg_country">'.__("Country","dg-lang").'</label>';
+					$cnt .= '<label for="dg_country" class="dg_country">'.__("Country").'</label>';
 					$mandatory = '';
 					if(@$dg_form_elem['dg_country_mandatory'] == 'checked'){
 						$mandatory = 'required';
@@ -1415,12 +1575,12 @@ if(!class_exists('DukaGate')) {
 					$dg_country_code_name = $dg_dukagate_settings['country'];
 					$cnt .= '<select name="dg_country_input" id="dg_country_input" style="width: 240px;" class="'.$mandatory.' dg_country_input">';
 					foreach ($dg_country_code_name as $country_code => $country_name) {
-						$cnt .= '<option value="' . $country_code . '" >' . __($country_name,"dg-lang") . '</option>';
+						$cnt .= '<option value="' . $country_code . '" >' . __($country_name) . '</option>';
 					}
 					$cnt .= '<br/>';
 				}
 				if(@$dg_form_elem['dg_state_visible'] == 'checked'){
-					$cnt .= '<label for="dg_state" class="dg_state">'.__("State","dg-lang").'</label>';
+					$cnt .= '<label for="dg_state" class="dg_state">'.__("State").'</label>';
 					$mandatory = '';
 					if(@$dg_form_elem['dg_state_mandatory'] == 'checked'){
 						$mandatory = 'required';
@@ -1475,7 +1635,7 @@ if(!class_exists('DukaGate')) {
 					foreach ($dg_gateways as $dg_gateway) {
 						if(intval($dg_gateway->active) == 1){
 							$active += 1;
-							$cnt .= '<label for="dg_gateway" class="'.$dg_gateway->gateway_slug.'">'.__("Pay Using ","dg-lang").$dg_gateway->gateway_name.'</label>';
+							$cnt .= '<label for="dg_gateway" class="'.$dg_gateway->gateway_slug.'">'.__("Pay Using ").$dg_gateway->gateway_name.'</label>';
 							$cnt .= '<input type="hidden" name="dg_gateway_action" value="'.$dg_gateway->gateway_slug.'"/></label>';
 						}
 					}
@@ -1483,7 +1643,7 @@ if(!class_exists('DukaGate')) {
 			}
 			if($active > 0){
 				$cnt .= '<p>';
-				$cnt .= '<input type="submit" name="dg_process_payment_form" id="dg_process_payment_form" value="'.__("Process Payment","dg-lang").'" />';
+				$cnt .= '<input type="submit" name="dg_process_payment_form" id="dg_process_payment_form" value="'.__("Process Payment").'" />';
 				$cnt .= '</p>';
 			}
 			$cnt .= '<input type="hidden" name="ajax" value="true" />';

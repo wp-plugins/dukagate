@@ -2,7 +2,7 @@
 /*
 Plugin Name: DukaGate Shopping Cart
 Description: DukaGate Shopping Cart
-Version: 1.0
+Version: 2.0
 Author: Paul Kevin
 */
 
@@ -19,6 +19,8 @@ define('DG_DUKAGATE_WIDGET_DIR', DG_DUKAGATE_DIR.'/widgets/');
 
 define('DG_GATEWAYS', DG_DUKAGATE_DIR.'/plugins-gateway/');
 define('DG_GATEWAYS_URL', DG_DUKAGATE_URL.'/plugins-gateway/');
+define('DG_SHIPPING', DG_DUKAGATE_DIR.'/plugins-shipping/');
+define('DG_SHIPPING_URL', DG_DUKAGATE_URL.'/plugins-shipping/');
 define('DG_ACTIVE_MERCHANT', DG_GATEWAYS.'libraries/aktive_merchant/');
 
 
