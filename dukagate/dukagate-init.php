@@ -736,7 +736,8 @@ if(!class_exists('DukaGate')) {
 							'currency_symbol' => '$',
 							'checkout_page' => '',
 							'thankyou_page' => '',
-							'discounts' => 'false');
+							'discounts' => 'false',
+							'shipping' => 'false');
 			update_option('dukagate_shop_settings', $opts);
 		}
 		

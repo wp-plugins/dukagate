@@ -16,9 +16,8 @@ function dg_get_cart($atts){
 		$dg_cart = $_SESSION['dg_cart'];
 	}
 	if (is_array($dg_cart) && count($dg_cart) > 0) {
-		global $dukagate_shipping;
-		if(isset($dukagate_shipping)){
-			$gteways = $dukagate_shipping->list_all_active_shipping_gateways();
+		if($dg_shop_settings['shipping'] === 'true'){
+			$gteways = $dukagate->list_all_active_shipping_gateways();
 			$class = '';
 			if (is_array($gteways) && count($gteways) > 0) {
 				foreach ($gteways as $gteways) {

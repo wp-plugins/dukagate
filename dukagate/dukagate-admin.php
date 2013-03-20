@@ -656,6 +656,7 @@ function dg_dukagate_settings(){
 		$checkout_page = $_POST['checkout_page'];
 		$thankyou_page = $_POST['thankyou_page'];
 		$discounts = ($_POST['discounts'] == 'checked') ? "true": "false";
+		$shipping = ($_POST['shipping'] == 'checked') ? "true": "false";
 		
 		$opts = array(
 						'shopname' => $shopname, 
@@ -668,7 +669,8 @@ function dg_dukagate_settings(){
 						'currency_symbol' => $currency_symbol,
 						'checkout_page' => $checkout_page,
 						'thankyou_page' => $thankyou_page,
-						'discounts' => $discounts);
+						'discounts' => $discounts,
+						'shipping' => $shipping);
 		update_option('dukagate_shop_settings', $opts);
 		
 		
@@ -790,6 +792,12 @@ function dg_dukagate_settings(){
 							<th scope="row"><label for="discounts"><?php _e("Enable Discounts"); ?>: </label></th>
 							<td>
 								<input type="checkbox" value="checked" name="discounts" <?php echo (@$dg_shop_settings['discounts'] == 'true') ? "checked='checked'": ""; ?>/>
+							</td>
+						</tr>
+						<tr valign="top">
+							<th scope="row"><label for="shipping"><?php _e("Enable Shipping"); ?>: </label></th>
+							<td>
+								<input type="checkbox" value="checked" name="shipping" <?php echo (@$dg_shop_settings['shipping'] == 'true') ? "checked='checked'": ""; ?>/>
 							</td>
 						</tr>
 					</tbody>
