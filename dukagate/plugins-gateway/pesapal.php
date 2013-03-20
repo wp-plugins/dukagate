@@ -32,8 +32,8 @@ class DukaGate_GateWay_PesaPal extends DukaGate_GateWay_API{
 	function on_create(){
 		
 		
-		$this->plugin_name = __('Pesapal', 'dg-lang');
-		$this->plugin_slug = __('pesapal', 'dg-lang');
+		$this->plugin_name = __('Pesapal');
+		$this->plugin_slug = __('pesapal');
 		$this->required_fields = array(
 										'customer_key' => '',
 										'customer_secret' => '');
@@ -133,30 +133,30 @@ class DukaGate_GateWay_PesaPal extends DukaGate_GateWay_API{
 		<form method="POST" action="">
 			<table class="form-table">
 				<tr>
-				    <th scope="row"><?php _e('PesaPal Merchant Credentials', 'dg-lang') ?></th>
+				    <th scope="row"><?php _e('PesaPal Merchant Credentials') ?></th>
 				    <td>
 						<p>
-							<label><?php _e('Customer Key', 'dg-lang') ?><br />
+							<label><?php _e('Customer Key') ?><br />
 							  <input value="<?php echo $options['customer_key']; ?>" size="30" name="<?php echo $plugin_slug; ?>_customer_key" type="text" />
 							</label>
 						</p>
 						<p>
-							<label><?php _e('Customer Secret', 'dg-lang') ?><br />
+							<label><?php _e('Customer Secret') ?><br />
 								 <input value="<?php echo $options['customer_secret']; ?>" size="30" name="<?php echo $plugin_slug; ?>_customer_secret" type="text" />
 							</label>
 						</p>
 				    </td>
 				</tr>
 				<tr>
-				    <th scope="row"><?php _e('Enable', 'dg-lang') ?></th>
+				    <th scope="row"><?php _e('Enable') ?></th>
 				    <td>
 						<p>
-							<label><?php _e('Select To enable or disable', 'dg-lang') ?><br />
+							<label><?php _e('Select To enable or disable') ?><br />
 							  <input value="checked" name="<?php echo $plugin_slug; ?>_enable" type="checkbox" <?php echo (intval($enabled) == 1) ? "checked='checked'": ""; ?> />
 							</label>
 						</p>
 						<p>
-							<input type="submit" name="<?php echo $plugin_slug; ?>" value="<?php _e('Save Settings', 'dg-lang') ?>" />
+							<input type="submit" name="<?php echo $plugin_slug; ?>" value="<?php _e('Save Settings') ?>" />
 						</p>
 				    </td>
 				</tr>

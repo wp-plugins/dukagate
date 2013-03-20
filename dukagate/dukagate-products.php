@@ -53,10 +53,10 @@ class DukaGate_Products{
 					<li class="dg_widget_product_name"><?php echo $instance['dg_product_name']; ?></li>
 				</ul>
 				<ul>
-					<li class="dg_widget_product_price"><?php _e("Price","dg-lang"); ?> : <?php echo $dg_shop_settings['currency_symbol'].' '.$instance['dg_product_price']; ?></li>
+					<li class="dg_widget_product_price"><?php _e("Price"); ?> : <?php echo $dg_shop_settings['currency_symbol'].' '.$instance['dg_product_price']; ?></li>
 				</ul>
 				<ul>
-					<li class="dg_widget_product_payment"><input class="dg_make_payment" type="submit" value="<?php _e("Make Payment","dg-lang"); ?>" /></li>
+					<li class="dg_widget_product_payment"><input class="dg_make_payment" type="submit" value="<?php _e("Make Payment"); ?>" /></li>
 				</ul>
 			</div>
 		</form>
@@ -158,12 +158,12 @@ class DukaGate_Products{
 				$content .= '<div class="dg_prod_info">';
 				$content .= '<p class="title"><a href="' . $prod_permalink . '" title="' . $product->post_title . '">' . __($product->post_title) . '</a></p>';
 				$content .= '<p class="detail">' . $product->post_excerpt . '</p>';
-				$content .= '<p class="price">' .__("Price","dg-lang").': '. $dg_shop_settings['currency_symbol'].' '.$price . '</p>';
+				$content .= '<p class="price">' .__("Price").': '. $dg_shop_settings['currency_symbol'].' '.$price . '</p>';
 				if($show_quantity == 'true'){
 					$total_q = 30;
 					if(isset($dg_shop_settings['max_quantity']) && !empty($dg_shop_settings['max_quantity']))
 						$total_q  = intval($dg_shop_settings['max_quantity']);
-					$content .= '<p class="quantity">'.__("Quantity ","dg-lang").' : ';
+					$content .= '<p class="quantity">'.__("Quantity ").' : ';
 					$content .= '<select class="prod_quantity" onchange="dukagate.add_quantity(this.value, \'dg_quantity_'.$product->ID.'\', \'uniq\')">';
 					for($i=1; $i<$total_q; $i++){
 						$content .= '<option value="'.$i.'">'.$i.'</option>';
@@ -180,7 +180,7 @@ class DukaGate_Products{
 				$content .= '<input type="hidden" name="price" value="'.$price.'">';
 				$content .= '<input type="hidden" name="product" value="'.$product->post_title.'">';
 				$content .= '<input type="hidden" name="product_image" value="'.$main_image.'">';
-				$content .= '<input type="submit" value="'.__("Add To Cart","dg-lang").'" class="dg_make_payment"/>';
+				$content .= '<input type="submit" value="'.__("Add To Cart").'" class="dg_make_payment"/>';
 				$content .= '</form>';
 				$content .= '</div>';
 				$content .= '</div>';
@@ -205,7 +205,7 @@ class DukaGate_Products{
 				if($checkout_link == 'true'){
 					$url = get_page_link($dg_shop_settings['checkout_page']);
 					$content .= '<div class="dg_to_cart">';
-					$content .= '<a href="'.$url.'" class="dg_show_cart">'.__('Proceed to Checkout', 'dg-lang').'</a>';
+					$content .= '<a href="'.$url.'" class="dg_show_cart">'.__('Proceed to Checkout').'</a>';
 					$content .= '</div>';
 				}
 			}
@@ -324,7 +324,7 @@ class DukaGate_Products{
 			$content .= '<p class="detail">' . $product->post_excerpt . '</p>';
 		if($fixed_price == 'checked'){
 			$content .= '<input type="hidden" name="fixed_price_'.$product->ID.'" id="fixed_price_'.$product->ID.'" value="'.$price.'">';
-			$content .= '<p class="price"><span class="price_label">' .__("Price","dg-lang").':</span> '. $dg_shop_settings['currency_symbol'].' '.$price . '</p>';
+			$content .= '<p class="price"><span class="price_label">' .__("Price").':</span> '. $dg_shop_settings['currency_symbol'].' '.$price . '</p>';
 		}
 		$content .= '<p class="select_option"><input type="'.$dg_prod_option.'" onclick="dukagate.add_price(\''.$price.'\', \'dg_cart_price\', \'sub_product_'.$product->ID.'\', \''.$fixed_price.'\');" name="sub_product_'.$product->ID.'" id="sub_product_'.$product->ID.'" value="'.$product->post_title.'"/></p>';
 		$content .= '</div>';
@@ -465,7 +465,7 @@ class DukaGate_Products{
 				$dg_shop_settings = get_option('dukagate_shop_settings');
 				if(isset($dg_shop_settings['max_quantity']) && !empty($dg_shop_settings['max_quantity']))
 					$total_q  = intval($dg_shop_settings['max_quantity']);
-				$content .= '<p class="quantity">'.__("Quantity ","dg-lang").' : ';
+				$content .= '<p class="quantity">'.__("Quantity ").' : ';
 				$content .= '<select class="prod_quantity" onchange="dukagate.add_quantity(this.value, \'dg_quantity\', \'uniq\')">';
 				for($i=1; $i<$total_q; $i++){
 					$content .= '<option value="'.$i.'">'.$i.'</option>';
@@ -479,7 +479,7 @@ class DukaGate_Products{
 				$dg_shop_settings = get_option('dukagate_shop_settings');
 				if(isset($dg_shop_settings['max_quantity']) && !empty($dg_shop_settings['max_quantity']))
 					$total_q  = intval($dg_shop_settings['max_quantity']);
-				$content .= '<p class="quantity">'.__("Quantity ","dg-lang").' : ';
+				$content .= '<p class="quantity">'.__("Quantity ").' : ';
 				$content .= '<select class="prod_quantity" onchange="dukagate.add_quantity(this.value, \'dg_quantity\', \'uniq\')">';
 				for($i=1; $i<$total_q; $i++){
 					$content .= '<option value="'.$i.'">'.$i.'</option>';
@@ -497,7 +497,7 @@ class DukaGate_Products{
 			$content .= '<input type="hidden" name="taxonomy_id" id="taxonomy_id" value="'.$parent.'">';
 			$content .= '<input type="hidden" name="product" id="product" value="'.$parent_name.'">';
 			$content .= '<input type="hidden" name="product_image" value="'.$parent_image.'">';
-			$content .= '<input type="submit" value="'.__("Add To Cart","dg-lang").'" class="dg_make_payment"/>';
+			$content .= '<input type="submit" value="'.__("Add To Cart").'" class="dg_make_payment"/>';
 			$content .= '</form>';
 			$content .= '<script type="text/javascript">';
 			$content .= 'jQuery(document).ready(function(){';
@@ -513,7 +513,7 @@ class DukaGate_Products{
 					$dg_shop_settings = get_option('dukagate_shop_settings');
 					$url = get_page_link($dg_shop_settings['checkout_page']);
 					$content .= '<div class="dg_to_cart">';
-					$content .= '<a href="'.$url.'" class="dg_show_cart">'.__('Proceed to Checkout', 'dg-lang').'</a>';
+					$content .= '<a href="'.$url.'" class="dg_show_cart">'.__('Proceed to Checkout').'</a>';
 					$content .= '</div>';
 				}
 			}

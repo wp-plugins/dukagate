@@ -48,7 +48,7 @@ function dg_get_cart($atts){
 			$cnt .= '<form method="POST" id="shipping_submit">';
 			$cnt .= $class->shipping_form();
 			$cnt .= '<input type="hidden" value="shipping_submit" name="action" />';
-			$cnt .= '<input type="submit" class="shipping_submit" id="shipping_submit_input" value="'.__("Proceed to Checkout","dg-lang").'" />';
+			$cnt .= '<input type="submit" class="shipping_submit" id="shipping_submit_input" value="'.__("Proceed to Checkout").'" />';
 			$cnt .= '</form>';
 			$cnt .= '<script type="text/javascript">';
 			$cnt .= 'jQuery(document).ready(function(){';
@@ -73,7 +73,7 @@ function dg_get_cart($atts){
 						$total_shipping += $shipping;
 					}
 				}
-				$cnt .= '<div class="dg_empty_cart"><span class="dg_empty">'.__("Empty Cart","dg-lang").'</span></div>';
+				$cnt .= '<div class="dg_empty_cart"><span class="dg_empty">'.__("Empty Cart").'</span></div>';
 				$cnt .= '<script type="text/javascript">';
 				$cnt .= 'jQuery(document).ready(function(){';
 				$cnt .= 'jQuery("span.dg_empty").click(function() {';
@@ -87,10 +87,10 @@ function dg_get_cart($atts){
 				if($dg_shop_settings['checkout_prod_image'] == 'true'){
 					$cnt .= '<th scope="col" class="dg_cart_header image">&nbsp;</th>';
 				}
-				$cnt .= '<th scope="col" class="dg_cart_header product">'.__("Product","dg-lang").'</th>';
-				$cnt .= '<th scope="col" class="dg_cart_header quantity">'.__("Quantity","dg-lang").'</th>';
-				$cnt .= '<th scope="col" class="dg_cart_header price">'.__("Price","dg-lang").'</th>';
-				$cnt .= '<th scope="col" class="dg_cart_header total">'.__("Total","dg-lang").'</th>';
+				$cnt .= '<th scope="col" class="dg_cart_header product">'.__("Product").'</th>';
+				$cnt .= '<th scope="col" class="dg_cart_header quantity">'.__("Quantity").'</th>';
+				$cnt .= '<th scope="col" class="dg_cart_header price">'.__("Price").'</th>';
+				$cnt .= '<th scope="col" class="dg_cart_header total">'.__("Total").'</th>';
 				$cnt .= '</tr>';
 				foreach ($dg_cart as $cart_items => $cart) {
 					if(!isset($_SESSION['dg_discount_value'])){
@@ -110,7 +110,7 @@ function dg_get_cart($atts){
 						$cnt .= '<td style="vertical-align:top" class="product image"><img src="'.$cart_img.'"  style="width:'.$dg_shop_settings['checkout_prod_image_width'].'px; height:'.$dg_shop_settings['checkout_prod_image_height'].'px"/></td>';
 					}
 					$cnt .= '<td class="product name">'.$cart['product'].'</td>';
-					$cnt .= '<td class="quantity"><input type="text" id="cart_quantity_'.$cart_items.'" value="'.$cart['quantity'].'" /> <button id="dg_btn_'.$cart_items.'">'.__("Update","dg-lang").'</button></td>';
+					$cnt .= '<td class="quantity"><input type="text" id="cart_quantity_'.$cart_items.'" value="'.$cart['quantity'].'" /> <button id="dg_btn_'.$cart_items.'">'.__("Update").'</button></td>';
 					$cnt .= '<td class="product price">'.$dg_shop_settings['currency_symbol'].' '. number_format($cart['price'],2).'</td>';
 					$cnt .= '<td class="product total">'.$dg_shop_settings['currency_symbol'].' '.number_format($cart['total'],2).'</td>';
 					$cnt .= '</tr>';
@@ -145,7 +145,7 @@ function dg_get_cart($atts){
 						$cnt .= '<td>&nbsp;</td>';
 					}
 					
-					$cnt .= '<td class="discount">'.__("Total Discount","dg-lang").'</td>';
+					$cnt .= '<td class="discount">'.__("Total Discount").'</td>';
 					$cnt .= '<td>&nbsp;</td>';
 					$cnt .= '<td>&nbsp;</td>';
 					$cnt .= '<td class="discount amount">'.$dg_shop_settings['currency_symbol'].' '.number_format(($total_discount),2).'</td>';
@@ -156,7 +156,7 @@ function dg_get_cart($atts){
 					if($dg_shop_settings['checkout_prod_image'] == 'true'){
 						$cnt .= '<td>&nbsp;</td>';
 					}
-					$cnt .= '<td class="shipping">'.__("Total Shipping","dg-lang").'</td>';
+					$cnt .= '<td class="shipping">'.__("Total Shipping").'</td>';
 					$cnt .= '<td>&nbsp;</td>';
 					$cnt .= '<td>&nbsp;</td>';
 					$cnt .= '<td class="shipping amount">'.$dg_shop_settings['currency_symbol'].' '.number_format($total_shipping,2).'</td>';
@@ -166,7 +166,7 @@ function dg_get_cart($atts){
 				if($dg_shop_settings['checkout_prod_image'] == 'true'){
 					$cnt .= '<td>&nbsp;</td>';
 				}
-				$cnt .= '<td class="total">'.__("Total","dg-lang").'</td>';
+				$cnt .= '<td class="total">'.__("Total").'</td>';
 				$cnt .= '<td>&nbsp;</td>';
 				$cnt .= '<td>&nbsp;</td>';
 				$cnt .= '<td class="total amount">'.$dg_shop_settings['currency_symbol'].' '.number_format($total_value,2).'</td>';
@@ -178,14 +178,14 @@ function dg_get_cart($atts){
 					$cnt .= '<span class="error" id="dg_disc_reponse"></span>';
 					$cnt .= '<table class="dg_discount">';
 					$cnt .= '<tr>';
-					$cnt .= '<td colspan="2">'.__("Enter Discount Code","dg-lang").'</td>';
+					$cnt .= '<td colspan="2">'.__("Enter Discount Code").'</td>';
 					if($dg_shop_settings['checkout_prod_image'] == 'true'){
 						$cnt .= '<td>&nbsp;</td>';
 					}
 					$cnt .= '</tr>';
 					$cnt .= '<tr>';
 					$cnt .= '<td><input type="text" id="dg_discount_code" autocomplete="off" /></td>';
-					$cnt .= '<td><button id="dg_disc_validate">'.__("Validate","dg-lang").'</button></td>';
+					$cnt .= '<td><button id="dg_disc_validate">'.__("Validate").'</button></td>';
 					if($dg_shop_settings['checkout_prod_image'] == 'true'){
 						$cnt .= '<td>&nbsp;</td>';
 					}
@@ -220,12 +220,12 @@ function dg_get_cart($atts){
 				$cnt .= '</script>';
 				$cnt .= '<div style="display:none" id="dg_payment_return"></div>';
 			}else{
-				$cnt .= __("There are no items in your cart","dg-lang");
+				$cnt .= __("There are no items in your cart");
 			}
 			
 		}
 	}else{
-		$cnt .= __("There are no items in your cart","dg-lang");
+		$cnt .= __("There are no items in your cart");
 	}
 	$cnt .= '</div>';
 	return $cnt;
@@ -244,9 +244,9 @@ function dg_cart_min($echo = 'false'){
 		$total = 0.00;
 		$cnt .= '<table class="dg_cart" id="dg_cart_table">';
 		$cnt .= '<tr>';
-		$cnt .= '<th scope="col" class="dg_cart_header product">'.__("Product","dg-lang").'</th>';
-		$cnt .= '<th scope="col" class="dg_cart_header quantity">'.__("Qty","dg-lang").'</th>';
-		$cnt .= '<th scope="col" class="dg_cart_header price">'.__("Price","dg-lang").'</th>';
+		$cnt .= '<th scope="col" class="dg_cart_header product">'.__("Product").'</th>';
+		$cnt .= '<th scope="col" class="dg_cart_header quantity">'.__("Qty").'</th>';
+		$cnt .= '<th scope="col" class="dg_cart_header price">'.__("Price").'</th>';
 		$cnt .= '</tr>';
 		foreach ($dg_cart as $cart_items => $cart) {
 			$cnt .= '<tr>';
@@ -270,9 +270,9 @@ function dg_cart_min($echo = 'false'){
 		}
 		$url = get_page_link($dg_shop_settings['checkout_page']);
 		$cnt .= '</table>';
-		$cnt .= '<p class="total">'.__("Total","dg-lang").' : '.$dg_shop_settings['currency_symbol'].' '.number_format($total,2).'</p>';
-		$cnt .= '<div class="dg_empty_cart"><span class="dg_empty">'.__("Empty Cart","dg-lang").'</span></div>';
-		$cnt .= '<p class="checkout"><a href="'.$url.'" class="go_checkout">'.__("Go to Checkout","dg-lang").'</a></p>';
+		$cnt .= '<p class="total">'.__("Total").' : '.$dg_shop_settings['currency_symbol'].' '.number_format($total,2).'</p>';
+		$cnt .= '<div class="dg_empty_cart"><span class="dg_empty">'.__("Empty Cart").'</span></div>';
+		$cnt .= '<p class="checkout"><a href="'.$url.'" class="go_checkout">'.__("Go to Checkout").'</a></p>';
 		$cnt .= '<script type="text/javascript">';
 		$cnt .= 'jQuery(document).ready(function(){';
 		$cnt .= 'jQuery("span.dg_empty").click(function() {';
@@ -283,7 +283,7 @@ function dg_cart_min($echo = 'false'){
 		$cnt .= '</script>';
 		
 	}else{
-		$cnt .= __("There are no items in your cart","dg-lang");
+		$cnt .= __("There are no items in your cart");
 	}
 	$cnt .= '</div>';
 	if($echo == 'true')

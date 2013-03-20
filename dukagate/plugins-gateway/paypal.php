@@ -30,8 +30,8 @@ class DukaGate_GateWay_PayPal extends DukaGate_GateWay_API{
 	
 	//Default method called on create
 	function on_create(){
-		$this->plugin_name = __('PayPal', 'dg-lang');
-		$this->plugin_slug = __('paypal', 'dg-lang');
+		$this->plugin_name = __('PayPal');
+		$this->plugin_slug = __('paypal');
 		$this->required_fields = array(
 										'sandbox' => '',
 										'paypal_id' => '',
@@ -152,25 +152,25 @@ class DukaGate_GateWay_PayPal extends DukaGate_GateWay_API{
 		<form method="POST" action="">
 			<table class="form-table">
 				<tr>
-				    <th scope="row"><?php _e('PayPal Settings', 'dg-lang') ?></th>
+				    <th scope="row"><?php _e('PayPal Settings') ?></th>
 				    <td>
 						<p>
-							<label><?php _e('Use PayPal Sandbox', 'dg-lang') ?><br />
+							<label><?php _e('Use PayPal Sandbox') ?><br />
 							  <input value="checked" name="<?php echo $plugin_slug; ?>_sandbox" type="checkbox" <?php echo ($options['sandbox'] == 'checked') ? "checked='checked'": ""; ?> />
 							</label>
 						</p>
 				    </td>
 				</tr>
 				<tr>
-				    <th scope="row"><?php _e('PayPal Credentials', 'dg-lang') ?></th>
+				    <th scope="row"><?php _e('PayPal Credentials') ?></th>
 				    <td>
 						<p>
-							<label><?php _e('PayPal ID', 'dg-lang') ?><br />
+							<label><?php _e('PayPal ID') ?><br />
 							  <input value="<?php echo $options['paypal_id']; ?>" size="30" name="<?php echo $plugin_slug; ?>_paypal_id" type="text" />
 							</label>
 						</p>
 						<p>
-							<label><?php _e('PayPal Currency', 'dg-lang') ?><br />
+							<label><?php _e('PayPal Currency') ?><br />
 								<select name="<?php echo $plugin_slug; ?>_currency">
 									<?php
 									$sel_currency = $options['currency'];
@@ -184,15 +184,15 @@ class DukaGate_GateWay_PayPal extends DukaGate_GateWay_API{
 				    </td>
 				</tr>
 				<tr>
-				    <th scope="row"><?php _e('Enable', 'dg-lang') ?></th>
+				    <th scope="row"><?php _e('Enable') ?></th>
 				    <td>
 						<p>
-							<label><?php _e('Select To enable or disable', 'dg-lang') ?><br />
+							<label><?php _e('Select To enable or disable') ?><br />
 							  <input value="checked" name="<?php echo $plugin_slug; ?>_enable" type="checkbox" <?php echo (intval($enabled) == 1) ? "checked='checked'": ""; ?> />
 							</label>
 						</p>
 						<p>
-							<input type="submit" name="<?php echo $plugin_slug; ?>" value="<?php _e('Save Settings', 'dg-lang') ?>" />
+							<input type="submit" name="<?php echo $plugin_slug; ?>" value="<?php _e('Save Settings') ?>" />
 						</p>
 				    </td>
 				</tr>

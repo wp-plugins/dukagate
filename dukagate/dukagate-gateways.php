@@ -25,7 +25,7 @@ if(!class_exists('DukaGate_GateWay_API')) {
 			
 			//check required vars
 			if (empty($this->plugin_name) || empty($this->plugin_slug) || empty($this->required_fields))
-				wp_die( __("You must override all required vars in your {$this->plugin_name} payment gateway plugin!", 'dg-lang') );
+				wp_die( __("You must override all required vars in your {$this->plugin_name} payment gateway plugin!") );
 				
 			$this->set_up_ipn_url();
 			add_action( 'dg_payment_submit_' . $this->plugin_slug, array(&$this, 'process_payment_form'), 10, 2 ); //Payment process

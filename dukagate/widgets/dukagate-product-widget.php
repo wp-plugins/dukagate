@@ -104,7 +104,7 @@ if(!class_exists('DukaGate_Product_Widget')) {
 		function replace_text_in_thickbox($translated_text, $source_text, $domain) {
 			if ( $this->is_sp_widget_context() ) {
 				if ('Insert into Post' == $source_text) {
-					return __('Insert Into Widget', 'dg-lang');
+					return __('Insert Into Widget');
 				}
 			}
 			return $translated_text;
@@ -187,7 +187,7 @@ if(!class_exists('DukaGate_Product_Widget')) {
 		
 		function widget($args, $instance) {
 			extract($args);
-			$title = empty( $instance['title'] ) ? '' : __($instance['title'],"dg-lang");
+			$title = empty( $instance['title'] ) ? '' : __($instance['title']);
 			echo $before_widget;
 			echo $before_title.$title.$after_title;
 			//Show product
@@ -240,34 +240,34 @@ if(!class_exists('DukaGate_Product_Widget')) {
 			
 			?>	
 				<p>
-					<label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Widget Title:',"dg-lang");?></label>
+					<label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Widget Title:');?></label>
 					<input type="text" value="<?php echo $title; ?>" name="<?php echo $this->get_field_name('title'); ?>" id="<?php echo $this->get_field_id('title'); ?>" class="widefat" />
 				</p>
 				<p>
-					<label for="<?php echo $this->get_field_id('dg_product_name'); ?>"><?php _e('Product Name:',"dg-lang");?></label>
+					<label for="<?php echo $this->get_field_id('dg_product_name'); ?>"><?php _e('Product Name:');?></label>
 					<input type="text" value="<?php echo $dg_product_name; ?>" name="<?php echo $this->get_field_name('dg_product_name'); ?>" id="<?php echo $this->get_field_id('dg_product_name'); ?>" class="widefat" />
 				</p>
 				<p>
-					<label for="<?php echo $this->get_field_id('dg_product_sku'); ?>"><?php _e('SKU:',"dg-lang");?></label>
+					<label for="<?php echo $this->get_field_id('dg_product_sku'); ?>"><?php _e('SKU:');?></label>
 					<input type="text" value="<?php echo $dg_product_sku; ?>" name="<?php echo $this->get_field_name('dg_product_sku'); ?>" id="<?php echo $this->get_field_id('dg_product_sku'); ?>" class="widefat" />
 				</p>
 				<p>
-					<label for="<?php echo $this->get_field_id('dg_product_price'); ?>"><?php _e('Price:',"dg-lang");?></label>
+					<label for="<?php echo $this->get_field_id('dg_product_price'); ?>"><?php _e('Price:');?></label>
 					<input type="text" value="<?php echo $dg_product_price; ?>" name="<?php echo $this->get_field_name('dg_product_price'); ?>" id="<?php echo $this->get_field_id('dg_product_price'); ?>" class="widefat" />
 				</p>
 				<p>
-					<label for="<?php echo $this->get_field_id('dg_product_discount'); ?>"><?php _e('Discount:',"dg-lang");?></label>
+					<label for="<?php echo $this->get_field_id('dg_product_discount'); ?>"><?php _e('Discount:');?></label>
 					<input type="text" value="<?php echo $dg_product_discount; ?>" name="<?php echo $this->get_field_name('dg_product_discount'); ?>" id="<?php echo $this->get_field_id('dg_product_discount'); ?>" class="widefat" />
 				</p>
 				<p>
-					<label for="<?php echo $this->get_field_id('dg_product_discount_type'); ?>"><?php _e('Discount Type:',"dg-lang");?></label>
+					<label for="<?php echo $this->get_field_id('dg_product_discount_type'); ?>"><?php _e('Discount Type:');?></label>
 					<select name="<?php echo $this->get_field_name('dg_product_discount_type'); ?>" id="<?php echo $this->get_field_id('dg_product_discount_type'); ?>" class="widefat">
 						<option value="percentage"<?php selected( $dg_product_discount_type, 'percentage' ); ?>><?php _e('Percentage', "dg-lang"); ?></option>
 						<option value="fixed"<?php selected( $dg_product_discount_type, 'fixed' ); ?>><?php _e('Fixed', "dg-lang"); ?></option>
 					</select>
 				</p>
 				<p>
-					<label for="<?php echo $this->get_field_id('dg_product_image'); ?>"><?php _e('Image:',"dg-lang");?></label>
+					<label for="<?php echo $this->get_field_id('dg_product_image'); ?>"><?php _e('Image:');?></label>
 					<?php
 						$media_upload_iframe_src = "media-upload.php?type=image&widget_id=".$this->id; //NOTE #1: the widget id is added here to allow uploader to only return array if this is used with image widget so that all other uploads are not harmed.
 						$image_upload_iframe_src = apply_filters('image_upload_iframe_src', "$media_upload_iframe_src");
@@ -294,15 +294,15 @@ if(!class_exists('DukaGate_Product_Widget')) {
 					<input id="<?php echo $this->get_field_id('dg_product_image'); ?>" name="<?php echo $this->get_field_name('dg_product_image'); ?>" type="hidden" value="<?php echo $instance['dg_product_image']; ?>" />
 				</p>
 				<p>
-					<label for="<?php echo $this->get_field_id('dg_product_image_width'); ?>"><?php _e('Image Width:',"dg-lang");?></label>
+					<label for="<?php echo $this->get_field_id('dg_product_image_width'); ?>"><?php _e('Image Width:');?></label>
 					<input type="text" value="<?php echo $dg_product_image_width; ?>" name="<?php echo $this->get_field_name('dg_product_image_width'); ?>" id="<?php echo $this->get_field_id('dg_product_image_width'); ?>" class="widefat" onchange="changeImgWidth('<?php echo $this->id; ?>')" />
 				</p>
 				<p>
-					<label for="<?php echo $this->get_field_id('dg_product_image_height'); ?>"><?php _e('Image Height:',"dg-lang");?></label>
+					<label for="<?php echo $this->get_field_id('dg_product_image_height'); ?>"><?php _e('Image Height:');?></label>
 					<input type="text" value="<?php echo $dg_product_image_height; ?>" name="<?php echo $this->get_field_name('dg_product_image_height'); ?>" id="<?php echo $this->get_field_id('dg_product_image_height'); ?>" class="widefat" onchange="changeImgHeight('<?php echo $this->id; ?>')" />
 				</p>
 				<p>
-					<label for="<?php echo $this->get_field_id('dg_product_image_align'); ?>"><?php _e('Image Align:',"dg-lang");?></label>
+					<label for="<?php echo $this->get_field_id('dg_product_image_align'); ?>"><?php _e('Image Align:');?></label>
 					<select onchange="changeImgAlign('<?php echo $this->id; ?>')" name="<?php echo $this->get_field_name('dg_product_image_align'); ?>" id="<?php echo $this->get_field_id('dg_product_image_align'); ?>" class="widefat">
 						<option value="none"<?php selected( $dg_product_image_align, 'none' ); ?>><?php _e('none', "dg-lang"); ?></option>
 						<option value="left"<?php selected( $dg_product_image_align, 'left' ); ?>><?php _e('left', "dg-lang"); ?></option>
@@ -311,11 +311,11 @@ if(!class_exists('DukaGate_Product_Widget')) {
 					</select>
 				</p>
 				<p>
-					<label for="<?php echo $this->get_field_id('dg_product_image_alt'); ?>"><?php _e('Image Alt:',"dg-lang");?></label>
+					<label for="<?php echo $this->get_field_id('dg_product_image_alt'); ?>"><?php _e('Image Alt:');?></label>
 					<input type="text" value="<?php echo $dg_product_image_alt; ?>" name="<?php echo $this->get_field_name('dg_product_image_alt'); ?>" id="<?php echo $this->get_field_id('dg_product_image_alt'); ?>" class="widefat" />
 				</p>
 				<p>
-					<label for="<?php echo $this->get_field_id('dg_product_image_background'); ?>"><?php _e('Use as background image:',"dg-lang");?></label>
+					<label for="<?php echo $this->get_field_id('dg_product_image_background'); ?>"><?php _e('Use as background image:');?></label>
 					<input type="checkbox" value="checked" name="<?php echo $this->get_field_name('dg_product_image_background'); ?>" <?php echo ($dg_product_image_background == 'checked') ? "checked='checked'": ""; ?>/>
 				</p>
 			<?php
