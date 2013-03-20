@@ -81,3 +81,6 @@ Some documenation on the shortcodes and set up. Still working on it
 
 = 1.2 =
 Fixed Pesapal bugs, need to work on the shopping cart ajax and finalise some payment options
+
+= 2.0 =
+Added shipping and removed language folder
