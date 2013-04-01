@@ -1,5 +1,6 @@
 === Dukagate ===
 Contributors: rixed
+Donate link: http://dukagate.info/
 Tags: shopping cart, web shop, cart, shop,Paypal,paypal,Pesapal, e-commerce, ecommerce
 
 Requires at least: 3.0

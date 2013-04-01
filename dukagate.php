@@ -3,7 +3,9 @@
 Plugin Name: DukaGate Shopping Cart
 Description: DukaGate Shopping Cart
 Version: 2.0
-Author: Paul Kevin
+Author: TheBunch
+Author URI: http://dukagate.info/
+Plugin URI: http://dukagate.info/
 */
 
 define('DG_PLUGIN_URL', WP_PLUGIN_URL.'/'.dirname(plugin_basename(__FILE__)));
