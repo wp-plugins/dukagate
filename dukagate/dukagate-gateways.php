@@ -20,6 +20,7 @@ if(!class_exists('DukaGate_GateWay_API')) {
 		
 		//Do not overide
 		function __construct() {
+			global $dukagate;
 			//run plugin construct
 			$this->on_create();
 			
@@ -30,10 +31,9 @@ if(!class_exists('DukaGate_GateWay_API')) {
 			$this->set_up_ipn_url();
 			add_action( 'dg_payment_submit_' . $this->plugin_slug, array(&$this, 'process_payment_form'), 10, 2 ); //Payment process
 			add_action( 'dg_handle_payment_return_' . $this->plugin_slug, array(&$this, 'process_ipn_return') ); //IPN
-			$registered = get_option($this->plugin_slug.'_registered');
-			if(!isset($registered) || empty($registered)){
+			$dg_pw_gw = $dukagate->dg_get_payment_gateway($this->plugin_slug);
+			if(empty($dg_pw_gw)){
 				$this->register();
-				update_option($this->plugin_slug.'_registered', 'registered');
 			}
 		}
 		
