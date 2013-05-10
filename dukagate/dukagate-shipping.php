@@ -17,15 +17,15 @@ if(!class_exists('DukaGate_Shipping_API')) {
 		
 		//Do not overide
 		function __construct() {
+			global $dukagate;
 			//run plugin construct
 			$this->on_create();
 			if ($this->use_metabox) {
 				
 			}
-			$registered = get_option($this->plugin_slug.'_registered');
-			if(!isset($registered) || empty($registered)){
+			$dg_sp_gw = $dukagate->dg_get_shipping_gateway($this->plugin_slug);
+			if(empty($dg_sp_gw)){
 				$this->register();
-				update_option($this->plugin_slug.'_registered', 'registered');
 			}
 			$this->register();
 			$this->add_column();

@@ -40,7 +40,7 @@ if(!class_exists('DukaGate')) {
 			add_action( 'save_post', array(&$this,'product_meta_save'));
 			add_action( 'init', array(&$this, 'set_up_styles'));
 			add_action( 'init', array(&$this, 'set_up_js'));
-			$this->load_dukagate_plugins();
+			add_action( 'init', array(&$this, 'load_dukagate_plugins'));
 		}
 		
 		
@@ -814,7 +814,7 @@ if(!class_exists('DukaGate')) {
 		/**
 		 * Load plugins
 		 */
-		private function load_dukagate_plugins(){
+		function load_dukagate_plugins(){
 			$this->load_gateway_plugins();
 			$this->load_shipping_plugins();
 		}
