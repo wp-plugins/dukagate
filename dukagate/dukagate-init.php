@@ -1490,7 +1490,7 @@ if(!class_exists('DukaGate')) {
 					$total = count($dg_form_elem);
 					
 					while($total > 0){
-						if($dg_form_elem[$total]['visible'] == 'checked'){
+						if(@$dg_form_elem[$total]['visible'] == 'checked'){
 							$input_type = $dg_form_elem[$total]['type'];
 							$form_class = '';
 							if($dg_form_elem[$total]['mandatory'] == 'checked'){

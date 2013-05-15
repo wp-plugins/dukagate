@@ -8,7 +8,7 @@ function dg_get_cart($atts){
                 'layout' => 'fixed'), $atts));
 	global $dukagate;
 	$dg_shop_settings = get_option('dukagate_shop_settings');
-	
+	$dg_shipping_required = 'false';
 	
 	$dg_cart = '';
 	$cnt = '<div class="dg_cart_container">';
@@ -83,7 +83,7 @@ function dg_get_cart($atts){
 				$cnt .= '</script>';
 				$cnt .= '<table class="dg_cart" id="dg_cart_table">';
 				$cnt .= '<tr>';
-				if($dg_shop_settings['checkout_prod_image'] == 'true'){
+				if(@$dg_shop_settings['checkout_prod_image'] == 'true'){
 					$cnt .= '<th scope="col" class="dg_cart_header image">&nbsp;</th>';
 				}
 				$cnt .= '<th scope="col" class="dg_cart_header product">'.__("Product").'</th>';
@@ -110,8 +110,8 @@ function dg_get_cart($atts){
 					}
 					$cnt .= '<td class="product name">'.$cart['product'].'</td>';
 					$cnt .= '<td class="quantity"><input type="text" id="cart_quantity_'.$cart_items.'" value="'.$cart['quantity'].'" /> <button id="dg_btn_'.$cart_items.'">'.__("Update").'</button></td>';
-					$cnt .= '<td class="product price">'.$dg_shop_settings['currency_symbol'].' '. number_format($cart['price'],2).'</td>';
-					$cnt .= '<td class="product total">'.$dg_shop_settings['currency_symbol'].' '.number_format($cart['total'],2).'</td>';
+					$cnt .= '<td class="product price">'.$dg_shop_settings['currency_symbol'].' '. number_format(@$cart['price'],2).'</td>';
+					$cnt .= '<td class="product total">'.$dg_shop_settings['currency_symbol'].' '.number_format(@$cart['total'],2).'</td>';
 					$cnt .= '</tr>';
 					$cnt .= '<script type="text/javascript">';
 					$cnt .= 'jQuery(document).ready(function(){';
@@ -162,7 +162,7 @@ function dg_get_cart($atts){
 					$cnt .= '</tr>';
 					$cnt .= '<tr>';
 				}
-				if($dg_shop_settings['checkout_prod_image'] == 'true'){
+				if(@$dg_shop_settings['checkout_prod_image'] == 'true'){
 					$cnt .= '<td>&nbsp;</td>';
 				}
 				$cnt .= '<td class="total">'.__("Total").'</td>';
@@ -296,7 +296,10 @@ add_action( 'wp_ajax_shipping_submit', 'dg_shipping_submit');
 
 
 function dg_shipping_submit(){
-	$options = $_REQUEST['shipping_rate_value'];
+	$options = "";
+	if(@$_REQUEST['shipping_rate_value']){
+		$options = $_REQUEST['shipping_rate_value'];
+	}
 	$_SESSION['dg_shipping_required'] = 'false';
 	$_SESSION['dg_shipping_total'] = $options;
 	header('Content-type: application/json; charset=utf-8');
@@ -328,7 +331,7 @@ function dg_validate_discount_code(){
 }
 
 
-add_action( 'wp_ajax_dg_update_cart', 'dg_shipping_submit');
+add_action( 'wp_ajax_dg_update_cart', 'dg_update_cart');
 
 /**
  * Update Cart
