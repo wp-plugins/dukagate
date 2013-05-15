@@ -2,7 +2,7 @@
 /*
 Plugin Name: DukaGate Shopping Cart
 Description: DukaGate Shopping Cart
-Version: 3.1
+Version: 3.3
 Author: TheBunch
 Author URI: http://dukagate.info/
 Plugin URI: http://dukagate.info/
@@ -50,8 +50,23 @@ $dukagate->set_up_directories_and_file_info();
 $dukagate->set_up();
 
 
-session_set_cookie_params(8*60*60); 
-session_save_path(DG_PLUGIN_DIR.'/temp'); 
-ini_set('session.gc_maxlifetime', '28800');
+/**
+ * This function adds links to the plugin page
+ */
+add_filter('plugin_row_meta', 'dg_register_links',10,2);
+function dg_register_links($links, $file) {
+   $base = plugin_basename(__FILE__);
+   if ($file == $base) {
+		$links[] = '<a href="options-general.php?page=dukagate-settings">'.__('Settings').'</a>';
+		$links[] = '<a href="http://dukagate.info/faq/" target="_blank">'.__('FAQ').'</a>';
+		$links[] = '<a href="http://dukagate.info/documentation/" target="_blank">'.__('Documentation').'</a>';
+   }
+   return $links;
+}
+
+
+#session_set_cookie_params(8*60*60); 
+#session_save_path(DG_PLUGIN_DIR.'/temp'); 
+#ini_set('session.gc_maxlifetime', '28800');
 session_start();
 ?>
