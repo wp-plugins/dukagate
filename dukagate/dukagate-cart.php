@@ -309,7 +309,7 @@ function dg_shipping_submit(){
 }
 
 
-add_action( 'wp_ajax_dg_validate_discount_code', 'dg_shipping_submit');
+add_action( 'wp_ajax_dg_validate_discount_code', 'dg_validate_discount_code');
 
 function dg_validate_discount_code(){
 	//Validate Dukapress discount plugin code
@@ -409,7 +409,7 @@ function dg_update_cart(){
 }
 
 //Empty cart
-add_action( 'wp_ajax_dg_empty_cart', 'dg_shipping_submit');
+add_action( 'wp_ajax_dg_empty_cart', 'dg_empty_cart');
 
 function dg_empty_cart(){
 	$products = $_SESSION['dg_cart'];
@@ -421,7 +421,7 @@ function dg_empty_cart(){
 }
 
 //Process Cart
-add_action( 'wp_ajax_dg_process_cart', 'dg_shipping_submit');
+add_action( 'wp_ajax_dg_process_cart', 'dg_process_cart');
 
 function dg_process_cart(){
 	global $dukagate;

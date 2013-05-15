@@ -26,11 +26,12 @@ Main Features:
 * Choose between a normal shop mode and a catalogue mode;
 * Numerous payment processing options including Paypal and more on the way
 * Ability to work with multiple currencies
-* Printable invoices;
 * One-page checkout;
 * A myriad of shipping processing options;
 * Custom GUI (Graphical User Interface) for product management;
 * Easy to translate into your own language
+
+We noticed printable invoices arent there :( Working to get this up in the upcoming versions
 
 There are still many more features we are working on that are yet to come
 
@@ -100,3 +101,6 @@ Fixing versioning
 
 = 3.2 =
 Fixed issue with adding to cart
+
+= 3.3 =
+Fixed issues on cart functions. At first it was all submitting shipping :(
