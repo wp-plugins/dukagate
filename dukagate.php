@@ -26,7 +26,6 @@ define('DG_SHIPPING_URL', DG_DUKAGATE_URL.'/plugins-shipping/');
 define('DG_ACTIVE_MERCHANT', DG_GATEWAYS.'libraries/aktive_merchant/');
 
 
-
 require_once(DG_DUKAGATE_DIR.'/dukagate-init.php');
 
 
