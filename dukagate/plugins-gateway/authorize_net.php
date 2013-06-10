@@ -51,7 +51,42 @@ class DukaGate_GateWay_AuthorizeNet extends DukaGate_GateWay_API{
 	 * Process IPN
 	 */
 	function process_ipn_return() {
+		global $wpdb;
+		global $dukagate;
+		$payment_status = intval($_POST['x_response_code']);
+		$invoice = $_POST['x_invoice_num'];
+		$payer_email = $_POST['x_email'];
+		
+		switch ($payment_status) {
+			case 1:
+				$updated_status = 'Paid';
+				break;
+			case 2:
+				$updated_status = 'Canceled';
+				break;
+			case 3:
+				$updated_status = 'Canceled';
+				break;
+			case 4:
+				$updated_status = 'Pending';
+				break;
+			default:
+				$updated_status = 'Canceled';
+				break;
+		}
 	
+		$dg_shop_settings = get_option('dukagate_shop_settings');
+
+		$dukagate->dg_update_order_log($invoice, $updated_status);
+		
+		$return_path = get_page_link($dp_shopping_cart_settings['thankyou_page']);
+		$check_return_path = explode('?', $return_path);
+		if (count($check_return_path) > 1) {
+			$return_path .= '&id=' . $invoice;
+		} else {
+			$return_path .= '?id=' . $invoice;
+		}
+		header("Location: $return_path");
 	}
 	
 	/**
@@ -160,43 +195,48 @@ class DukaGate_GateWay_AuthorizeNet extends DukaGate_GateWay_API{
 		}
 		
 		//Set up return url
-		$return_url = $this->post_url;
+		$action_url = $this->post_url;
 		if($options['sandbox'] == 'checked'){
-			$return_url = $this->sandbox_url;
+			$action_url = $this->sandbox_url;
 		}
-		$output = '<form name="dg_paypal_form" id="dg_payment_form" action="' . $return_url . '" method="post">';
-        $output .= '<input type="hidden" name="return" value="' . $return_path . '"/>
-                     <input type="hidden" name="cmd" value="_ext-enter" />
-                     <input type="hidden" name="notify_url" value="' . $this->ipn_url . '"/>
-                     <input type="hidden" name="redirect_cmd" value="_cart" />
-                     <input type="hidden" name="business" value="' . $options['paypal_id'] . '"/>
-                     <input type="hidden" name="cancel_return" value="' . $return_path . '&status=cancel"/>
-                     <input type="hidden" name="rm" value="2" />
-                     <input type="hidden" name="upload" value="1" />
-                     <input type="hidden" name="currency_code" value="' . $options['currency'] . '"/>
-                     <input type="hidden" name="no_note" value="1" />
-                     <input type="hidden" name="invoice" value="' . $invoice_id . '">';
-					 
-		$count_product = 1;
-        $tax_rate = 0;
-        $shipping_total = 0.00;
+		$sequence = rand(1, 1000);
+        $timeStamp = time();
+		$dg_total = 0;
 		foreach ($dg_cart as $cart_items => $cart) {
-			$output .= '<input type="hidden" name="item_name_' . $count_product . '" value="' . $cart['product']. '"/>
-                             <input type="hidden" name="amount_' . $count_product . '" value="' . number_format($conversion_rate * $cart['price'], 2) . '"/>
-                             <input type="hidden" name="quantity_' . $count_product . '" value="' . $cart['quantity'] . '"/>
-                             <input type="hidden" name="item_number_' . $count_product . '" value="' . $count_product. '"/>
-                             <input type="hidden" name="tax_rate_' . $count_product . '" value="' . $tax_rate . '"/>';
-			
+			$price = number_format($conversion_rate * $cart['price'], 2);
 			if(!empty($_SESSION['dg_discount_value'])){
-				$output .= '<input type="hidden" name="discount_rate_' . $count_product . '" value="' .$_SESSION['dg_discount_value']. '" />';
+				$price - $_SESSION['dg_discount_value'];
 			}else{
 				if($cart['discount'] > 0){	
-					$output .= '<input type="hidden" name="discount_rate_' . $count_product . '" value="' . $cart['discount'] . '" />';
+					$price - $cart['discount'];
 				}
-			}			
-			$count_product++;
+			}
+			$dg_total +=  $price * $cart['quantity'];
 		}
-		$output .= '<input type="hidden" name="handling_cart" value="' . number_format($shipping_total, 2) . '"/></form>';
+		if (phpversion() >= '5.1.2') {
+            $fingerprint = hash_hmac("md5", $dg_shop_settings['authorize_api'] . "^" . $sequence . "^" . $timeStamp . "^" . $dg_total . "^", $dg_shop_settings['authorize_transaction_key']);
+        } else {
+            $fingerprint = bin2hex(mhash(MHASH_MD5, $dg_shop_settings['authorize_api'] . "^" . $sequence . "^" . $timeStamp . "^" . $dg_total . "^", $dg_shop_settings['authorize_transaction_key']));
+        }
+		
+		$output .= '<form name="dpsc_authorize_form" id="dpsc_payment_form" action="' . $action_url . '" method="post">';
+        $output .= '<input type="hidden" name="x_login" value="' . $dg_shop_settings['authorize_api'] . '" />';
+        $output .= '<input type="hidden" name="x_version" value="3.1" />';
+        $output .= '<input type="hidden" name="x_method" value="CC" />';
+        $output .= '<input type="hidden" name="x_type" value="AUTH_CAPTURE" />';
+        $output .= '<input type="hidden" name="x_amount" value="' . $dg_total . '" />';
+        $output .= '<input type="hidden" name="x_description" value="Your Order No.: ' . $invoice_id . '" />';
+        $output .= '<input type="hidden" name="x_invoice_num" value="' . $invoice_id . '" />';
+        $output .= '<input type="hidden" name="x_fp_sequence" value="' . $sequence . '" />';
+        $output .= '<input type="hidden" name="x_fp_timestamp" value="' . $timeStamp . '" />';
+        $output .= '<input type="hidden" name="x_fp_hash" value="' . $fingerprint . '" />';
+        $output .= '<input type="hidden" name="x_show_form" value="PAYMENT_FORM" />';
+        $output .= '<input type="hidden" name="x_relay_response" value="TRUE" />';
+        $output .= '<input type="hidden" name="x_receipt_link_method" value="LINK" />';
+        $output .= '<input type="hidden" name="x_receipt_link_text" value="Back to Shop" />';
+        $output .= '<input type="hidden" name="x_receipt_link_URL" value="' . $return_path . '" />';
+        $output .= '</form>';
+		
 		return $output;
 	}
 }
