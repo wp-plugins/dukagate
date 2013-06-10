@@ -227,11 +227,11 @@ class DukaGate_GateWay_PayPal extends DukaGate_GateWay_API{
 		}
 		
 		//Set up return url
-		$return_url = $this->post_url;
+		$action_url = $this->post_url;
 		if($options['sandbox'] == 'checked'){
-			$return_url = $this->sandbox_url;
+			$action_url = $this->sandbox_url;
 		}
-		$output = '<form name="dg_paypal_form" id="dg_payment_form" action="' . $return_url . '" method="post">';
+		$output = '<form name="dg_paypal_form" id="dg_payment_form" action="' . $action_url . '" method="post">';
         $output .= '<input type="hidden" name="return" value="' . $return_path . '"/>
                      <input type="hidden" name="cmd" value="_ext-enter" />
                      <input type="hidden" name="notify_url" value="' . $this->ipn_url . '"/>

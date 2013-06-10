@@ -5,7 +5,7 @@ Tags: shopping cart, web shop, cart, shop,Paypal,paypal,Pesapal, e-commerce, eco
 
 Requires at least: 3.0
 Tested up to: 3.5.1
-Stable tag: 3.3
+Stable tag: 3.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -104,3 +104,6 @@ Fixed issue with adding to cart
 
 = 3.3 =
 Fixed issues on cart functions. At first it was all submitting shipping :(
+
+= 3.4 =
+Added Authorize.net payment gateway
