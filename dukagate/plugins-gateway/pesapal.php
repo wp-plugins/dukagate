@@ -18,7 +18,7 @@ class DukaGate_GateWay_PesaPal extends DukaGate_GateWay_API{
 	//Payment gateway required fields
 	var $required_fields;
 	
-	var $post_url = 'https://www.pesapal.com/api/PostPesapalDirectOrderV2';
+	var $post_url = 'https://www.pesapal.com/api/PostPesapalDirectOrderV4';
 	
 	var $status_request = 'https://www.pesapal.com/api/verifypesapaldirectorder';
 	
@@ -72,11 +72,15 @@ class DukaGate_GateWay_PesaPal extends DukaGate_GateWay_API{
 		global $wpdb;
 		global $dukagate;
 		$dg_shop_settings = get_option('dukagate_shop_settings');
+		$options = DukaGate::json_to_array($dukagate->dg_get_gateway_options($this->plugin_slug));
+		$consumer_key = $options['customer_key'];
+		$consumer_secret = $options['customer_secret'];
+		
 		$transaction_tracking_id = $_REQUEST['pesapal_transaction_tracking_id'];
-		$payment_status = $_REQUEST['pesapal_transaction_status'];
+		$payment_notification = $_REQUEST['pesapal_notification_type'];
 		$invoice = $_REQUEST['pesapal_merchant_reference'];
 		
-		$this->ipn_request($transaction_tracking_id , $payment_status, $invoice);
+		$this->ipn_request($transaction_tracking_id , $payment_notification, $invoice, $consumer_key, $consumer_secret);
 		
 		$return_path = get_page_link($dp_shopping_cart_settings['thankyou_page']);
 		$check_return_path = explode('?', $return_path);
@@ -91,26 +95,62 @@ class DukaGate_GateWay_PesaPal extends DukaGate_GateWay_API{
 	/** 
 	 * Private Pesapal function to process IPN requests from url and from the cron job
 	 * @param transaction_tracking_id - Pesapal Tracking ID
-	 * @param payment_status - Pesapal Payment status
+	 * @param payment_notification - Pesapal Notification Type
 	 * @param invoice - invoice id
 	 */
-	private function ipn_request($transaction_tracking_id , $payment_status, $invoice){
+	private function ipn_request($transaction_tracking_id , $payment_notification, $invoice, $consumer_key, $consumer_secret){
 		global $dukagate;
-		switch ($payment_status) {
-			case 'PENDING':
-				$updated_status = 'Pending';
-				break;
-			case 'COMPLETED':
-				$updated_status = 'Paid';
-				break;
-			case 'FAILED':
-				$updated_status = 'Canceled';
-				break;
-			default:
-				$updated_status = 'Canceled';
-				break;
+		$statusrequestAPI = 'https://www.pesapal.com/api/querypaymentstatus';
+		if($pesapalNotification=="CHANGE" && $pesapalTrackingId!=''){
+			$token = $params = NULL;
+			$consumer = new OAuthConsumer($consumer_key, $consumer_secret);
+			$signature_method = new OAuthSignatureMethod_HMAC_SHA1();
+
+			//get transaction status
+			$request_status = OAuthRequest::from_consumer_and_token($consumer, $token, "GET", $statusrequestAPI, $params);
+			$request_status->set_parameter("pesapal_merchant_reference", $pesapal_merchant_reference);
+			$request_status->set_parameter("pesapal_transaction_tracking_id",$invoice);
+			$request_status->sign_request($signature_method, $consumer, $token);
+			$ch = curl_init();
+			curl_setopt($ch, CURLOPT_URL, $request_status);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+			curl_setopt($ch, CURLOPT_HEADER, 1);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+			 if(defined('CURL_PROXY_REQUIRED')) if (CURL_PROXY_REQUIRED == 'True'){
+				$proxy_tunnel_flag = (defined('CURL_PROXY_TUNNEL_FLAG') && strtoupper(CURL_PROXY_TUNNEL_FLAG) == 'FALSE') ? false : true;
+				curl_setopt ($ch, CURLOPT_HTTPPROXYTUNNEL, $proxy_tunnel_flag);
+				curl_setopt ($ch, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
+				curl_setopt ($ch, CURLOPT_PROXY, CURL_PROXY_SERVER_DETAILS);
+			}
+
+			$response = curl_exec($ch);
+
+			$header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+			$raw_header  = substr($response, 0, $header_size - 4);
+			$headerArray = explode("\r\n\r\n", $raw_header);
+			$header      = $headerArray[count($headerArray) - 1];
+
+			 //transaction status
+			$elements = preg_split("/=/",substr($response, $header_size));
+			$status = $elements[1];
+
+			curl_close ($ch);
+			switch ($status) {
+				case 'PENDING':
+					$updated_status = 'Pending';
+					break;
+				case 'COMPLETED':
+					$updated_status = 'Paid';
+					break;
+				case 'FAILED':
+					$updated_status = 'Canceled';
+					break;
+				default:
+					$updated_status = 'Canceled';
+					break;
+			}
+			$dukagate->dg_update_order_log($invoice, $updated_status);
 		}
-		$dukagate->dg_update_order_log($invoice, $updated_status);
 	}
 	
 	/**
@@ -218,7 +258,7 @@ class DukaGate_GateWay_PesaPal extends DukaGate_GateWay_API{
 		$payment_method = '';//leave blank
 		$code = '';//leave blank
 		
-		$callback_url = $return_path; //redirect url, the page that will handle the response from pesapal.
+		$callback_url = network_site_url('/').'?dg_handle_payment_return_pesapal'; //redirect url, the page that will handle the response from pesapal.
 		$post_xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?><PesapalDirectOrderInfo xmlns:xsi=\"http://www.w3.org/2001/XMLSchemainstance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" Amount=\"".$amount."\" Description=\"".$desc."\" Code=\"".$code."\" Type=\"".$type."\" PaymentMethod=\"".$payment_method."\" Reference=\"".$reference."\" FirstName=\"".$first_name."\" LastName=\"".$last_name."\" Email=\"".$email."\" PhoneNumber=\"".$phonenumber."\" UserName=\"".$username."\" xmlns=\"http://www.pesapal.com\" />";
 		$post_xml = htmlentities($post_xml);
 		

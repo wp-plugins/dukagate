@@ -4,8 +4,8 @@ Donate link: http://dukagate.info/
 Tags: shopping cart, web shop, cart, shop,Paypal,paypal,Pesapal, e-commerce, ecommerce
 
 Requires at least: 3.0
-Tested up to: 3.5.1
-Stable tag: 3.4
+Tested up to: 3.5.2
+Stable tag: 3.4.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -107,3 +107,7 @@ Fixed issues on cart functions. At first it was all submitting shipping :(
 
 = 3.4 =
 Added Authorize.net payment gateway
+
+= 3.4.1=
+* Fixing checkout page settings. Added ability to show/hide images for products.
+* Pesapal upgrade

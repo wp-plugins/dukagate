@@ -380,8 +380,18 @@ function dg_dukagate_checkout(){
 		}
 		$form_elem['dg_fullname_mandatory'] = (empty($_POST['dg_fullname_mandatory'])) ? 'notchecked' : 'checked';
 		$form_elem['dg_fullname_visible'] = (empty($_POST['dg_fullname_visible'])) ? 'notchecked' : 'checked';
+		$form_elem['dg_firstname_mandatory'] = (empty($_POST['dg_firstname_mandatory'])) ? 'notchecked' : 'checked';
+		$form_elem['dg_firstname_visible'] = (empty($_POST['dg_firstname_visible'])) ? 'notchecked' : 'checked';
+		$form_elem['dg_lastname_mandatory'] = (empty($_POST['dg_lastname_mandatory'])) ? 'notchecked' : 'checked';
+		$form_elem['dg_lastname_visible'] = (empty($_POST['dg_lastname_visible'])) ? 'notchecked' : 'checked';
 		$form_elem['dg_email_mandatory'] = (empty($_POST['dg_email_mandatory'])) ? 'notchecked' : 'checked';
 		$form_elem['dg_email_visible'] = (empty($_POST['dg_email_visible'])) ? 'notchecked' : 'checked';
+		$form_elem['dg_phone_mandatory'] = (empty($_POST['dg_phone_mandatory'])) ? 'notchecked' : 'checked';
+		$form_elem['dg_phone_visible'] = (empty($_POST['dg_phone_visible'])) ? 'notchecked' : 'checked';
+		$form_elem['dg_country_mandatory'] = (empty($_POST['dg_country_mandatory'])) ? 'notchecked' : 'checked';
+		$form_elem['dg_country_visible'] = (empty($_POST['dg_country_visible'])) ? 'notchecked' : 'checked';
+		$form_elem['dg_state_mandatory'] = (empty($_POST['dg_state_mandatory'])) ? 'notchecked' : 'checked';
+		$form_elem['dg_state_visible'] = (empty($_POST['dg_state_visible'])) ? 'notchecked' : 'checked';
 		update_option('dukagate_checkout_options', $form_elem);
 		
 	}
@@ -826,6 +836,7 @@ function dg_dukagate_advanced_settings(){
 		$checkout_prod_image_width = $_POST['checkout_prod_image_width'];
 		$checkout_prod_image_height = $_POST['checkout_prod_image_height'];
 		$checkout_gateway_image = ($_POST['checkout_gateway_image'] == 'checked') ? "true": "false"; 
+		$products_image = ($_POST['products_image'] == 'checked') ? "true": "false"; 
 		
 		
 		$opts = array(
@@ -838,7 +849,8 @@ function dg_dukagate_advanced_settings(){
 						'checkout_prod_image_url' => $checkout_prod_image_url,
 						'checkout_prod_image_width' => $checkout_prod_image_width,
 						'checkout_prod_image_height' => $checkout_prod_image_height,
-						'checkout_gateway_image' => $checkout_gateway_image);
+						'checkout_gateway_image' => $checkout_gateway_image,
+						'products_image' => $products_image);
 		update_option('dukagate_advanced_shop_settings', $opts);
 		
 		
@@ -849,6 +861,9 @@ function dg_dukagate_advanced_settings(){
 		$dg_shop_settings = $dukagate->get_advanced_settings();;
 	}else {
 		$dg_shop_settings = get_option('dukagate_advanced_shop_settings');
+	}
+	if(!$dg_shop_settings['products_image']){
+		$dg_shop_settings['products_image'] = 'true';
 	}
 	?>
 		<div class="wrap">
@@ -931,6 +946,10 @@ function dg_dukagate_advanced_settings(){
 						<tr valign="top">
 							<th scope="row"><label for="checkout_gateway_image"><?php _e("Display Checkout Payment Gateway Image (Not Yet Implemented)"); ?> (<em><?php _e("shows payment gateway image on checkout page instead of text"); ?></em>): </label></th>
 							<td><input type="checkbox" value="checked" name="checkout_gateway_image" <?php echo ($dg_shop_settings['checkout_gateway_image'] == 'true') ? "checked='checked'": ""; ?>/></td>
+						</tr>
+						<tr valign="top">
+							<th scope="row"><label for="checkout_gateway_image"><?php _e("Show Product Images"); ?> (<em><?php _e("show or hide product images"); ?></em>): </label></th>
+							<td><input type="checkbox" value="checked" name="checkout_gateway_image" <?php echo ($dg_shop_settings['products_image'] == 'true') ? "checked='checked'": ""; ?>/></td>
 						</tr>
 					</tbody>
 				</table>
