@@ -16,6 +16,7 @@ class DukaGate_Products{
 	 * Show The widget Product
 	 */
 	static function widget_product($instance){
+		global $dukagate;
 		$dg_shop_settings = get_option('dukagate_shop_settings');
 		$dg_width = (!empty($instance['dg_product_image_width'])) ? $instance['dg_product_image_width'] : 170; 
 		$dg_height = (!empty($instance['dg_product_image_height'])) ? $instance['dg_product_image_height'] : 200; 
@@ -23,7 +24,7 @@ class DukaGate_Products{
 		$dg_bg_image = ($instance['dg_product_image_background'] == 'checked') ? "true": "false";
 		$dg_image_align = '';
 		if (!empty($instance['dg_product_image_align']) && $instance['dg_product_image_align'] != 'none') {
-			$dg_image_align = "class=\"align{$instance['dg_product_image_align']}\"";
+			$dg_image_align = "class=\"align {$instance['dg_product_image_align']}\"";
 		}
 		$dg_alt = @$instance['dg_product_image_alt'];
 		
@@ -45,7 +46,7 @@ class DukaGate_Products{
 			<input type="hidden" name="product_image" value="<?php echo $dg_img_url; ?>" />
 			<div class="dg_widget_image" style="width:<?php echo $dg_width.'px'; ?> ; height:<?php echo $dg_height.'px'; ?> ">
 				<?php if($dg_bg_image === 'false'){?>
-					<img src="<?php echo $dg_img_url; ?>" style="width:<?php echo $dg_width.'px'; ?> ; height:<?php echo $dg_height.'px'; ?> " alt="<?php echo $dg_alt ?>" <?php echo $dg_image_align; ?>/>
+					<img src="<?php echo $dukagate->resize_image('', $dg_img_url, $dg_width, $dg_height); ?>" alt="<?php echo $dg_alt ?>" <?php echo $dg_image_align; ?>/>
 				<?php } ?>
 			</div>
 			<div class="dg_widget_info">
@@ -92,8 +93,10 @@ class DukaGate_Products{
 	 * @param prod_height - height of image
 	 * @param group - taxonomy of product
 	 * @param ajax_cart - set to use ajax to add to cart
+	 * @param show_add_to_cart - show add to cart
 	 */
-	static function show_products($layout, $total, $per_page, $order, $prod_width, $prod_height, $group, $show_quantity, $ajax_cart, $top_row, $checkout_link){
+	static function show_products($layout, $total, $per_page, $order, $prod_width, $prod_height, $group, $show_quantity, $ajax_cart, $top_row, $checkout_link, $show_add_to_cart = true){
+		global $dukagate;
 		$offset = '';
 		$content = '';
 		$page_links = '';
@@ -132,8 +135,9 @@ class DukaGate_Products{
 		if (is_array($products) && count($products) > 0) {
 			$content .= '<div class="dg_product_holder '.$layout.'">';
 			$count = 1;
+			$dg_shop_settings = get_option('dukagate_shop_settings');
+			$dg_advanced_shop_settings = get_option('dukagate_advanced_shop_settings');
 			foreach ($products as $product) {
-				$dg_shop_settings = get_option('dukagate_shop_settings');
 				$attachment_images = &get_children('post_type=attachment&post_status=inherit&post_mime_type=image&post_parent=' . $product->ID);
                 $main_image = '';
 				$price = get_post_meta($product->ID, 'price', true);
@@ -149,12 +153,14 @@ class DukaGate_Products{
 					$style= 'style="min-height:'.$prod_height.'px;"';
 				}
 				$content .= '<div class="dg_product_item '.$layout.'" '.$style.'>';
-				$content .= '<div class="dg_prod_image">';
-				if (empty($main_image)) {
-                    $main_image = DG_DUKAGATE_URL.'/images/no.jpg';
-                }
-				$content .= '<a href="' . $prod_permalink . '" title="' . $product->post_title . '"><img src="' . $main_image.'" style="width:'.$prod_width.'px; height:'.$prod_height.'px;" ></a>';
-				$content .= '</div>';
+				if($dg_advanced_shop_settings['products_image'] == 'true'){
+					$content .= '<div class="dg_prod_image">';
+					if (empty($main_image)) {
+						$main_image = DG_DUKAGATE_URL.'/images/no.jpg';
+					}
+					$content .= '<a href="' . $prod_permalink . '" title="' . $product->post_title . '"><img src="' . $dukagate->resize_image('', $main_image, $prod_width, $prod_height).'" ></a>';
+					$content .= '</div>';
+				}
 				$content .= '<div class="dg_prod_info">';
 				$content .= '<p class="title"><a href="' . $prod_permalink . '" title="' . $product->post_title . '">' . __($product->post_title) . '</a></p>';
 				$content .= '<p class="detail">' . $product->post_excerpt . '</p>';
@@ -172,17 +178,31 @@ class DukaGate_Products{
 					$content .= '</select>';
 					$content .= '<p>';
 				}
-				$content .= '<div class="button">';
-				$content .= '<form method="POST" action="" id="dg_prod_'.$product->ID.'">';
-				$content .= '<input type="hidden" name="action" value="dg_update_cart">';
-				$content .= '<input type="hidden" name="product_id" value="'.$product->ID.'">';
-				$content .= '<input type="hidden" name="quantity" id="dg_quantity_'.$product->ID.'" value="">';
-				$content .= '<input type="hidden" name="price" value="'.$price.'">';
-				$content .= '<input type="hidden" name="product" value="'.$product->post_title.'">';
-				$content .= '<input type="hidden" name="product_image" value="'.$main_image.'">';
-				$content .= '<input type="submit" value="'.__("Add To Cart").'" class="dg_make_payment"/>';
-				$content .= '</form>';
-				$content .= '</div>';
+				if($show_add_to_cart){
+					$content .= '<div class="button">';
+					$content .= '<form method="POST" action="" id="dg_prod_'.$product->ID.'">';
+					$content .= '<input type="hidden" name="action" value="dg_update_cart">';
+					$content .= '<input type="hidden" name="product_id" value="'.$product->ID.'">';
+					$content .= '<input type="hidden" name="quantity" id="dg_quantity_'.$product->ID.'" value="">';
+					$content .= '<input type="hidden" name="price" value="'.$price.'">';
+					$content .= '<input type="hidden" name="product" value="'.$product->post_title.'">';
+					$content .= '<input type="hidden" name="product_image" value="'.$main_image.'">';
+					$content .= '<input type="submit" value="'.__("Add To Cart").'" class="dg_make_payment"/>';
+					$content .= '</form>';
+					$content .= '</div>';
+				}else{
+					$content .= '<div class="button">';
+					$content .= '<form method="POST" action="" id="dg_prod_'.$product->ID.'">';
+					$content .= '<input type="hidden" name="action" value="dg_update_cart">';
+					$content .= '<input type="hidden" name="product_id" value="'.$product->ID.'">';
+					$content .= '<input type="hidden" name="quantity" id="dg_quantity_'.$product->ID.'" value="">';
+					$content .= '<input type="hidden" name="price" value="'.$price.'">';
+					$content .= '<input type="hidden" name="product" value="'.$product->post_title.'">';
+					$content .= '<input type="hidden" name="product_image" value="'.$main_image.'">';
+					$content .= '<input type="submit" value="'.__("Checkout").'" class="dg_make_payment"/>';
+					$content .= '</form>';
+					$content .= '</div>';
+				}
 				$content .= '</div>';
 				$content .= '</div>';
 				$content .= '<script type="text/javascript">';
@@ -236,6 +256,7 @@ class DukaGate_Products{
 					$total_to_show = 'number='.$total;
 			$taxonomies=get_terms('grouped_product', $total_to_show.$group_include); 
 			$dg_shop_settings = get_option('dukagate_shop_settings');
+			$dg_advanced_shop_settings = get_option('dukagate_advanced_shop_settings');
 			if  ($taxonomies) {
 				$content .= '<div class="dg_product_holder">';
 				$count = 1;
@@ -256,11 +277,13 @@ class DukaGate_Products{
 						$prod_permalink = $categ_url;
 					}
 					$content .= '<div class="dg_grouped_product" style="min-height:'.$prod_height.'px;">';
-					$main_image = $dukagate->grouped_product_crude($taxonomy->term_id, 'image-url', '', 'get');
-					if (empty($main_image)) {
-						$main_image = DG_DUKAGATE_URL.'/images/no.jpg';
+					if($dg_advanced_shop_settings['products_image'] == 'true'){
+						$main_image = $dukagate->grouped_product_crude($taxonomy->term_id, 'image-url', '', 'get');
+						if (empty($main_image)) {
+							$main_image = DG_DUKAGATE_URL.'/images/no.jpg';
+						}
+						$content .= '<a href="' . $prod_permalink . '" title="' . $taxonomy->name . '"><img src="' . $dukagate->resize_image('', $main_image, $prod_width, $prod_height).'" class="dg_image" ></a>';
 					}
-					$content .= '<a href="' . $prod_permalink . '" title="' . $taxonomy->name . '"><img src="' . $main_image.'" class="dg_image" style="width:'.$prod_width.'px; height:'.$prod_height.'px;" ></a>';
 					$content .= '<p class="dg_title"><a href="' .$prod_permalink . '" title="' . $taxonomy->name . '">' . __($taxonomy->name) . '</a></p>';
 					$price = $dukagate->grouped_product_crude($taxonomy->term_id, 'price', '', 'get');
 					if($price)
@@ -289,8 +312,10 @@ class DukaGate_Products{
 	 * @param children_img - array of taxanomy to show or hide image from shortcode
 	 */
 	static function grouped_product($product, $term, $dg_width, $dg_height, $dg_prod_option, $children_img){
+		global $dukagate;
 		$content = '';
 		$dg_shop_settings = get_option('dukagate_shop_settings');
+		$dg_advanced_shop_settings = get_option('dukagate_advanced_shop_settings');
 		$attachment_images = &get_children('post_type=attachment&post_status=inherit&post_mime_type=image&post_parent=' . $product->ID);
 		$main_image = '';
 		$price  = get_post_meta($product->ID, 'price', true);
@@ -309,13 +334,16 @@ class DukaGate_Products{
 		}
 		$view = '';
 		if(is_array($children_img)){
-			if(!in_array($term->term_id,$children_img))
-				$content .= '<img src="' . $main_image.'" alt="'.$product->post_title.'" style="width:'.$dg_width.'px; height:'.$dg_height.'px;" >';	
-			else
+			if(!in_array($term->term_id,$children_img)){
+				if($dg_advanced_shop_settings['products_image'] == 'true')
+					$content .= '<img src="' . $dukagate->resize_image('', $main_image, $dg_width, $dg_height).'" alt="'.$product->post_title.'" >';	
+			}else
 				$view = 'dg_list';
 		}
-		else
-			$content .= '<img src="' . $main_image.'" alt="'.$product->post_title.'" style="width:'.$dg_width.'px; height:'.$dg_height.'px;" >';
+		else{
+			if($dg_advanced_shop_settings['products_image'] == 'true')
+				$content .= '<img src="' . $dukagate->resize_image('', $main_image, $dg_width, $dg_height).'" alt="'.$product->post_title.'"  >';
+		}
 		
 		$content .= '</div>';
 		$content .= '<div class="dg_prod_info '.$view.'">';
