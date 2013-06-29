@@ -41,10 +41,10 @@ class DukaGate_GateWay_PesaPal extends DukaGate_GateWay_API{
 		//Set Pesapal transaction ID field
 		$this->add_column();
 		
-		//require_once(DG_GATEWAYS.'libraries/pesapal/OAuth.php');
+		require_once(DG_GATEWAYS.'libraries/pesapal/OAuth.php');
 		//require_once(DG_GATEWAYS.'libraries/pesapal/class.XMLHttpRequest.php');
 		
-		add_action( 'pesapal_per_minute_event', array(&$this, 'cron'));
+		//add_action( 'pesapal_per_minute_event', array(&$this, 'cron'));
 		add_action( 'dg_pesapal', array(&$this, 'activation'));
 	}
 	
@@ -172,6 +172,15 @@ class DukaGate_GateWay_PesaPal extends DukaGate_GateWay_API{
 		?>
 		<form method="POST" action="">
 			<table class="form-table">
+				<tr>
+				    <th scope="row"><?php _e('PesaPal Checkout') ?></th>
+				    <td>
+						<p>
+							<?php _e('PesaPal requires Full names and email or  phone number') ?>
+						</p>
+						
+				    </td>
+				</tr>
 				<tr>
 				    <th scope="row"><?php _e('PesaPal Merchant Credentials') ?></th>
 				    <td>
