@@ -95,7 +95,7 @@ class DukaGate_Products{
 	 * @param ajax_cart - set to use ajax to add to cart
 	 * @param show_add_to_cart - show add to cart
 	 */
-	static function show_products($layout, $total, $per_page, $order, $prod_width, $prod_height, $group, $show_quantity, $ajax_cart, $top_row, $checkout_link, $show_add_to_cart = true){
+	static function show_products($layout, $total, $per_page, $order, $prod_width, $prod_height, $group, $show_quantity, $ajax_cart, $top_row, $checkout_link, $add_to_cart_text = 'Add To Cart',$show_add_to_cart = 'true'){
 		global $dukagate;
 		$offset = '';
 		$content = '';
@@ -178,7 +178,7 @@ class DukaGate_Products{
 					$content .= '</select>';
 					$content .= '<p>';
 				}
-				if($show_add_to_cart){
+				if($show_add_to_cart =='true'){
 					$content .= '<div class="button">';
 					$content .= '<form method="POST" action="" id="dg_prod_'.$product->ID.'">';
 					$content .= '<input type="hidden" name="action" value="dg_update_cart">';
@@ -187,7 +187,7 @@ class DukaGate_Products{
 					$content .= '<input type="hidden" name="price" value="'.$price.'">';
 					$content .= '<input type="hidden" name="product" value="'.$product->post_title.'">';
 					$content .= '<input type="hidden" name="product_image" value="'.$main_image.'">';
-					$content .= '<input type="submit" value="'.__("Add To Cart").'" class="dg_make_payment"/>';
+					$content .= '<input type="submit" value="'.$add_to_cart_text.'" class="dg_make_payment"/>';
 					$content .= '</form>';
 					$content .= '</div>';
 				}else{
@@ -199,7 +199,7 @@ class DukaGate_Products{
 					$content .= '<input type="hidden" name="price" value="'.$price.'">';
 					$content .= '<input type="hidden" name="product" value="'.$product->post_title.'">';
 					$content .= '<input type="hidden" name="product_image" value="'.$main_image.'">';
-					$content .= '<input type="submit" value="'.__("Checkout").'" class="dg_make_payment"/>';
+					$content .= '<input type="submit" value="'.$add_to_cart_text.'" class="dg_make_payment"/>';
 					$content .= '</form>';
 					$content .= '</div>';
 				}
