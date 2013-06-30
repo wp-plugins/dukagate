@@ -20,7 +20,11 @@ class DukaGate_GateWay_PesaPal extends DukaGate_GateWay_API{
 	
 	var $post_url = 'https://www.pesapal.com/api/PostPesapalDirectOrderV4';
 	
-	var $status_request = 'https://www.pesapal.com/api/verifypesapaldirectorder';
+	var $test_post_url = 'http://demo.pesapal.com/api/PostPesapalDirectOrderV4';
+	
+	var $status_request = 'https://www.pesapal.com/api/querypaymentstatus';
+	
+	var $test_status_request = 'https://demo.pesapal.com/api/querypaymentstatus';
 	
 	//Determine if to use form submit or other method
 	var $form_submit = false;
@@ -36,7 +40,8 @@ class DukaGate_GateWay_PesaPal extends DukaGate_GateWay_API{
 		$this->plugin_slug = __('pesapal');
 		$this->required_fields = array(
 										'customer_key' => '',
-										'customer_secret' => '');
+										'customer_secret' => '',
+										'sandbox' => '');
 						
 		//Set Pesapal transaction ID field
 		$this->add_column();
@@ -80,7 +85,11 @@ class DukaGate_GateWay_PesaPal extends DukaGate_GateWay_API{
 		$payment_notification = $_REQUEST['pesapal_notification_type'];
 		$invoice = $_REQUEST['pesapal_merchant_reference'];
 		
-		$this->ipn_request($transaction_tracking_id , $payment_notification, $invoice, $consumer_key, $consumer_secret);
+		$statusrequestAPI = $this->status_request;
+		if($options['sandbox'] == 'checked'){
+			$statusrequestAPI = $this->test_status_request;
+		}
+		$this->ipn_request($transaction_tracking_id , $payment_notification, $invoice, $consumer_key, $consumer_secret,$statusrequestAPI);
 		
 		$return_path = get_page_link($dp_shopping_cart_settings['thankyou_page']);
 		$check_return_path = explode('?', $return_path);
@@ -98,9 +107,9 @@ class DukaGate_GateWay_PesaPal extends DukaGate_GateWay_API{
 	 * @param payment_notification - Pesapal Notification Type
 	 * @param invoice - invoice id
 	 */
-	private function ipn_request($transaction_tracking_id , $payment_notification, $invoice, $consumer_key, $consumer_secret){
+	private function ipn_request($transaction_tracking_id , $payment_notification, $invoice, $consumer_key, $consumer_secret, $statusrequestAPI){
 		global $dukagate;
-		$statusrequestAPI = 'https://www.pesapal.com/api/querypaymentstatus';
+		
 		if($pesapalNotification=="CHANGE" && $pesapalTrackingId!=''){
 			$token = $params = NULL;
 			$consumer = new OAuthConsumer($consumer_key, $consumer_secret);
@@ -161,9 +170,11 @@ class DukaGate_GateWay_PesaPal extends DukaGate_GateWay_API{
 		if(@$_POST[$plugin_slug]){
 			$required_fields = array(
 									'customer_key' => '',
-									'customer_secret' => '');
+									'customer_secret' => '',
+									'sandbox' => '');
 			$required_fields['customer_key'] = $_POST[$plugin_slug.'_customer_key'];
 			$required_fields['customer_secret'] = $_POST[$plugin_slug.'_customer_secret'];
+			$required_fields['sandbox'] = $_POST[$plugin_slug.'_sandbox'];
 			$enabled = (@$_POST[$plugin_slug.'_enable'] == 'checked') ? 1 : 0;
 			$dukagate->dg_save_gateway_options($plugin_slug ,DukaGate::array_to_json($required_fields), $enabled);
 		}
@@ -176,14 +187,21 @@ class DukaGate_GateWay_PesaPal extends DukaGate_GateWay_API{
 				    <th scope="row"><?php _e('PesaPal Checkout') ?></th>
 				    <td>
 						<p>
-							<?php _e('PesaPal requires Full names and email or  phone number') ?>
+							<?php _e('PesaPal requires Full names and email or  phone number. To handle APN return requests, please set the url '); ?>
+							<strong><?php echo get_bloginfo('url').'?dg_handle_payment_return_pesapal' ; ?></strong>
+							<?php _e(' on your <a href="https://www.pesapal.com/merchantdashboard" target="_blank">pesapal</a> account settings'); ?>
 						</p>
 						
 				    </td>
 				</tr>
 				<tr>
-				    <th scope="row"><?php _e('PesaPal Merchant Credentials') ?></th>
+				    <th scope="row"><?php _e('PesaPal Merchant Credentials'); ?></th>
 				    <td>
+						<p>
+							<label><?php _e('Use PesaPal Sandbox'); ?><br />
+							  <input value="checked" name="<?php echo $plugin_slug; ?>_sandbox" type="checkbox" <?php echo ($options['sandbox'] == 'checked') ? "checked='checked'": ""; ?> />
+							</label>
+						</p>
 						<p>
 							<label><?php _e('Customer Key') ?><br />
 							  <input value="<?php echo $options['customer_key']; ?>" size="30" name="<?php echo $plugin_slug; ?>_customer_key" type="text" />
@@ -267,12 +285,16 @@ class DukaGate_GateWay_PesaPal extends DukaGate_GateWay_API{
 		$payment_method = '';//leave blank
 		$code = '';//leave blank
 		
-		$callback_url = network_site_url('/').'?dg_handle_payment_return_pesapal'; //redirect url, the page that will handle the response from pesapal.
+		$callback_url = $return_path; //redirect url, the page that will handle the response from pesapal.
 		$post_xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?><PesapalDirectOrderInfo xmlns:xsi=\"http://www.w3.org/2001/XMLSchemainstance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" Amount=\"".$amount."\" Description=\"".$desc."\" Code=\"".$code."\" Type=\"".$type."\" PaymentMethod=\"".$payment_method."\" Reference=\"".$reference."\" FirstName=\"".$first_name."\" LastName=\"".$last_name."\" Email=\"".$email."\" PhoneNumber=\"".$phonenumber."\" UserName=\"".$username."\" xmlns=\"http://www.pesapal.com\" />";
 		$post_xml = htmlentities($post_xml);
 		
 		$consumer = new OAuthConsumer($consumer_key, $consumer_secret);
 		//post transaction to pesapal
+		$pp_post_url = $this->post_url;
+		if($options['sandbox'] == 'checked'){
+			$pp_post_url = $this->test_post_url;
+		}
 		$iframe_src = OAuthRequest::from_consumer_and_token($consumer, $token, "GET", $this->post_url, $params);
 		$iframe_src->set_parameter("oauth_callback", $callback_url);
 		$iframe_src->set_parameter("pesapal_request_data", $post_xml);
