@@ -205,7 +205,7 @@ class DukaGate_GateWay_PayPal extends DukaGate_GateWay_API{
 	/**
 	 * Process Payment
 	 */
-	function process_payment_form($content){
+	function process_payment_form($cart){
 		global $dukagate;
 		$invoice_id = $_SESSION['dg_invoice'];
 		$dg_cart = $_SESSION['dg_cart'];

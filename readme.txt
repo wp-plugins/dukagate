@@ -5,7 +5,7 @@ Tags: shopping cart, web shop, cart, shop,Paypal,paypal,Pesapal, e-commerce, eco
 
 Requires at least: 3.0
 Tested up to: 3.5.2
-Stable tag: 3.4.1
+Stable tag: 3.4.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -111,3 +111,15 @@ Added Authorize.net payment gateway
 = 3.4.1=
 * Fixing checkout page settings. Added ability to show/hide images for products.
 * Pesapal upgrade
+
+= 3.4.2 =
+Making Pesapal work
+
+=3.4.3=
+Pesapal Sandbox mode for tests and APN return url
+
+=3.4.4=
+Added option to modify text on products
+
+= 3.4.5 =
+Fixed ajax for non auth

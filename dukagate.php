@@ -2,7 +2,7 @@
 /*
 Plugin Name: DukaGate Shopping Cart
 Description: DukaGate Shopping Cart
-Version: 3.4.1
+Version: 3.4.5
 Author: TheBunch
 Author URI: http://dukagate.info/
 Plugin URI: http://dukagate.info/
@@ -59,6 +59,8 @@ function dg_register_links($links, $file) {
 		$links[] = '<a href="options-general.php?page=dukagate-settings">'.__('Settings').'</a>';
 		$links[] = '<a href="http://dukagate.info/faq/" target="_blank">'.__('FAQ').'</a>';
 		$links[] = '<a href="http://dukagate.info/documentation/" target="_blank">'.__('Documentation').'</a>';
+		$links[] = '<a href="http://dukagate.info/forums/forum/bugs/" target="_blank">'.__('Bugs').'</a>';
+		$links[] = '<a href="http://dukagate.info/contact/" target="_blank">'.__('Contact').'</a>';
    }
    return $links;
 }
