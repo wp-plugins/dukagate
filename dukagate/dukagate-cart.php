@@ -291,7 +291,7 @@ function dg_cart_min($echo = 'false'){
 		return $cnt;
 }
 
-
+add_action( 'wp_ajax_nopriv_shipping_submit', 'dg_shipping_submit');
 add_action( 'wp_ajax_shipping_submit', 'dg_shipping_submit');
 
 
@@ -309,6 +309,7 @@ function dg_shipping_submit(){
 }
 
 
+add_action( 'wp_ajax_nopriv_dg_validate_discount_code', 'dg_validate_discount_code');
 add_action( 'wp_ajax_dg_validate_discount_code', 'dg_validate_discount_code');
 
 function dg_validate_discount_code(){
@@ -331,6 +332,7 @@ function dg_validate_discount_code(){
 }
 
 
+add_action( 'wp_ajax_nopriv_dg_update_cart', 'dg_update_cart');
 add_action( 'wp_ajax_dg_update_cart', 'dg_update_cart');
 
 /**
@@ -409,6 +411,7 @@ function dg_update_cart(){
 }
 
 //Empty cart
+add_action( 'wp_ajax_nopriv_dg_empty_cart', 'dg_empty_cart');
 add_action( 'wp_ajax_dg_empty_cart', 'dg_empty_cart');
 
 function dg_empty_cart(){
@@ -421,6 +424,7 @@ function dg_empty_cart(){
 }
 
 //Process Cart
+add_action( 'wp_ajax_nopriv_dg_process_cart', 'dg_process_cart');
 add_action( 'wp_ajax_dg_process_cart', 'dg_process_cart');
 
 function dg_process_cart(){

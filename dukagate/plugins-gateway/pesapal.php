@@ -253,14 +253,7 @@ class DukaGate_GateWay_PesaPal extends DukaGate_GateWay_API{
         }
 		$amount = 0.0;
 		foreach ($dg_cart as $cart_items => $cart) {	
-			if(!isset($_SESSION['dg_discount_value'])){
-				$discount_value = floatval(($cart['discount'] * $cart['total'])/100);
-				$percentage_discount += $cart['discount'];
-			}else{
-				$discount_value = 0.00;
-			}
-			$total_value = number_format(($cart['total'] - $discount_value),2);
-			$amount += $total_value;
+			$amount += $cart['total'];
 		}
 		if(isset($_SESSION['dg_discount_value'])){
 			$total_discount = $_SESSION['dg_discount_value'];
