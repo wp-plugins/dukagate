@@ -2,7 +2,7 @@
 /*
 Plugin Name: DukaGate Shopping Cart
 Description: DukaGate Shopping Cart
-Version: 3.4.5
+Version: 3.4.6
 Author: TheBunch
 Author URI: http://dukagate.info/
 Plugin URI: http://dukagate.info/
@@ -17,6 +17,10 @@ define('DG_DOWNLOAD_FILES_DIR_TEMP', WP_CONTENT_DIR. '/uploads/dg_temp_download_
 define('DG_DUKAGATE_URL', DG_PLUGIN_URL.'/dukagate');
 define('DG_DUKAGATE_DIR', DG_PLUGIN_DIR.'/dukagate');
 
+
+define('DG_DUKAGATE_INVOICE_URL', DG_PLUGIN_URL.'/invoice');
+define('DG_DUKAGATE_INVOICE_DIR', DG_PLUGIN_DIR.'/invoice');
+
 define('DG_DUKAGATE_WIDGET_DIR', DG_DUKAGATE_DIR.'/widgets/');
 
 define('DG_GATEWAYS', DG_DUKAGATE_DIR.'/plugins-gateway/');
@@ -25,6 +29,7 @@ define('DG_SHIPPING', DG_DUKAGATE_DIR.'/plugins-shipping/');
 define('DG_SHIPPING_URL', DG_DUKAGATE_URL.'/plugins-shipping/');
 define('DG_ACTIVE_MERCHANT', DG_GATEWAYS.'libraries/aktive_merchant/');
 
+define('DG_DUKAGATE_PDF_TEMPLATE_DIR', DG_DUKAGATE_DIR.'/pdf-templates/');
 
 require_once(DG_DUKAGATE_DIR.'/dukagate-init.php');
 
