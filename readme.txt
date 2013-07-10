@@ -69,23 +69,23 @@ We test Dukagate on a large number of different server set-ups and envrionments 
 
 == Changelog ==
 
-= 3.4.6=
+= 3.4.6 =
 PDF invoices and invoice customizations. Read more here http://dukagate.info/documentation/invoices/
 
 = 3.4.5 =
 Fixed ajax for non auth
 
-=3.4.4=
+=3.4.4 =
 Added option to modify text on products
 
-=3.4.3=
+=3.4.3 =
 Pesapal Sandbox mode for tests and APN return url
 
 
 = 3.4.2 =
 Making Pesapal work
 
-= 3.4.1=
+= 3.4.1 =
 * Fixing checkout page settings. Added ability to show/hide images for products.
 * Pesapal upgrade
 
