@@ -75,10 +75,10 @@ PDF invoices and invoice customizations. Read more here http://dukagate.info/doc
 = 3.4.5 =
 Fixed ajax for non auth
 
-=3.4.4 =
+= 3.4.4 =
 Added option to modify text on products
 
-=3.4.3 =
+= 3.4.3 =
 Pesapal Sandbox mode for tests and APN return url
 
 
