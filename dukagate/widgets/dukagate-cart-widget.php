@@ -7,9 +7,9 @@ if(!class_exists('DukaGate_Cart_Widget')) {
 	class DukaGate_Cart_Widget extends WP_Widget {
 		
 		function DukaGate_Cart_Widget(){
-			$widget_ops = array( 'classname' => 'dukagate_cart_widget', 'description' => __('DukaGate Cart Widget', "dg-lang") ); // Widget Settings
+			$widget_ops = array( 'classname' => 'dukagate_cart_widget', 'description' => __('DukaGate Cart Widget') ); // Widget Settings
 			$control_ops = array( 'id_base' => 'dukagate_cart_widget' ); // Widget Control Settings
-			$this->WP_Widget( 'dukagate_cart_widget', __('DukaGate Cart', "dg-lang"), $widget_ops, $control_ops ); //
+			$this->WP_Widget( 'dukagate_cart_widget', __('DukaGate Cart'), $widget_ops, $control_ops ); //
 		}
 		
 		

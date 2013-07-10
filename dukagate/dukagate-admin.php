@@ -96,6 +96,16 @@ function dg_dukagate_order_log_info($id){
 		<div class="csv_export">
 			<a href="javascript:;" onclick="dukagate.order_csv_export('<?php echo $order_log->id; ?>');">Export as CSV</a>
 		</div>
+		<?php
+			$invoice_file = DG_DUKAGATE_INVOICE_DIR. '/invoice_' . $order_log->invoice.'.pdf';
+			if(file_exists($invoice_file)){
+		?>
+		<div class="csv_export">
+			<a href="<?php echo DG_DUKAGATE_INVOICE_URL.'/invoice_' . $order_log->invoice . '.pdf'; ?>">Download Invoice</a>
+		</div>
+		<?php
+			}
+		?>
 		<table width="100%" class="widefat" style="background-color: #FFFFFF;">
 			<tr>
 				<td><strong><?php _e("Invoice"); ?></strong></td>
@@ -544,7 +554,7 @@ function dg_dukagate_mail(){
 			if (is_array($dukagate_mails) && count($dukagate_mails) > 0) {
 				?>
 				<p>
-					<?php _e("Use");?> :<strong>%details%</strong>, <strong>%inv%</strong>, <strong>%shop%</strong>, <strong>%siteurl%</strong>, <strong>%info%</strong>, <strong>%order-log-transaction%</strong> , <strong>%fname%</strong> <?php _e("as");?> <?php _e("Order Details, Invoice Number, Shop Name, Site URL, Order Form Information, Order URL, First Name");?>
+					<?php _e("Use");?> :<strong>%inv%</strong>, <strong>%shop%</strong>, <strong>%siteurl%</strong>, <strong>%info%</strong>, <strong>%order-log-transaction%</strong> , <strong>%fname%</strong>,  <strong>%lname%</strong>, <strong>%fullnames%</strong>, <strong>%invoice-link%</strong> <?php _e("as");?> <?php _e("Invoice Number, Shop Name, Site URL, Order Form Information, Order URL, First Name, Last Name, Full Names, Invoice link");?>
 				</p>
 				<?php
 				foreach ($dukagate_mails as $dukagate_mail) {
@@ -837,6 +847,8 @@ function dg_dukagate_advanced_settings(){
 		$checkout_prod_image_height = $_POST['checkout_prod_image_height'];
 		$checkout_gateway_image = ($_POST['checkout_gateway_image'] == 'checked') ? "true": "false"; 
 		$products_image = ($_POST['products_image'] == 'checked') ? "true": "false"; 
+		$pdf_invoices = ($_POST['pdf_invoices'] == 'checked') ? "true": "false"; 
+		$pdf_invoice_file = $_POST['pdf_invoice_file'];
 		
 		
 		$opts = array(
@@ -850,7 +862,9 @@ function dg_dukagate_advanced_settings(){
 						'checkout_prod_image_width' => $checkout_prod_image_width,
 						'checkout_prod_image_height' => $checkout_prod_image_height,
 						'checkout_gateway_image' => $checkout_gateway_image,
-						'products_image' => $products_image);
+						'products_image' => $products_image,
+						'pdf_invoices' => $pdf_invoices,
+						'pdf_invoice_file' => $pdf_invoice_file);
 		update_option('dukagate_advanced_shop_settings', $opts);
 		
 		
@@ -948,8 +962,32 @@ function dg_dukagate_advanced_settings(){
 							<td><input type="checkbox" value="checked" name="checkout_gateway_image" <?php echo ($dg_shop_settings['checkout_gateway_image'] == 'true') ? "checked='checked'": ""; ?>/></td>
 						</tr>
 						<tr valign="top">
-							<th scope="row"><label for="checkout_gateway_image"><?php _e("Show Product Images"); ?> (<em><?php _e("show or hide product images"); ?></em>): </label></th>
-							<td><input type="checkbox" value="checked" name="checkout_gateway_image" <?php echo ($dg_shop_settings['products_image'] == 'true') ? "checked='checked'": ""; ?>/></td>
+							<th scope="row"><label for="products_image"><?php _e("Show Product Images"); ?> (<em><?php _e("show or hide product images"); ?></em>): </label></th>
+							<td><input type="checkbox" value="checked" name="products_image" <?php echo ($dg_shop_settings['products_image'] == 'true') ? "checked='checked'": ""; ?>/></td>
+						</tr>
+						<tr valign="top">
+							<th scope="row"><label for="pdf_invoices"><?php _e("Enable PDF Invoice"); ?> (<em><?php _e("enable or disable pdf invoices"); ?></em>): </label></th>
+							<td><input type="checkbox" value="checked" name="pdf_invoices" <?php echo ($dg_shop_settings['pdf_invoices'] == 'true') ? "checked='checked'": ""; ?>/></td>
+						</tr>
+						<tr valign="top">
+							<th scope="row"><label for="pdf_invoice_file"><?php _e("Invoice PDF Template"); ?>: </label></th>
+							<td>
+								<select name="pdf_invoice_file">
+									<?php 
+									$invoice_templates = DukaGate_Invoice::list_files();
+									foreach ( $invoice_templates as $invoice_template ) {
+										$cont_selected = '';
+										if (intval($dg_shop_settings['pdf_invoice_file']) === $invoice_template) {
+											$cont_selected = 'selected="selected"';
+										}
+										$option = '<option value="' .$invoice_template. '" '.$cont_selected.'>';
+										$option .= ucfirst($invoice_template);
+										$option .= '</option>';
+										echo $option;
+									}
+									?>
+								</select>
+							</td>
 						</tr>
 					</tbody>
 				</table>
