@@ -3,10 +3,12 @@
 
 /* Generic exception class
  */
+if(!class_exists('OAuthException')) {
 class OAuthException extends Exception {
   // pass
 }
-
+}
+if(!class_exists('OAuthConsumer')) {
 class OAuthConsumer {
   public $key;
   public $secret;
@@ -21,7 +23,8 @@ class OAuthConsumer {
     return "OAuthConsumer[key=$this->key,secret=$this->secret]";
   }
 }
-
+}
+if(!class_exists('OAuthToken')) {
 class OAuthToken {
   // access tokens and request tokens
   public $key;
@@ -51,14 +54,17 @@ class OAuthToken {
     return $this->to_string();
   }
 }
+}
 
+if(!class_exists('OAuthSignatureMethod')) {
 class OAuthSignatureMethod {
   public function check_signature(&$request, $consumer, $token, $signature) {
     $built = $this->build_signature($request, $consumer, $token);
     return $built == $signature;
   }
 }
-
+}
+if(!class_exists('OAuthSignatureMethod_HMAC_SHA1')) {
 class OAuthSignatureMethod_HMAC_SHA1 extends OAuthSignatureMethod {
   function get_name() {
     return "HMAC-SHA1";
@@ -79,7 +85,8 @@ class OAuthSignatureMethod_HMAC_SHA1 extends OAuthSignatureMethod {
     return base64_encode(hash_hmac('sha1', $base_string, $key, true));
   }
 }
-
+}
+if(!class_exists('OAuthSignatureMethod_PLAINTEXT')) {
 class OAuthSignatureMethod_PLAINTEXT extends OAuthSignatureMethod {
   public function get_name() {
     return "PLAINTEXT";
@@ -103,7 +110,8 @@ class OAuthSignatureMethod_PLAINTEXT extends OAuthSignatureMethod {
     return OAuthUtil::urlencode_rfc3986($raw);
   }
 }
-
+}
+if(!class_exists('OAuthSignatureMethod_RSA_SHA1')) {
 class OAuthSignatureMethod_RSA_SHA1 extends OAuthSignatureMethod {
   public function get_name() {
     return "RSA-SHA1";
@@ -166,7 +174,9 @@ class OAuthSignatureMethod_RSA_SHA1 extends OAuthSignatureMethod {
     return $ok == 1;
   }
 }
+}
 
+if(!class_exists('OAuthRequest')) {
 class OAuthRequest {
   private $parameters;
   private $http_method;
@@ -426,7 +436,9 @@ class OAuthRequest {
     return $uuid;
   }
 }
+}
 
+if(!class_exists('OAuthServer')) {
 class OAuthServer {
   protected $timestamp_threshold = 300; // in seconds, five minutes
   protected $version = 1.0;             // hi blaine
@@ -618,7 +630,8 @@ class OAuthServer {
   }
 
 }
-
+}
+if(!class_exists('OAuthDataStore')) {
 class OAuthDataStore {
   function lookup_consumer($consumer_key) {
     // implement me
@@ -644,7 +657,9 @@ class OAuthDataStore {
   }
 
 }
+}
 
+if(!class_exists('OAuthUtil')) {
 class OAuthUtil {
   public static function urlencode_rfc3986($input) {
   if (is_array($input)) {
@@ -779,6 +794,7 @@ class OAuthUtil {
     // Each name-value pair is separated by an '&' character (ASCII code 38)
     return implode('&', $pairs);
   }
+}
 }
 
 ?>
