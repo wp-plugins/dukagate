@@ -11,7 +11,7 @@ if(!class_exists('DukaGate')) {
 			$this->dukagate_db();
 			$this->set_up_plugin_info();
 			$this->set_up_directories_and_file_info();
-			update_option('dg_version_info', 1.0);
+			update_option('dg_version_info', 3.47);
 		}
 		
 		
@@ -21,6 +21,7 @@ if(!class_exists('DukaGate')) {
 			require_once(DG_DUKAGATE_DIR.'/dukagate-settings.php');
 			require_once(DG_DUKAGATE_DIR.'/dukagate-mail.php');
 			require_once(DG_DUKAGATE_DIR.'/dukagate-gateways.php');
+			require_once(DG_DUKAGATE_DIR.'/dukagate-invoice.php');
 			require_once(DG_DUKAGATE_DIR.'/dukagate-shipping.php');
 			require_once(DG_DUKAGATE_DIR.'/dukagate-admin.php');
 			require_once(DG_DUKAGATE_DIR.'/dukagate-products.php');
@@ -64,7 +65,7 @@ if(!class_exists('DukaGate')) {
 						'payment' => $wpdb->prefix . "dkgt_payment_options",
 						'mail' => $wpdb->prefix . "dkgt_mail_settings",
 						'meta' => $wpdb->prefix . "dkgt_taxonomymeta",
-						'shipping' => $wpdb->prefix . "dkgt_shipping"
+						'shipping' => $wpdb->prefix . "dkgt_shipping"						
 						);
 		}
 		
@@ -90,8 +91,14 @@ if(!class_exists('DukaGate')) {
 			if(is_admin()){
 				wp_enqueue_script('dukagate_admin', DG_DUKAGATE_URL.'/js/dukagate_admin.js', array('jquery'), '', false);
 				wp_enqueue_script('wysiwyg_js', DG_DUKAGATE_URL.'/js/wyzz0.65/wyzz.php', array('jquery'), '', false);
+				wp_enqueue_script('js_class', DG_DUKAGATE_URL.'/js/graph/js-class.js',__FILE__);
+				wp_enqueue_script('excanvas', DG_DUKAGATE_URL.'/js/graph/excanvas.js',__FILE__);
+				wp_enqueue_script('bluff_min', DG_DUKAGATE_URL.'/js/graph/bluff-min.js',__FILE__);
 				wp_enqueue_script("dukagate_admin");
 				wp_enqueue_script("wysiwyg_js");
+				wp_enqueue_script("js_class");
+				wp_enqueue_script("excanvas");
+				wp_enqueue_script("bluff_min");
 			}else{
 				wp_enqueue_script('dukagate_js', DG_DUKAGATE_URL.'/js/dukagate.js', array('jquery'), '', false);
 				wp_enqueue_script('jquery_validate', DG_DUKAGATE_URL.'/js/jquery.validate.js', array('jquery'), '', false);
@@ -764,7 +771,9 @@ if(!class_exists('DukaGate')) {
 							'checkout_prod_image_height' => '100',
 							'checkout_gateway_image' => 'false',
 							'max_quantity' => '',
-							'products_image' => 'true');
+							'products_image' => 'true',
+							'pdf_invoices' => 'false',
+							'pdf_invoice_file' => 'default');
 			
 			update_option('dukagate_advanced_shop_settings', $opts);
 			return get_option('dukagate_advanced_shop_settings');
@@ -982,6 +991,7 @@ if(!class_exists('DukaGate')) {
 			$databases = self::db_names();
 			
 			$dg_shop_settings = get_option('dukagate_shop_settings');
+			$dg_advanced_shop_settings = get_option('dukagate_advanced_shop_settings');
 			global $wpdb;
 			global $dukagate_mail;
 			$total = 0.00;
@@ -1001,6 +1011,10 @@ if(!class_exists('DukaGate')) {
 			}
 			$name = $order_info['dg_fullname'];
 			$email = $order_info['dg_email'];
+			$fname = $order_info['dg_firstname'];
+			$lname = $order_info['dg_lastname'];
+			if(empty($name))
+				$name = $fname.' '.$lname;
 			$discount = $_SESSION['dg_cart_discount_value'];
 			$discount = floatval(($discount * $total)/100);
 			$total_shipping = 0.00;
@@ -1037,7 +1051,15 @@ if(!class_exists('DukaGate')) {
 			$mail = $dukagate_mail->get_mail('order_placed');
 			$to =  $mail->to_mail;
 			$subject = $mail->title;
-			$shop = get_bloginfo('name');
+			
+			$shop = $dg_shop_settings['shopname'];
+			
+			$file_path = '';
+			if($dg_advanced_shop_settings['pdf_invoices'] == 'true'){
+				DukaGate_Invoice::generate_invoice($_SESSION['dg_cart'], $order_form_info, $invoice);
+				$file_path = DG_DUKAGATE_INVOICE_URL.'/invoice_' . $invoice . '.pdf';
+				$file_path = '<a href="'.$file_path.'" target="_blank">Invoice</a>';
+			}
 			
 			//To Admin
 			$url = site_url();
@@ -1089,18 +1111,18 @@ if(!class_exists('DukaGate')) {
 				
 			}
 			
+			
 			$transaction_url = admin_url("admin.php?page=dukagate-order-log&order_id=".$order_id);
 			$message = $mail->content_admin;
-			$array1 = array('%siteurl%', '%info%', '%shop%', '%order-log-transaction%');
-			$array2 = array($url, $info, $shop, $transaction_url);
+			
+			$array1 = array('%siteurl%', '%info%', '%shop%', '%order-log-transaction%','%fname%','%lname%','%fullnames%','%invoice-link%');
+			$array2 = array($url, $info, $shop, $transaction_url,$fname,$lname,$name,$file_path);
 			$message = str_replace($array1, $array2, $message);
 			
 			$dukagate_mail->send_mail($to, $subject, $message);
 			
 			//To user
 			$message = $mail->content_user;
-			$array1 = array('%shop%');
-			$array2 = array($shop);
 			$message = str_replace($array1, $array2, $message);
 			$dukagate_mail->send_mail($email, $subject, $message);
 			
@@ -1759,6 +1781,68 @@ if(!class_exists('DukaGate')) {
 				'height'    => $height
 			);
 			return $dp_image['url'];
+		}
+		
+		/**
+		 * Get all sales days
+		 */
+		private function sales_days(){
+			$databases = self::db_names();
+			global $wpdb;
+			$table_name = $databases['transactions'];
+			$sql = "SELECT Date(`date`) as day FROM `$table_name` GROUP BY Date(`date`) ORDER BY Date(`date`) ASC LIMIT 10";
+			return $wpdb->get_results($sql);
+			
+		}
+		
+		/**
+		 * Show sales summmary on home page for the days
+		 */
+		function sales_summary($payment_status){
+			$summary = array();
+			$databases = self::db_names();
+			$dates = $this->sales_days();
+			global $wpdb;
+			$table_name = $databases['transactions'];
+			foreach ($dates as $date) {
+				$summary['days'][] = $date->day;
+				$sql = "SELECT SUM(`total`) as total FROM `$table_name` WHERE `payment_status` = '$payment_status' AND  Date(`date`) = '$date->day'";
+				$results =  $wpdb->get_results($sql);
+				if(!empty($results)){
+					foreach ($results as $result) {
+						if($result->total != null && !(empty($result->total))){
+							$summary['total'][] = $result->total;
+						}else{
+							$summary['total'][] = "0";
+						}
+					}
+				}else{
+					$summary['total'][] = "0";
+				}
+			}
+			return $summary;
+		}
+		
+		/**
+		 * Get total revenue
+		 */
+		function total_revenue(){
+			$databases = self::db_names();
+			global $wpdb;
+			$table_name = $databases['transactions'];
+			$sql = "SELECT SUM(`total`) as total FROM `$table_name` WHERE `payment_status` = 'Paid'";
+			return $wpdb->get_var($sql);
+		}
+		
+		/**
+		 * Count total sales
+		 */
+		function total_sales(){
+			$databases = self::db_names();
+			global $wpdb;
+			$table_name = $databases['transactions'];
+			$sql = "SELECT count(`id`) as total FROM `$table_name` WHERE `payment_status` = 'Paid'";
+			return $wpdb->get_var($sql);
 		}
 	}
 }

@@ -2,7 +2,7 @@
 /*
 Plugin Name: DukaGate Shopping Cart
 Description: DukaGate Shopping Cart
-Version: 3.4.5
+Version: 3.4.7
 Author: TheBunch
 Author URI: http://dukagate.info/
 Plugin URI: http://dukagate.info/
@@ -17,6 +17,10 @@ define('DG_DOWNLOAD_FILES_DIR_TEMP', WP_CONTENT_DIR. '/uploads/dg_temp_download_
 define('DG_DUKAGATE_URL', DG_PLUGIN_URL.'/dukagate');
 define('DG_DUKAGATE_DIR', DG_PLUGIN_DIR.'/dukagate');
 
+
+define('DG_DUKAGATE_INVOICE_URL', DG_PLUGIN_URL.'/invoice');
+define('DG_DUKAGATE_INVOICE_DIR', DG_PLUGIN_DIR.'/invoice');
+
 define('DG_DUKAGATE_WIDGET_DIR', DG_DUKAGATE_DIR.'/widgets/');
 
 define('DG_GATEWAYS', DG_DUKAGATE_DIR.'/plugins-gateway/');
@@ -25,6 +29,7 @@ define('DG_SHIPPING', DG_DUKAGATE_DIR.'/plugins-shipping/');
 define('DG_SHIPPING_URL', DG_DUKAGATE_URL.'/plugins-shipping/');
 define('DG_ACTIVE_MERCHANT', DG_GATEWAYS.'libraries/aktive_merchant/');
 
+define('DG_DUKAGATE_PDF_TEMPLATE_DIR', DG_DUKAGATE_DIR.'/pdf-templates/');
 
 require_once(DG_DUKAGATE_DIR.'/dukagate-init.php');
 
@@ -65,6 +70,59 @@ function dg_register_links($links, $file) {
    return $links;
 }
 
+/**
+ * This function shows Transaction Widget on Dashboard
+ */
+add_action('wp_dashboard_setup', 'dg_show_revenue_graph', 1);
+function dg_show_revenue_graph() {
+    wp_add_dashboard_widget( 'dg_revenue_widget_admin', __( 'Dukagate Revenue Graph' ), 'dg_revenue_graph' );
+}
+
+/**
+ * Show revenue widget
+ */
+function dg_revenue_graph(){
+	global $dukagate;
+	$dg_shop_settings = get_option('dukagate_shop_settings');
+	printf(__("Total %d orders sold with total amount of %s %d"),$dukagate->total_sales(),$dg_shop_settings['currency_symbol'],number_format($dukagate->total_revenue(),2));
+	$payment_status = array('Pending', 'Paid', 'Canceled');
+	$days = array();
+	?>
+	<canvas id="revenuedata"></canvas>
+	<script type="text/javascript">
+		var width = jQuery('#dg_revenue_widget_admin').width() - 20;
+		var height = jQuery('#dg_revenue_widget_admin').width() - 200;
+		var g = new Bluff.Line('revenuedata', width+'x'+height);
+		g.title = 'Transactions Revenue';
+		g.tooltips = true;
+		g.theme_37signals();
+		g.labels = {};
+		<?php
+		foreach($payment_status as $status){
+			$results = $dukagate->sales_summary($status);
+			if(!empty($results)){
+				?>
+				g.data("<?php echo $status; ?>", <?php echo str_replace('"', "", json_encode($results['total'])); ?>);
+				<?php
+				array_push($days,$results['days']);
+			}
+		}
+		$days = array_unique($days);
+		$i=0;
+		foreach($days as $day){
+			foreach($day as $d){
+				?>
+				g.labels[<?php echo $i; ?>] = '<?php echo $d; ?>';
+				<?php
+				$i++;
+			}
+		}
+		?>
+		g.draw();
+	</script>
+	<?php
+	
+}
 
 #session_set_cookie_params(8*60*60); 
 #session_save_path(DG_PLUGIN_DIR.'/temp'); 
