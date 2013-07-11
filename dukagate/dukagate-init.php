@@ -11,7 +11,7 @@ if(!class_exists('DukaGate')) {
 			$this->dukagate_db();
 			$this->set_up_plugin_info();
 			$this->set_up_directories_and_file_info();
-			update_option('dg_version_info', 3.45);
+			update_option('dg_version_info', 3.47);
 		}
 		
 		
@@ -91,8 +91,14 @@ if(!class_exists('DukaGate')) {
 			if(is_admin()){
 				wp_enqueue_script('dukagate_admin', DG_DUKAGATE_URL.'/js/dukagate_admin.js', array('jquery'), '', false);
 				wp_enqueue_script('wysiwyg_js', DG_DUKAGATE_URL.'/js/wyzz0.65/wyzz.php', array('jquery'), '', false);
+				wp_enqueue_script('js_class', DG_DUKAGATE_URL.'/js/graph/js-class.js',__FILE__);
+				wp_enqueue_script('excanvas', DG_DUKAGATE_URL.'/js/graph/excanvas.js',__FILE__);
+				wp_enqueue_script('bluff_min', DG_DUKAGATE_URL.'/js/graph/bluff-min.js',__FILE__);
 				wp_enqueue_script("dukagate_admin");
 				wp_enqueue_script("wysiwyg_js");
+				wp_enqueue_script("js_class");
+				wp_enqueue_script("excanvas");
+				wp_enqueue_script("bluff_min");
 			}else{
 				wp_enqueue_script('dukagate_js', DG_DUKAGATE_URL.'/js/dukagate.js', array('jquery'), '', false);
 				wp_enqueue_script('jquery_validate', DG_DUKAGATE_URL.'/js/jquery.validate.js', array('jquery'), '', false);
@@ -1775,6 +1781,68 @@ if(!class_exists('DukaGate')) {
 				'height'    => $height
 			);
 			return $dp_image['url'];
+		}
+		
+		/**
+		 * Get all sales days
+		 */
+		private function sales_days(){
+			$databases = self::db_names();
+			global $wpdb;
+			$table_name = $databases['transactions'];
+			$sql = "SELECT Date(`date`) as day FROM `$table_name` GROUP BY Date(`date`) ORDER BY Date(`date`) ASC LIMIT 10";
+			return $wpdb->get_results($sql);
+			
+		}
+		
+		/**
+		 * Show sales summmary on home page for the days
+		 */
+		function sales_summary($payment_status){
+			$summary = array();
+			$databases = self::db_names();
+			$dates = $this->sales_days();
+			global $wpdb;
+			$table_name = $databases['transactions'];
+			foreach ($dates as $date) {
+				$summary['days'][] = $date->day;
+				$sql = "SELECT SUM(`total`) as total FROM `$table_name` WHERE `payment_status` = '$payment_status' AND  Date(`date`) = '$date->day'";
+				$results =  $wpdb->get_results($sql);
+				if(!empty($results)){
+					foreach ($results as $result) {
+						if($result->total != null && !(empty($result->total))){
+							$summary['total'][] = $result->total;
+						}else{
+							$summary['total'][] = "0";
+						}
+					}
+				}else{
+					$summary['total'][] = "0";
+				}
+			}
+			return $summary;
+		}
+		
+		/**
+		 * Get total revenue
+		 */
+		function total_revenue(){
+			$databases = self::db_names();
+			global $wpdb;
+			$table_name = $databases['transactions'];
+			$sql = "SELECT SUM(`total`) as total FROM `$table_name` WHERE `payment_status` = 'Paid'";
+			return $wpdb->get_var($sql);
+		}
+		
+		/**
+		 * Count total sales
+		 */
+		function total_sales(){
+			$databases = self::db_names();
+			global $wpdb;
+			$table_name = $databases['transactions'];
+			$sql = "SELECT count(`id`) as total FROM `$table_name` WHERE `payment_status` = 'Paid'";
+			return $wpdb->get_var($sql);
 		}
 	}
 }
