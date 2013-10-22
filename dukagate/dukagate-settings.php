@@ -16,13 +16,16 @@ class DukaGate_Settings{
 	//Form Elements
 	var $form_elements = array('Text' => 'text' ,'Text Area' => 'textarea', 'Check Box' => 'checkbox','Paragraph' => 'paragraph');
 	
+	var $variation_types = array('Single Select' => 'radio', 'Multiple Select' => 'checkbox','Drop Down' => 'select');
+	
 	var $payment_status = array('Pending', 'Paid', 'Canceled');
 	
 	function get_settings(){
 		return array('country' => $this->country_code_name,
 		             'currency' => $this->currency_codes,
 					'forms' => $this->form_elements,
-					'payment_status' => $this->payment_status);
+					'payment_status' => $this->payment_status,
+					'variation' => $this->variation_types);
 	}
 	
 	function set_manadatory_forms($name, $dg_form_elem){
@@ -34,7 +37,9 @@ class DukaGate_Settings{
 		}
 	}
 	
-	
+	function get_variation($key){
+		echo array_keys($this->variation_types, $key)[0];
+	}
 }
 
 global $dukagate_settings;

@@ -15,6 +15,7 @@ function dg_create_admin_menu(){
 	add_submenu_page('dukagate-order-log', __('DukaGate Shipping Options'), __('Shipping Options'), 'edit_others_posts', 'dukagate-shipping-options', 'dg_dukagate_shipping');
 	add_submenu_page('dukagate-order-log', __('DukaGate CheckOut Settings'), __('Check Out Settings'), 'edit_others_posts', 'dukagate-checkout-options', 'dg_dukagate_checkout');
 	add_submenu_page('dukagate-order-log', __('DukaGate Mail Settings'), __('Mail Settings'), 'edit_others_posts', 'dukagate-mail-options', 'dg_dukagate_mail');
+	add_submenu_page('dukagate-order-log', __('DukaGate Product Variations'), __('Product Variations'), 'edit_others_posts', 'dukagate-product-variations', 'dg_dukagate_product_variations');
 	add_submenu_page('dukagate-order-log', __('DukaGate Settings'), __('Settings'), 'edit_others_posts', 'dukagate-settings', 'dg_dukagate_settings');
 	add_submenu_page('dukagate-order-log', __('DukaGate Advanced Settings'), __('Advanced Settings'), 'edit_others_posts', 'dukagate-advanced-settings', 'dg_dukagate_advanced_settings');
 	
@@ -515,7 +516,7 @@ function dg_dukagate_checkout(){
 														$cont_selected = 'selected="selected"';
 													}
 													?>
-													<option value="<?php echo $form; ?>" <?php echo $cont_selected; ?> ><?php echo _e($forms,'dg-lang'); ?></option>
+													<option value="<?php echo $form; ?>" <?php echo $cont_selected; ?> ><?php echo _e($forms); ?></option>
 													<?php
 												}
 											?>
@@ -832,7 +833,7 @@ function dg_dukagate_settings(){
 
 
 function dg_dukagate_advanced_settings(){
-	global $dukagate_settings;
+	
 	global $dukagate;
 	
 	if(@$_POST['dg_advanced_settings']){
@@ -996,6 +997,78 @@ function dg_dukagate_advanced_settings(){
 				</p>
 			</form>
 		</div>
+	<?php
+}
+
+/**
+ * Product Variations
+ */
+function dg_dukagate_product_variations(){
+	global $dukagate_settings;
+	if(@$_POST['dg_save_variation']){
+		$dg_variation_name = $_POST['dg_variation_name'];
+		$dg_variation_type = $_POST['dg_variation_type'];
+		$dg_variations = get_option('dg_variations');
+		$new_var = array('name' => $dg_variation_name, 'type' => $dg_variation_type);
+		$dg_variations[] = $new_var;
+		update_option('dg_variations', $dg_variations);
+	}
+	$settings = $dukagate_settings->get_settings();
+	$dg_variations = get_option('dg_variations');
+	?>
+	<div class="wrap">
+		<h2><?php _e("Dukagate Product Variations"); ?></h2>
+		<form method="POST" action="<?php echo $_SERVER['REQUEST_URI']; ?>">
+			<table class="form-table">
+				<tr valign="top">
+					<th scope="row"><label for="dg_variation_name"><?php _e("Variation Name"); ?></label></th>
+					<td><input type="text" value="" name="dg_variation_name" /></td>
+				</tr>
+				<tr valign="top">
+					<th scope="row"><label for="dg_variation_type"><?php _e("Variation type"); ?></label></th>
+					<td>
+						<select name="dg_variation_type">
+							<?php
+								foreach ($settings['variation'] as $forms => $form) {
+									?>
+									<option value="<?php echo $form; ?>" ><?php echo _e($forms); ?></option>
+									<?php
+								}
+							?>
+						</select>
+					</td>
+				</tr>
+			</table>
+			<p class="submit">
+				<input class='button-primary' type='submit' name='dg_save_variation' value='<?php _e('Save Variation'); ?>' id='submitbutton' />
+			</p>
+		</form>
+		<?php if (is_array($dg_variations) && count($dg_variations) > 0) { ?>
+			<table width="100%" border="0" class="widefat">
+				<thead>
+					<tr>
+						<th width="20%" align="left" scope="col"><?php _e('Name'); ?></th>
+						<th width="10%" align="left" scope="col"><?php _e('Type'); ?></th>
+					</tr>
+				</thead>
+				<tbody>
+				<?php
+				foreach ($dg_variations as $variations => $var) {
+					?>
+					<tr>
+						<td><?php _e($var['name']); ?></td>
+						<td><?php _e($var['type']); ?></td>
+					</tr>
+					<?php
+				}
+				?>
+				</tbody>
+			</table>
+		<?php
+		}else{
+			echo '<p>'.__('No Variations Found').'</p>';
+		}?>
+	</div>
 	<?php
 }
 ?>

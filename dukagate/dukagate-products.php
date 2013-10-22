@@ -187,7 +187,7 @@ class DukaGate_Products{
 					$content .= '<input type="hidden" name="price" value="'.$price.'">';
 					$content .= '<input type="hidden" name="product" value="'.$product->post_title.'">';
 					$content .= '<input type="hidden" name="product_image" value="'.$main_image.'">';
-					$content .= '<input type="submit" value="'.$add_to_cart_text.'" class="dg_make_payment"/>';
+					$content .= '<input type="submit" value="'.__($add_to_cart_text).'" class="dg_make_payment"/>';
 					$content .= '</form>';
 					$content .= '</div>';
 				}else{
@@ -199,7 +199,7 @@ class DukaGate_Products{
 					$content .= '<input type="hidden" name="price" value="'.$price.'">';
 					$content .= '<input type="hidden" name="product" value="'.$product->post_title.'">';
 					$content .= '<input type="hidden" name="product_image" value="'.$main_image.'">';
-					$content .= '<input type="submit" value="'.$add_to_cart_text.'" class="dg_make_payment"/>';
+					$content .= '<input type="submit" value="'.__($add_to_cart_text).'" class="dg_make_payment"/>';
 					$content .= '</form>';
 					$content .= '</div>';
 				}
@@ -354,7 +354,21 @@ class DukaGate_Products{
 			$content .= '<input type="hidden" name="fixed_price_'.$product->ID.'" id="fixed_price_'.$product->ID.'" value="'.$price.'">';
 			$content .= '<p class="price"><span class="price_label">' .__("Price").':</span> '. $dg_shop_settings['currency_symbol'].' '.$price . '</p>';
 		}
-		$content .= '<p class="select_option"><input type="'.$dg_prod_option.'" onclick="dukagate.add_price(\''.$price.'\', \'dg_cart_price\', \'sub_product_'.$product->ID.'\', \''.$fixed_price.'\');" name="sub_product_'.$product->ID.'" id="sub_product_'.$product->ID.'" value="'.$product->post_title.'"/></p>';
+		if($dg_prod_option != 'none'){
+			$content .= '<p class="select_option"><input type="'.$dg_prod_option.'" onclick="dukagate.add_price(\''.$price.'\', \'dg_cart_price\', \'sub_product_'.$product->ID.'\', \''.$fixed_price.'\');" name="sub_product_'.$product->ID.'" id="sub_product_'.$product->ID.'" value="'.$product->post_title.'"/></p>';
+		}else{
+			$content .= '<div class="button">';
+			$content .= '<form method="POST" action="" id="dg_prod_'.$product->ID.'">';
+			$content .= '<input type="hidden" name="action" value="dg_update_cart">';
+			$content .= '<input type="hidden" name="product_id" value="'.$product->ID.'">';
+			$content .= '<input type="hidden" name="quantity" id="dg_quantity_'.$product->ID.'" value="">';
+			$content .= '<input type="hidden" name="price" value="'.$price.'">';
+			$content .= '<input type="hidden" name="product" value="'.$product->post_title.'">';
+			$content .= '<input type="hidden" name="product_image" value="'.$main_image.'">';
+			$content .= '<input type="submit" value="'.__('Add To Cart').'" class="dg_make_payment"/>';
+			$content .= '</form>';
+			$content .= '</div>';
+		}
 		$content .= '</div>';
 		$content .= '</div>';
 		return $content;
@@ -390,7 +404,7 @@ class DukaGate_Products{
 						$dg_height = $prod_height;
 					}
 					if(empty($dg_prod_option)){
-						$dg_prod_option = 'radio';
+						$dg_prod_option = 'none';
 					}
 					$args=array(
 					  'grouped_product' => $term->name,
