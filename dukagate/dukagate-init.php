@@ -39,9 +39,15 @@ if(!class_exists('DukaGate')) {
 			add_action('edited_grouped_product', array(&$this,'update_grouped_product_metadata'), 10, 1);
 			add_action('delete_grouped_product', array(&$this,'delete_grouped_product_metadata'), 10, 1);
 			add_action( 'save_post', array(&$this,'product_meta_save'));
+			add_action( 'edit_post', array(&$this,'add_quick_edit_save'), 10, 3);
 			add_action( 'init', array(&$this, 'set_up_styles'));
 			add_action( 'init', array(&$this, 'set_up_js'));
 			add_action( 'init', array(&$this, 'load_dukagate_plugins'));
+			
+			add_filter('manage_dg_product_posts_columns', array(&$this,'create_post_column'));
+			add_action('manage_posts_custom_column', array(&$this,'render_post_columns'), 10, 2);
+			add_action('admin_footer-edit.php', array(&$this,'admin_edit_dg_product_foot'), 11);
+			add_action('quick_edit_custom_box',  array(&$this,'add_quick_edit'), 10, 2);
 		}
 		
 		
@@ -283,6 +289,67 @@ if(!class_exists('DukaGate')) {
 				update_post_meta($post_id, 'affiliate_url', $affiliate_url);
 			}
 			
+		}
+		
+		/**
+		 * Create post columns
+		 */
+		function create_post_column($columns){
+			$columns['price'] = 'Price';
+			return $columns;
+		}
+		
+		/**
+		 * Render the post column content
+		 */
+		function render_post_columns($column_name, $id){
+			switch ($column_name) {
+				case 'price':
+					// show widget set
+					$price = get_post_meta( $id, 'price', TRUE);
+					$widget_set = NULL;
+					if ($price) 
+						echo $price;
+					else 
+						echo 'Not Set';               
+					break;
+			}
+		}
+		
+		/**
+		 * Load custom javascript for quick edit
+		 */
+		function admin_edit_dg_product_foot(){
+			$slug = 'dg_product';
+			# load only when editing a dg_product
+			if (   (isset($_GET['page']) && $_GET['page'] == $slug)
+				|| (isset($_GET['post_type']) && $_GET['post_type'] == $slug)){
+				echo '<script type="text/javascript" src="'.DG_DUKAGATE_URL.'/js/admin_edit.js"></script>';
+			}
+		}
+		
+		/**
+		 * Add Quick Edit options
+		 */
+		function add_quick_edit($column_name, $post_type){
+			if ($column_name != 'price') return;
+			?>
+			<fieldset class="inline-edit-col-left">
+			<div class="inline-edit-col">
+				<span class="title">Price</span>
+				<input type="hidden" name="dukagate_noncename" id="dukagate_noncename" value="dukagate_noncename" />
+				<input type="text" value="" name="price" id="price" />
+				<input type="hidden" name="is_quickedit" value="true" /></div>
+			</div>
+			</fieldset>
+			<?php
+		}
+		
+		
+		public function add_quick_edit_save($post_id, $post){
+			if( $post->post_type != 'dg_product' ) return;
+			if (isset($_POST['is_quickedit']))
+				update_post_meta($post_id, 'price', $_POST['price']);
 		}
 		
 		/**

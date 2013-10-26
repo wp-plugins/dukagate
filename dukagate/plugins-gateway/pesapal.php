@@ -91,7 +91,7 @@ class DukaGate_GateWay_PesaPal extends DukaGate_GateWay_API{
 		}
 		$this->ipn_request($transaction_tracking_id , $payment_notification, $invoice, $consumer_key, $consumer_secret,$statusrequestAPI);
 		
-		$return_path = get_page_link($dp_shopping_cart_settings['thankyou_page']);
+		$return_path = get_page_link($dg_shop_settings['thankyou_page']);
 		$check_return_path = explode('?', $return_path);
 		if (count($check_return_path) > 1) {
 			$return_path .= '&id=' . $invoice;

@@ -15,7 +15,7 @@ function dg_create_admin_menu(){
 	add_submenu_page('dukagate-order-log', __('DukaGate Shipping Options'), __('Shipping Options'), 'edit_others_posts', 'dukagate-shipping-options', 'dg_dukagate_shipping');
 	add_submenu_page('dukagate-order-log', __('DukaGate CheckOut Settings'), __('Check Out Settings'), 'edit_others_posts', 'dukagate-checkout-options', 'dg_dukagate_checkout');
 	add_submenu_page('dukagate-order-log', __('DukaGate Mail Settings'), __('Mail Settings'), 'edit_others_posts', 'dukagate-mail-options', 'dg_dukagate_mail');
-	add_submenu_page('dukagate-order-log', __('DukaGate Product Variations'), __('Product Variations'), 'edit_others_posts', 'dukagate-product-variations', 'dg_dukagate_product_variations');
+	//add_submenu_page('dukagate-order-log', __('DukaGate Product Variations'), __('Product Variations'), 'edit_others_posts', 'dukagate-product-variations', 'dg_dukagate_product_variations');
 	add_submenu_page('dukagate-order-log', __('DukaGate Settings'), __('Settings'), 'edit_others_posts', 'dukagate-settings', 'dg_dukagate_settings');
 	add_submenu_page('dukagate-order-log', __('DukaGate Advanced Settings'), __('Advanced Settings'), 'edit_others_posts', 'dukagate-advanced-settings', 'dg_dukagate_advanced_settings');
 	
