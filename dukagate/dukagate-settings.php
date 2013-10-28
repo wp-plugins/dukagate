@@ -38,7 +38,8 @@ class DukaGate_Settings{
 	}
 	
 	function get_variation($key){
-		echo array_keys($this->variation_types, $key)[0];
+		$variation = array_keys($this->variation_types, $key);
+		echo $variation[0];
 	}
 }
 
