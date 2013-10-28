@@ -39,9 +39,15 @@ if(!class_exists('DukaGate')) {
 			add_action('edited_grouped_product', array(&$this,'update_grouped_product_metadata'), 10, 1);
 			add_action('delete_grouped_product', array(&$this,'delete_grouped_product_metadata'), 10, 1);
 			add_action( 'save_post', array(&$this,'product_meta_save'));
+			add_action( 'edit_post', array(&$this,'add_quick_edit_save'), 10, 3);
 			add_action( 'init', array(&$this, 'set_up_styles'));
 			add_action( 'init', array(&$this, 'set_up_js'));
 			add_action( 'init', array(&$this, 'load_dukagate_plugins'));
+			
+			add_filter('manage_dg_product_posts_columns', array(&$this,'create_post_column'));
+			add_action('manage_posts_custom_column', array(&$this,'render_post_columns'), 10, 2);
+			add_action('admin_footer-edit.php', array(&$this,'admin_edit_dg_product_foot'), 11);
+			add_action('quick_edit_custom_box',  array(&$this,'add_quick_edit'), 10, 2);
 		}
 		
 		
@@ -218,6 +224,7 @@ if(!class_exists('DukaGate')) {
 					<td><input type="text" value="<?php echo $affiliate_url; ?>" name="affiliate_url" id="affiliate_url"></td>
 				</tr>
 			</table>
+			
 			<?php
 		}
 		
@@ -282,6 +289,67 @@ if(!class_exists('DukaGate')) {
 				update_post_meta($post_id, 'affiliate_url', $affiliate_url);
 			}
 			
+		}
+		
+		/**
+		 * Create post columns
+		 */
+		function create_post_column($columns){
+			$columns['price'] = 'Price';
+			return $columns;
+		}
+		
+		/**
+		 * Render the post column content
+		 */
+		function render_post_columns($column_name, $id){
+			switch ($column_name) {
+				case 'price':
+					// show widget set
+					$price = get_post_meta( $id, 'price', TRUE);
+					$widget_set = NULL;
+					if ($price) 
+						echo $price;
+					else 
+						echo 'Not Set';               
+					break;
+			}
+		}
+		
+		/**
+		 * Load custom javascript for quick edit
+		 */
+		function admin_edit_dg_product_foot(){
+			$slug = 'dg_product';
+			# load only when editing a dg_product
+			if (   (isset($_GET['page']) && $_GET['page'] == $slug)
+				|| (isset($_GET['post_type']) && $_GET['post_type'] == $slug)){
+				echo '<script type="text/javascript" src="'.DG_DUKAGATE_URL.'/js/admin_edit.js"></script>';
+			}
+		}
+		
+		/**
+		 * Add Quick Edit options
+		 */
+		function add_quick_edit($column_name, $post_type){
+			if ($column_name != 'price') return;
+			?>
+			<fieldset class="inline-edit-col-left">
+			<div class="inline-edit-col">
+				<span class="title">Price</span>
+				<input type="hidden" name="dukagate_noncename" id="dukagate_noncename" value="dukagate_noncename" />
+				<input type="text" value="" name="price" id="price" />
+				<input type="hidden" name="is_quickedit" value="true" /></div>
+			</div>
+			</fieldset>
+			<?php
+		}
+		
+		
+		public function add_quick_edit_save($post_id, $post){
+			if( $post->post_type != 'dg_product' ) return;
+			if (isset($_POST['is_quickedit']))
+				update_post_meta($post_id, 'price', $_POST['price']);
 		}
 		
 		/**
@@ -412,8 +480,9 @@ if(!class_exists('DukaGate')) {
 				</th>
 				<td>
 					<select name="product_select" id="product_select">
-						<option value="checkbox" <?php selected( $product_select, 'checkbox' ); ?>><?php _e('Use CheckBox', "dg-lang"); ?></option>
-						<option value="radio" <?php selected( $product_select, 'radio' ); ?>><?php _e('Use Radio', "dg-lang"); ?></option>
+						<option value="none" <?php selected( $product_select, 'none' ); ?>><?php _e('Simple Click to select'); ?></option>
+						<option value="checkbox" <?php selected( $product_select, 'checkbox' ); ?>><?php _e('Use CheckBox'); ?></option>
+						<option value="radio" <?php selected( $product_select, 'radio' ); ?>><?php _e('Use Radio'); ?></option>
 					</select>
 					<p class="description"><?php _e('This will be the select option for the product.'); ?></p>
 				</td>
@@ -1679,108 +1748,112 @@ if(!class_exists('DukaGate')) {
 		 * Resize image
 		 */
 		function resize_image($attach_id = null, $img_url = null, $width, $height, $crop = true){
-			$org_img = getimagesize($img_url);
-			if(empty($width)){
-				$width = $org_img[0];
-			}
-			if(empty($height)){
-				$height = $org_img[1];
-			}
-			if($attach_id){
-				// this is an attachment, so we have the ID
-				$image_src = wp_get_attachment_image_src($attach_id, 'full');
-				$file_path = get_attached_file($attach_id);
-			} elseif($img_url){
-				// this is not an attachment, let's use the image url
-				$file_path = parse_url($img_url);
-				$file_path = $_SERVER['DOCUMENT_ROOT'].$file_path['path'];
-				// Look for Multisite Path
-				if(file_exists($file_path) === false){
-					global $blog_id;
+			$org_img = @getimagesize($img_url);
+			if($org_img){
+				if(empty($width)){
+					$width = $org_img[0];
+				}
+				if(empty($height)){
+					$height = $org_img[1];
+				}
+				if($attach_id){
+					// this is an attachment, so we have the ID
+					$image_src = wp_get_attachment_image_src($attach_id, 'full');
+					$file_path = get_attached_file($attach_id);
+				} elseif($img_url){
+					// this is not an attachment, let's use the image url
 					$file_path = parse_url($img_url);
-					if(preg_match('/files/', $file_path['path'])){
-						$path = explode('/', $file_path['path']);
-						foreach($path as $k => $v){
-							if($v == 'files'){
-								$path[$k-1] = 'wp-content/blogs.dir/'.$blog_id;
+					$file_path = $_SERVER['DOCUMENT_ROOT'].$file_path['path'];
+					// Look for Multisite Path
+					if(file_exists($file_path) === false){
+						global $blog_id;
+						$file_path = parse_url($img_url);
+						if(preg_match('/files/', $file_path['path'])){
+							$path = explode('/', $file_path['path']);
+							foreach($path as $k => $v){
+								if($v == 'files'){
+									$path[$k-1] = 'wp-content/blogs.dir/'.$blog_id;
+								}
 							}
+							$path = implode('/', $path);
 						}
-						$path = implode('/', $path);
+						$file_path = $_SERVER['DOCUMENT_ROOT'].$path;
 					}
-					$file_path = $_SERVER['DOCUMENT_ROOT'].$path;
+					//$file_path = ltrim( $file_path['path'], '/' );
+					//$file_path = rtrim( ABSPATH, '/' ).$file_path['path'];
+					$orig_size = getimagesize($file_path);
+					$image_src[0] = $img_url;
+					$image_src[1] = $orig_size[0];
+					$image_src[2] = $orig_size[1];
 				}
-				//$file_path = ltrim( $file_path['path'], '/' );
-				//$file_path = rtrim( ABSPATH, '/' ).$file_path['path'];
-				$orig_size = getimagesize($file_path);
-				$image_src[0] = $img_url;
-				$image_src[1] = $orig_size[0];
-				$image_src[2] = $orig_size[1];
-			}
-			$file_info = pathinfo($file_path);
-			// check if file exists
-			$base_file = $file_info['dirname'].'/'.$file_info['filename'].'.'.$file_info['extension'];
-			if(!file_exists($base_file))
-			return;
-			$extension = '.'. $file_info['extension'];
-			// the image path without the extension
-			$no_ext_path = $file_info['dirname'].'/'.$file_info['filename'];
-			$cropped_img_path = $no_ext_path.'-'.$width.'x'.$height.$extension;
-			// checking if the file size is larger than the target size
-			// if it is smaller or the same size, stop right here and return
-			if($image_src[1] > $width){
-				// the file is larger, check if the resized version already exists (for $crop = true but will also work for $crop = false if the sizes match)
-				if(file_exists($cropped_img_path)){
-					$cropped_img_url = str_replace(basename($image_src[0]), basename($cropped_img_path), $image_src[0]);
-					$dp_image = array(
-						'url'   => $cropped_img_url,
-						'width' => $width,
-						'height'    => $height
-					);
-					return $dp_image['url'];
-				}
-				// $crop = false or no height set
-				if($crop == false OR !$height){
-					// calculate the size proportionaly
-					$proportional_size = wp_constrain_dimensions($image_src[1], $image_src[2], $width, $height);
-					$resized_img_path = $no_ext_path.'-'.$proportional_size[0].'x'.$proportional_size[1].$extension;
-					// checking if the file already exists
-					if(file_exists($resized_img_path)){
-						$resized_img_url = str_replace(basename($image_src[0]), basename($resized_img_path), $image_src[0]);
+				$file_info = pathinfo($file_path);
+				// check if file exists
+				$base_file = $file_info['dirname'].'/'.$file_info['filename'].'.'.$file_info['extension'];
+				if(!file_exists($base_file))
+				return;
+				$extension = '.'. $file_info['extension'];
+				// the image path without the extension
+				$no_ext_path = $file_info['dirname'].'/'.$file_info['filename'];
+				$cropped_img_path = $no_ext_path.'-'.$width.'x'.$height.$extension;
+				// checking if the file size is larger than the target size
+				// if it is smaller or the same size, stop right here and return
+				if($image_src[1] > $width){
+					// the file is larger, check if the resized version already exists (for $crop = true but will also work for $crop = false if the sizes match)
+					if(file_exists($cropped_img_path)){
+						$cropped_img_url = str_replace(basename($image_src[0]), basename($cropped_img_path), $image_src[0]);
 						$dp_image = array(
-							'url'   => $resized_img_url,
-							'width' => $proportional_size[0],
-							'height'    => $proportional_size[1]
+							'url'   => $cropped_img_url,
+							'width' => $width,
+							'height'    => $height
 						);
 						return $dp_image['url'];
 					}
-				}
-				// check if image width is smaller than set width
-				$img_size = getimagesize($file_path);
-				if($img_size[0] <= $width) $width = $img_size[0];
-					// Check if GD Library installed
-					if(!function_exists('imagecreatetruecolor')){
-						echo 'GD Library Error: imagecreatetruecolor does not exist - please contact your webhost and ask them to install the GD library';
-						return;
+					// $crop = false or no height set
+					if($crop == false OR !$height){
+						// calculate the size proportionaly
+						$proportional_size = wp_constrain_dimensions($image_src[1], $image_src[2], $width, $height);
+						$resized_img_path = $no_ext_path.'-'.$proportional_size[0].'x'.$proportional_size[1].$extension;
+						// checking if the file already exists
+						if(file_exists($resized_img_path)){
+							$resized_img_url = str_replace(basename($image_src[0]), basename($resized_img_path), $image_src[0]);
+							$dp_image = array(
+								'url'   => $resized_img_url,
+								'width' => $proportional_size[0],
+								'height'    => $proportional_size[1]
+							);
+							return $dp_image['url'];
+						}
 					}
-					// no cache files - let's finally resize it
-					$new_img_path = image_resize($file_path, $width.'px', $height.'px', $crop);
-					$new_img_size = getimagesize($new_img_path);
-					$new_img = str_replace(basename($image_src[0]), basename($new_img_path), $image_src[0]);
-					// resized output
-					$dp_image = array(
-						'url'   => $new_img,
-						'width' => $new_img_size[0],
-						'height'    => $new_img_size[1]
-					);
-					return $dp_image['url'];
+					// check if image width is smaller than set width
+					$img_size = getimagesize($file_path);
+					if($img_size[0] <= $width) $width = $img_size[0];
+						// Check if GD Library installed
+						if(!function_exists('imagecreatetruecolor')){
+							echo 'GD Library Error: imagecreatetruecolor does not exist - please contact your webhost and ask them to install the GD library';
+							return;
+						}
+						// no cache files - let's finally resize it
+						$new_img_path = image_resize($file_path, $width.'px', $height.'px', $crop);
+						$new_img_size = getimagesize($new_img_path);
+						$new_img = str_replace(basename($image_src[0]), basename($new_img_path), $image_src[0]);
+						// resized output
+						$dp_image = array(
+							'url'   => $new_img,
+							'width' => $new_img_size[0],
+							'height'    => $new_img_size[1]
+						);
+						return $dp_image['url'];
+				}
+				// default output - without resizing
+				$dp_image = array(
+					'url'   => $image_src[0],
+					'width' => $width,
+					'height'    => $height
+				);
+				return $dp_image['url'];
+			}else{
+				return $img_url;
 			}
-			// default output - without resizing
-			$dp_image = array(
-				'url'   => $image_src[0],
-				'width' => $width,
-				'height'    => $height
-			);
-			return $dp_image['url'];
 		}
 		
 		/**

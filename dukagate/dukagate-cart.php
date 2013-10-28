@@ -291,6 +291,34 @@ function dg_cart_min($echo = 'false'){
 		return $cnt;
 }
 
+//Mini cart to just show total
+function dg_mini_cart($echo = 'false', $imgurl = 'false'){
+	$cnt = '<div class="dg_mini_cart_container">';
+	$dg_cart = '';
+	$total = 0;
+	if(isset($_SESSION['dg_cart']) && !empty($_SESSION['dg_cart'])) {
+		$dg_cart = $_SESSION['dg_cart'];
+	}
+	if (is_array($dg_cart)) {
+		$total = count($dg_cart);
+	}
+	$cnt .= '<table>';
+	$cnt .= '<tr>';
+	$cnt .= '<td>';
+	$cnt .= '<img src="'.$imgurl.'" />';
+	$cnt .= '</td>';
+	$cnt .= '<td>';
+	$cnt .= '<a href="'.$url.'" class="go_checkout">'.$total.' items in cart. '.__("Checkout").'</a>';
+	$cnt .= '</td>';
+	$cnt .= '</tr>';
+	$cnt .= '</table>';
+	$cnt .= '</div>';
+	if($echo == 'true')
+		echo $cnt;
+	else
+		return $cnt;
+}
+
 add_action( 'wp_ajax_nopriv_shipping_submit', 'dg_shipping_submit');
 add_action( 'wp_ajax_shipping_submit', 'dg_shipping_submit');
 
