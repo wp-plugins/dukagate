@@ -308,7 +308,7 @@ function dg_mini_cart($echo = 'false', $imgurl = 'false'){
 	$cnt .= '<img src="'.$imgurl.'" />';
 	$cnt .= '</td>';
 	$cnt .= '<td>';
-	$cnt .= '<a href="'.$url.'" class="go_checkout">'.$total.' items in cart. '.__("Checkout").'</a>';
+	$cnt .= '<a href="'.$url.'" class="go_checkout"><span id="mini_cart_total">'.$total.'</span> items in cart. '.__("Checkout").'</a>';
 	$cnt .= '</td>';
 	$cnt .= '</tr>';
 	$cnt .= '</table>';
@@ -433,10 +433,12 @@ function dg_update_cart(){
 		if($dg_shop_settings['up_selling_page_checkout'] == 'true')
 			$url = get_page_link($dg_shop_settings['up_selling_page']);
 	}
+	$html = dg_cart_min();
 	header('Content-type: application/json; charset=utf-8');
-	echo DukaGate::array_to_json(array('url' => $url, 'success' => 'true'));
+	echo DukaGate::array_to_json(array('url' => $url, 'success' => 'true', 'total' => count($dg_cart), 'html' => $html));
 	exit();
 }
+
 
 //Empty cart
 add_action( 'wp_ajax_nopriv_dg_empty_cart', 'dg_empty_cart');
