@@ -26,6 +26,12 @@ var dukagate ={
 						if(ajax_cart == 'true'){
 							btn.val('Added To Cart');
 							btn.attr('disabled','disabled');
+							if(jQuery('#mini_cart_total').length > 0){
+								jQuery('#mini_cart_total').html(response.total);
+							}
+							if(jQuery('#dukagate_cart_widget').length > 0){
+								jQuery('#dukagate_cart_widget').html(response.html);
+							}
 						}
 						else{
 							window.location.href = response.url;
@@ -51,6 +57,12 @@ var dukagate ={
 						if(ajax_cart == 'true'){
 							btn.val('Added To Cart');
 							btn.attr('disabled','disabled');
+							if(jQuery('#mini_cart_total').length > 0){
+								jQuery('#mini_cart_total').html(response.total);
+							}
+							if(jQuery('#dukagate_cart_widget').length > 0){
+								jQuery('#dukagate_cart_widget').html(response.html);
+							}
 						}
 						else{
 							window.location.href = response.url;

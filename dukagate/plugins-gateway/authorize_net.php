@@ -79,7 +79,7 @@ class DukaGate_GateWay_AuthorizeNet extends DukaGate_GateWay_API{
 
 		$dukagate->dg_update_order_log($invoice, $updated_status);
 		
-		$return_path = get_page_link($dp_shopping_cart_settings['thankyou_page']);
+		$return_path = get_page_link($dg_shop_settings['thankyou_page']);
 		$check_return_path = explode('?', $return_path);
 		if (count($check_return_path) > 1) {
 			$return_path .= '&id=' . $invoice;
