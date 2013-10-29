@@ -55,8 +55,21 @@ function dg_display_grouped_products($atts){
 	return $output;
 }
 
-//Cart shortcode
+//Checkout Cart shortcode
 add_shortcode('dg_display_cart_checkout', 'dg_get_cart');
+
+//Shopping cart shortcode
+add_shortcode('dg_display_cart', 'dg_display_cart');
+function dg_display_cart($atts){
+	extract(shortcode_atts(array(
+				'mini' => 'false'), $atts));
+	if($mini == 'false'){
+		$output = dg_cart_min('false');;
+	}else{
+		$output = dg_mini_cart('false');;
+	}
+	return $output;
+}
 
 
 //Diplay links
