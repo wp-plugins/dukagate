@@ -15,10 +15,11 @@ function dg_display_products($atts){
 				'ajax_cart' => 'false',
 				'quantity' => 'false',
 				'checkout_link' => 'true',
+				'productlink' => 'true',
 				'add_to_cart_text' => 'Add To Cart',
 				'show_add_to_cart' => 'true'), $atts));
 				
-	$output = DukaGate_Products::show_products($layout, $total, $per_page, $order, $image_width, $image_height, $group, $quantity, $ajax_cart, $top, $checkout_link, $add_to_cart_text, $show_add_to_cart);
+	$output = DukaGate_Products::show_products($layout, $total, $per_page, $order, $image_width, $image_height, $group, $quantity, $ajax_cart, $top, $checkout_link, $productlink, $add_to_cart_text, $show_add_to_cart);
 	return $output;
 }
 

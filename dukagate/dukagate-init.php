@@ -1711,13 +1711,20 @@ if(!class_exists('DukaGate')) {
 			}
 			$dg_gateways = $this->list_all_active_gateways();
 			$active = 0;
+			$gw_name = '';
 			if (is_array($dg_gateways) && count($dg_gateways) > 0) {
 				if(count($dg_gateways) > 1){
 					$cnt .= '<ul>';
 					foreach ($dg_gateways as $dg_gateway) {
+						$gw_name = '';
 						if(intval($dg_gateway->active) == 1){
+							$options = DukaGate::json_to_array($this->dg_get_gateway_options($dg_gateway->gateway_slug));
+							$gw_name = $dg_gateway->gateway_name;
+							if(!empty($options['custom_name'])){
+								$gw_name = $options['custom_name'];
+							}
 							$cnt .= '<li>';
-							$cnt .= '<label for="dg_gateway"><input type="radio" class="required" name="dg_gateway_action" value="'.$dg_gateway->gateway_slug.'"/>'.$dg_gateway->gateway_name.'</label>';
+							$cnt .= '<label for="dg_gateway"><input type="radio" class="required" name="dg_gateway_action" value="'.$dg_gateway->gateway_slug.'"/>'.$gw_name.'</label>';
 							$cnt .= '</li>';
 							$active += 1;
 						}
@@ -1725,9 +1732,15 @@ if(!class_exists('DukaGate')) {
 					$cnt .= '</ul>';
 				}else{
 					foreach ($dg_gateways as $dg_gateway) {
+						$gw_name = '';
 						if(intval($dg_gateway->active) == 1){
 							$active += 1;
-							$cnt .= '<label for="dg_gateway" class="'.$dg_gateway->gateway_slug.'">'.__("Pay Using ").$dg_gateway->gateway_name.'</label>';
+							$options = DukaGate::json_to_array($this->dg_get_gateway_options($dg_gateway->gateway_slug));
+							$gw_name = $dg_gateway->gateway_name;
+							if(!empty($options['custom_name'])){
+								$gw_name = $options['custom_name'];
+							}
+							$cnt .= '<label for="dg_gateway" class="'.$dg_gateway->gateway_slug.'">'.__("Pay Using ").$gw_name.'</label>';
 							$cnt .= '<input type="hidden" name="dg_gateway_action" value="'.$dg_gateway->gateway_slug.'"/></label>';
 						}
 					}
@@ -1795,6 +1808,12 @@ if(!class_exists('DukaGate')) {
 				// the image path without the extension
 				$no_ext_path = $file_info['dirname'].'/'.$file_info['filename'];
 				$cropped_img_path = $no_ext_path.'-'.$width.'x'.$height.$extension;
+				
+				//remove old files older than 2 days to keep things fresh incase an image of the same name is changed
+				if(file_exists($cropped_img_path))
+					if(time() - @filemtime(utf8_decode($cropped_img_path)) >= 2*24*60*60){
+						unlink($cropped_img_path);
+					}
 				// checking if the file size is larger than the target size
 				// if it is smaller or the same size, stop right here and return
 				if($image_src[1] > $width){

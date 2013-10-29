@@ -92,10 +92,11 @@ class DukaGate_Products{
 	 * @param prod_width - width of image
 	 * @param prod_height - height of image
 	 * @param group - taxonomy of product
+	 * @param productlink - product link
 	 * @param ajax_cart - set to use ajax to add to cart
 	 * @param show_add_to_cart - show add to cart
 	 */
-	static function show_products($layout, $total, $per_page, $order, $prod_width, $prod_height, $group, $show_quantity, $ajax_cart, $top_row, $checkout_link, $add_to_cart_text = 'Add To Cart',$show_add_to_cart = 'true'){
+	static function show_products($layout, $total, $per_page, $order, $prod_width, $prod_height, $group, $show_quantity, $ajax_cart, $top_row, $checkout_link,$productlink = 'false', $add_to_cart_text = 'Add To Cart',$show_add_to_cart = 'true'){
 		global $dukagate;
 		$offset = '';
 		$content = '';
@@ -137,7 +138,9 @@ class DukaGate_Products{
 			$count = 1;
 			$dg_shop_settings = get_option('dukagate_shop_settings');
 			$dg_advanced_shop_settings = get_option('dukagate_advanced_shop_settings');
+			$attachment_images = '';
 			foreach ($products as $product) {
+				$attachment_images = '';
 				$attachment_images = &get_children('post_type=attachment&post_status=inherit&post_mime_type=image&post_parent=' . $product->ID);
                 $main_image = '';
 				$price = get_post_meta($product->ID, 'price', true);
@@ -146,6 +149,9 @@ class DukaGate_Products{
                     break;
                 }
 				$prod_permalink = get_permalink($product->ID);
+				if($productlink == 'false'){
+					$prod_permalink= 'javascript:;';
+				}
 				$style= '';
 				if($layout != 'list'){
 					$style= 'style="width:'.$prod_width.'px;"';
