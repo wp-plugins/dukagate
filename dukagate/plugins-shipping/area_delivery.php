@@ -66,7 +66,7 @@ class DukaGate_Shipping_Area_Delivery extends DukaGate_Shipping_API{
 				$cnt .= '<tr>';
 				$cnt .= '<td>'.$o['area'].'</td>';
 				$cnt .= '<td>'.$o['rate'].'</td>';
-				$cnt .= '<td><input type="checkbox" name="shipping_rate_value[]" id="'.$option.'" value="'.$o['rate'].'" onclick="area_delivery_select(\''.$option.'\')" /></td>';
+				$cnt .= '<td><input type="radio" name="shipping_rate_value[]" id="'.$option.'" value="'.$o['rate'].'" onclick="area_delivery_select(\''.$option.'\')" /></td>';
 				$cnt .= '</tr>';
 			}
 		}
