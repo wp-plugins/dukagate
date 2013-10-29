@@ -4,8 +4,8 @@ Donate link: http://dukagate.info/
 Tags: shopping cart, web shop, cart, shop,Paypal,paypal,Pesapal, e-commerce, ecommerce
 
 Requires at least: 3.0
-Tested up to: 3.5.2
-Stable tag: 3.4.8
+Tested up to: 3.7
+Stable tag: 3.4.9.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -68,6 +68,19 @@ We test Dukagate on a large number of different server set-ups and envrionments 
 8. Sample product with a widget product
 
 == Changelog ==
+
+= 3.4.9.2 =
+* Fixed issue with Area shipping plugin.
+* Added Ajax update on all cart widgets. 
+* Modified Pesapal to have custom checkout name. 
+
+
+= 3.4.9.1 =
+Afew bug fixes and versioning fix
+
+= 3.4.9 =
+Added a mini cart widget. Working on product variations
+Added cash on delivery. Still working on more functions
 
 = 3.4.8 =
 Forgot some javascript :)
