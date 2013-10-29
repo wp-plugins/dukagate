@@ -2,7 +2,7 @@
 /*
 Plugin Name: DukaGate Shopping Cart
 Description: DukaGate Shopping Cart
-Version: 3.4.9.2
+Version: 3.4.9.3
 Author: TheBunch
 Author URI: http://dukagate.info/
 Plugin URI: http://dukagate.info/

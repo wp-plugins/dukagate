@@ -293,6 +293,7 @@ function dg_cart_min($echo = 'false'){
 
 //Mini cart to just show total
 function dg_mini_cart($echo = 'false', $imgurl = 'false'){
+	$dg_shop_settings = get_option('dukagate_shop_settings');
 	$cnt = '<div class="dg_mini_cart_container">';
 	$dg_cart = '';
 	$total = 0;
@@ -302,6 +303,7 @@ function dg_mini_cart($echo = 'false', $imgurl = 'false'){
 	if (is_array($dg_cart)) {
 		$total = count($dg_cart);
 	}
+	$url = get_page_link($dg_shop_settings['checkout_page']);
 	$cnt .= '<table>';
 	$cnt .= '<tr>';
 	$cnt .= '<td>';
