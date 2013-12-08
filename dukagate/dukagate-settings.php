@@ -15,9 +15,7 @@ class DukaGate_Settings{
 
 	//Form Elements
 	var $form_elements = array('Text' => 'text' ,'Text Area' => 'textarea', 'Check Box' => 'checkbox','Paragraph' => 'paragraph');
-	
-	var $variation_types = array('Single Select' => 'radio', 'Multiple Select' => 'checkbox','Drop Down' => 'select');
-	
+		
 	var $payment_status = array('Pending', 'Paid', 'Canceled');
 	
 	function get_settings(){
@@ -36,11 +34,7 @@ class DukaGate_Settings{
 			$dg_form_elem[$name.'_visible'] = 'checked';
 		}
 	}
-	
-	function get_variation($key){
-		$variation = array_keys($this->variation_types, $key);
-		echo $variation[0];
-	}
+
 }
 
 global $dukagate_settings;
