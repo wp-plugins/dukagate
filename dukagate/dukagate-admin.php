@@ -515,7 +515,7 @@ function dg_dukagate_checkout(){
 														$cont_selected = 'selected="selected"';
 													}
 													?>
-													<option value="<?php echo $form; ?>" <?php echo $cont_selected; ?> ><?php echo _e($forms,'dg-lang'); ?></option>
+													<option value="<?php echo $form; ?>" <?php echo $cont_selected; ?> ><?php echo _e($forms); ?></option>
 													<?php
 												}
 											?>
@@ -832,7 +832,7 @@ function dg_dukagate_settings(){
 
 
 function dg_dukagate_advanced_settings(){
-	global $dukagate_settings;
+	
 	global $dukagate;
 	
 	if(@$_POST['dg_advanced_settings']){
@@ -997,5 +997,45 @@ function dg_dukagate_advanced_settings(){
 			</form>
 		</div>
 	<?php
+}
+
+
+//Save or delete variation of product
+if (@$_REQUEST['action'] === 'dg_change_variation') {
+	add_action( 'init', 'dg_change_variation');
+}
+
+function dg_change_variation(){
+	$product_id = $_REQUEST['product'];
+	$variationid = $_REQUEST['variation'];
+	$action = $_REQUEST['dg_action'];
+	$type = $_REQUEST['type'];
+	$value = $_REQUEST['value'];
+	$options = get_option('dg_product_variations');
+	$total = count($options) + 1;
+	if(!empty($action)){
+		if($action == 'delete'){
+			unset($options[$product_id][$variationid]);
+		}
+	}else{
+		if(empty($variationid)){
+			$options[$product_id][$total]['type'] = $type;
+			$options[$product_id][$total]['value'] = $value;
+		}else{
+			$options[$product_id][$variationid]['type'] = $type;
+			$options[$product_id][$variationid]['value'] = $value;
+			$total  = $variationid;
+		}
+	}
+	
+	update_option('dg_product_variations', $options);
+	
+	$html = '<tr id="dg_var_'.$total.'">
+					<td>'.$type.'</td>
+					<td>'.$value.'</td>
+					<td><a href="javascript:;" onclick="dukagate.del_variation(\''.$total.'\',\''.$product_id.'\')">Delete</a></td>
+				</tr>';
+	echo DukaGate::array_to_json(array('success' => 'true', 'html' => $html));
+	exit();
 }
 ?>

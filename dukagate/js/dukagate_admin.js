@@ -49,5 +49,24 @@ var dukagate = {
 		var request_aparms = "ajax=true&dg_order_export=export&id="+id;
 		window.location.href = dpsc_url+'/index.php?' + request_aparms;
 		return false;
+	},
+	
+	add_variation : function(id){
+		var var_prod = jQuery("#var_prod").val();
+		var var_type = jQuery("#var_type").val();
+		var var_val = jQuery("#var_val").val();
+		jQuery.ajax({
+			type: "POST",
+			url: userSettings.ajaxurl,
+			data: {'product' : var_prod, 'type' : var_type, 'value' : var_val, 'action' : 'dg_change_variation'},
+			success: function(response){
+				if(response.success == 'true')
+					jQuery('#'+id).prepend(unescape(response.html));
+			}
+		});
+	},
+	
+	del_variation : function(){
+	
 	}
 }

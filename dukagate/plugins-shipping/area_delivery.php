@@ -35,23 +35,14 @@ class DukaGate_Shipping_Area_Delivery extends DukaGate_Shipping_API{
 		if (@$_REQUEST['action'] === 'dg_sel_area_delivery') {
 			$this->select_rate_id();
 		}
-		
-		//Load scripts
-		add_action( 'init', array(&$this, 'load_js'));
+
 	}
 	
 	//Register Plugin
 	function register(){
 		dg_register_shipping_plugin('DukaGate_Shipping_Area_Delivery', $this->plugin_name, $this->plugin_slug, $this->shipping_info, true);
 	}
-	
-	//Load javascript
-	function load_js(){
-		if(is_admin()){
-			wp_enqueue_script('area_delivery_js', DG_SHIPPING_URL.'area_delivery/area_delivery.js', array('jquery'), '', false);
-			wp_enqueue_script("area_delivery_js");
-		}
-	}
+
 	
 	 /**
 	 * Echo anything you want to add to the top of the shipping screen
@@ -75,7 +66,7 @@ class DukaGate_Shipping_Area_Delivery extends DukaGate_Shipping_API{
 				$cnt .= '<tr>';
 				$cnt .= '<td>'.$o['area'].'</td>';
 				$cnt .= '<td>'.$o['rate'].'</td>';
-				$cnt .= '<td><input type="checkbox" name="shipping_rate_value[]" id="'.$option.'" value="'.$o['rate'].'" onclick="area_delivery_select(\''.$option.'\')" /></td>';
+				$cnt .= '<td><input type="radio" name="shipping_rate_value[]" id="'.$option.'" value="'.$o['rate'].'" onclick="area_delivery_select(\''.$option.'\')" /></td>';
 				$cnt .= '</tr>';
 			}
 		}
@@ -172,7 +163,7 @@ class DukaGate_Shipping_Area_Delivery extends DukaGate_Shipping_API{
 				</form>
 			</tr>
 		</table>
-		
+		<script type="text/javascript" src="<?php echo DG_SHIPPING_URL; ?>/area_delivery/area_delivery.js"></script>
 		<?php
 	}
 		
@@ -190,13 +181,15 @@ class DukaGate_Shipping_Area_Delivery extends DukaGate_Shipping_API{
 		}else{
 			$options[$id]['area'] = $area;
 			$options[$id]['rate'] = $rate;
+			$total = $id;
 		}
 		$dukagate->dg_save_shipping_info_only($this->plugin_slug, DukaGate::array_to_json($options));
-		$html = '<tr>
+		$html = '<tr id="del_'.$total.'">
 					<td>'.$area.'</td>
 					<td>'.$rate.'</td>
+					<td><a href="javascript:;" onclick="area_delivery.edit(\''.$total.'\', \''.$this->plugin_slug.'\')">Edit</a>&nbsp;&nbsp;<a href="javascript:;" onclick="area_delivery.del(\''.$total.'\')">Delete</a></td>
 				</tr>';
-		$html = str_replace(Array("\n", "\r"), Array("\\n", "\\r"), addslashes($html));
+		//$html = str_replace(Array("\n", "\r"), Array("\\n", "\\r"), addslashes($html));
 		header('Content-type: application/json; charset=utf-8');
 		echo DukaGate::array_to_json(array('success' => 'true', 'html' => $html));
 		exit();
