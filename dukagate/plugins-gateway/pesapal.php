@@ -263,6 +263,15 @@ class DukaGate_GateWay_PesaPal extends DukaGate_GateWay_API{
 		foreach ($dg_cart as $cart_items => $cart) {	
 			$amount += $cart['total'];
 		}
+		
+		$total_shipping = 0.00;
+		$dg_shipping = $_SESSION['dg_shipping_total'];
+		if(is_array($dg_shipping)){
+			foreach ($dg_shipping as $shipping) {
+				$total_shipping += $shipping;
+			}
+		}
+		$amount = $amount + $total_shipping;
 		if(isset($_SESSION['dg_discount_value'])){
 			$total_discount = $_SESSION['dg_discount_value'];
 			$total_discount = floatval(($total_discount * $amount)/100);

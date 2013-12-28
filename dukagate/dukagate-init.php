@@ -11,7 +11,7 @@ if(!class_exists('DukaGate')) {
 			$this->dukagate_db();
 			$this->set_up_plugin_info();
 			$this->set_up_directories_and_file_info();
-			update_option('dg_version_info', 3.47);
+			update_option('dg_version_info', 3.5);
 		}
 		
 		
@@ -226,39 +226,6 @@ if(!class_exists('DukaGate')) {
 					<td><?php _e('Affiliate URL:');?> :</td>
 					<td><input type="text" value="<?php echo $affiliate_url; ?>" name="affiliate_url" id="affiliate_url"></td>
 				</tr>
-			</table>
-			<h3><?php _e('Product Variations:');?></h3>
-			<table width="100%">
-				<input type="hidden" value="<?php echo $post_id; ?>" name="var_prod" id="var_prod">
-				<tr>
-					<td><?php _e('Type:');?> :</td>
-					<td><input type="text" value="" name="var_type" id="var_type"></td>
-				</tr>
-				<tr>
-					<td><?php _e('Value:');?> :</td>
-					<td><input type="text" value="" name="var_val" id="var_val"></td>
-				</tr>
-				<tr>
-					<td colspan="2"><span onclick="dukagate.add_variation('dg_prod_variations');" style="cursor:pointer">Add</span></td>
-				</tr>
-			</table>
-			<table width="100%" id="dg_prod_variations">
-				<?php
-					if(is_array($dg_variations)){
-						$dg_prod_variations = $dg_variations[$post_id];
-						if(is_array($dg_prod_variations)){
-							foreach ($dg_prod_variations as $dg_prod_variation => $dg_prod_var) {
-								?>
-								<tr id="dg_var_<?php echo $dg_prod_variation; ?>">
-									<td><?php echo  $dg_prod_var['type']; ?></td>
-									<td><?php echo  $dg_prod_var['value']; ?></td>
-									<td><a href="javascript:;" onclick="dukagate.del_variation('<?php echo $dg_prod_variation; ?>','<?php echo $post_id; ?>')">Delete</a></td>
-								</tr>
-								<?php
-							}
-						}
-					}
-				?>
 			</table>
 			<?php
 		}

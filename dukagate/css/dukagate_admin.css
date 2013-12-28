@@ -29,6 +29,7 @@
 
 .dg_instructions{
 	float:right;
+	margin-right:5px;
 }
 
 .dg_gateway_options{
@@ -90,4 +91,14 @@ button{
 .csv_export{
 	width:100%;
 	clear:both;
+}
+
+.paymentwrap{
+	background-color:#ffffff;
+}
+.paymentwrap .title{
+	margin-left:24px;
+}
+.paymentwrap .button-primary{
+	margin-left:5px;
 }

@@ -78,7 +78,7 @@ function dg_dukagate_order_log(){
 				</tbody>
 			</table>
 		<?php } else{
-			__("No Records found");
+			_e("No Orders found.");
 		}?>
 	</div>
 	<?php
@@ -533,7 +533,7 @@ function dg_dukagate_checkout(){
 					</tbody>
 				</table>
 				<p class="submit">
-					<input class='button-primary' type='submit' name='dg_checkout_settings' value='<?php _e('Save Options'); ?>'/>
+					<input class='button button-primary' type='submit' name='dg_checkout_settings' value='<?php _e('Save Options'); ?>'/>
 				</p>
 			</div>
 		</form>
@@ -547,8 +547,8 @@ function dg_dukagate_mail(){
 	$dukagate_mails = $dukagate_mail->list_mails();
 	$mail_types = DukaGate_Mail::mail_types();
 	?>
-	<div class="wrap">
-		<h2><?php _e("Dukagate Mail Settings"); ?></h2>
+	<div class="wrap paymentwrap">
+		<h2 class="title"><?php _e("Dukagate Mail Settings"); ?></h2>
 		<div id="dg_mail_settings">
 			<?php
 			if (is_array($dukagate_mails) && count($dukagate_mails) > 0) {
@@ -614,7 +614,7 @@ function dg_dukagate_mail(){
 									</tr>
 								</table>
 							<p>
-								<input type="submit" name="save_email_settings" value="<?php _e("Update "); ?> <?php _e($mail_types[$dukagate_mail->type]); ?>" />
+								<input type="submit" class="button button-primary" name="save_email_settings" value="<?php _e("Update "); ?> <?php _e($mail_types[$dukagate_mail->type]); ?>" />
 							</p>
 							</form>
 						</div>
@@ -716,23 +716,23 @@ function dg_dukagate_settings(){
 					<tbody>
 						<tr valign="top">
 							<th scope="row"><label for="shopname"><?php _e("Name of shop"); ?>: </label></th>
-							<td><input id="shopname" name="shopname" class="regular-text" value="<?php echo $dg_shop_settings['shopname']; ?>" /></td>
+							<td><input id="shopname" name="shopname" type="text" class="regular-text" value="<?php echo $dg_shop_settings['shopname']; ?>" /></td>
 						</tr>
 						<tr valign="top">
 							<th scope="row"><label for="address"><?php _e("Address"); ?>: </label></th>
-							<td><input id="address" name="address" value="<?php echo $dg_shop_settings['address']; ?>" class="regular-text" /></td>
+							<td><input id="address" name="address" type="text" value="<?php echo $dg_shop_settings['address']; ?>" class="regular-text" /></td>
 						</tr>
 						<tr valign="top">
 							<th scope="row"><label for="state_province"><?php _e("State / Province"); ?>: </label></th>
-							<td><input id="state_province" name="state_province" value="<?php echo $dg_shop_settings['state_province']; ?>" class="regular-text" /></td>
+							<td><input id="state_province" type="text" name="state_province" value="<?php echo $dg_shop_settings['state_province']; ?>" class="regular-text" /></td>
 						</tr>
 						<tr valign="top">
 							<th scope="row"><label for="postal"><?php _e("Postal Code"); ?>: </label></th>
-							<td><input id="postal" name="postal" value="<?php echo $dg_shop_settings['postal']; ?>" class="regular-text" /></td>
+							<td><input id="postal" name="postal" type="text" value="<?php echo $dg_shop_settings['postal']; ?>" class="regular-text" /></td>
 						</tr>
 						<tr valign="top">
 							<th scope="row"><label for="city"><?php _e("City / Town"); ?>: </label></th>
-							<td><input id="city" name="city" value="<?php echo $dg_shop_settings['city']; ?>" class="regular-text" /></td>
+							<td><input id="city" name="city" type="text" value="<?php echo $dg_shop_settings['city']; ?>" class="regular-text" /></td>
 						</tr>
 						<tr valign="top">
 							<th scope="row"><label for="country"><?php _e("Country "); ?>: </label></th>
@@ -766,7 +766,7 @@ function dg_dukagate_settings(){
 						</tr>
 						<tr valign="top">
 							<th scope="row"><label for="currency_symbol"><?php _e("Currency Symbol"); ?>: </label></th>
-							<td><input id="currency_symbol" name="currency_symbol" value="<?php echo $dg_shop_settings['currency_symbol']; ?>" class="regular-text" /></td>
+							<td><input id="currency_symbol" type="text" name="currency_symbol" value="<?php echo $dg_shop_settings['currency_symbol']; ?>" class="regular-text" /></td>
 						</tr>
 						<tr valign="top">
 							<th scope="row"><label for="checkout_page"><?php _e("Checkout Page"); ?>: </label></th>
@@ -823,7 +823,7 @@ function dg_dukagate_settings(){
 					</tbody>
 				</table>
 				<p class="submit">
-					<input class='button-primary' type='submit' name='dg_settings' value='<?php _e('Save Options'); ?>' id='submitbutton' />
+					<input class='button button-primary' type='submit' name='dg_settings' value='<?php _e('Save Options'); ?>' id='submitbutton' />
 				</p>
 			</form>
 		</div>
@@ -893,7 +893,7 @@ function dg_dukagate_advanced_settings(){
 							<th scope="row">
 								<label for="max_quantity"><?php _e("Maximum product in cart"); ?> <em>(<?php _e("defaults to 30"); ?>)</em>: </label>
 							</th>
-							<td><input id="max_quantity" name="max_quantity" value="<?php echo $dg_shop_settings['max_quantity']; ?>" /></td></td>
+							<td><input id="max_quantity" type="text" name="max_quantity" value="<?php echo $dg_shop_settings['max_quantity']; ?>" /></td></td>
 						</tr>
 						<tr valign="top">
 							<th scope="row"><label for="products_page"><?php _e("Grouped Products Page"); ?>: </label></th>
@@ -947,15 +947,15 @@ function dg_dukagate_advanced_settings(){
 						</tr>
 						<tr valign="top">
 							<th scope="row"><label for="checkout_prod_image_url"><?php _e("Checkout Product Image URL"); ?>: </label></th>
-							<td><input id="checkout_prod_image_url" name="checkout_prod_image_url" value="<?php echo @$dg_shop_settings['checkout_prod_image_url']; ?>" class="regular-text" /></td>
+							<td><input id="checkout_prod_image_url" type="text" name="checkout_prod_image_url" value="<?php echo @$dg_shop_settings['checkout_prod_image_url']; ?>" class="regular-text" /></td>
 						</tr>
 						<tr valign="top">
 							<th scope="row"><label for="checkout_prod_image_width"><?php _e("Checkout Product Image Width"); ?>: </label></th>
-							<td><input id="checkout_prod_image_width" name="checkout_prod_image_width" value="<?php echo @$dg_shop_settings['checkout_prod_image_width']; ?>" class="regular-text" /></td>
+							<td><input id="checkout_prod_image_width" type="text" name="checkout_prod_image_width" value="<?php echo @$dg_shop_settings['checkout_prod_image_width']; ?>" class="regular-text" /></td>
 						</tr>
 						<tr valign="top">
 							<th scope="row"><label for="checkout_prod_image_height"><?php _e("Checkout Product Image Height"); ?>: </label></th>
-							<td><input id="checkout_prod_image_height" name="checkout_prod_image_height" value="<?php echo @$dg_shop_settings['checkout_prod_image_height']; ?>" class="regular-text" /></td>
+							<td><input id="checkout_prod_image_height" type="text" name="checkout_prod_image_height" value="<?php echo @$dg_shop_settings['checkout_prod_image_height']; ?>" class="regular-text" /></td>
 						</tr>
 						<tr valign="top">
 							<th scope="row"><label for="checkout_gateway_image"><?php _e("Display Checkout Payment Gateway Image (Not Yet Implemented)"); ?> (<em><?php _e("shows payment gateway image on checkout page instead of text"); ?></em>): </label></th>
