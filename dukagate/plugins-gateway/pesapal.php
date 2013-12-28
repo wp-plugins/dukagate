@@ -41,7 +41,8 @@ class DukaGate_GateWay_PesaPal extends DukaGate_GateWay_API{
 		$this->required_fields = array(
 										'customer_key' => '',
 										'customer_secret' => '',
-										'sandbox' => '');
+										'sandbox' => '',
+										'custom_name' => '');
 						
 		//Set Pesapal transaction ID field
 		$this->add_column();
@@ -91,7 +92,7 @@ class DukaGate_GateWay_PesaPal extends DukaGate_GateWay_API{
 		}
 		$this->ipn_request($transaction_tracking_id , $payment_notification, $invoice, $consumer_key, $consumer_secret,$statusrequestAPI);
 		
-		$return_path = get_page_link($dp_shopping_cart_settings['thankyou_page']);
+		$return_path = get_page_link($dg_shop_settings['thankyou_page']);
 		$check_return_path = explode('?', $return_path);
 		if (count($check_return_path) > 1) {
 			$return_path .= '&id=' . $invoice;
@@ -171,7 +172,9 @@ class DukaGate_GateWay_PesaPal extends DukaGate_GateWay_API{
 			$required_fields = array(
 									'customer_key' => '',
 									'customer_secret' => '',
-									'sandbox' => '');
+									'sandbox' => '',
+									'custom_name' => '');
+			$required_fields['custom_name'] = $_POST[$plugin_slug.'_custom_name'];
 			$required_fields['customer_key'] = $_POST[$plugin_slug.'_customer_key'];
 			$required_fields['customer_secret'] = $_POST[$plugin_slug.'_customer_secret'];
 			$required_fields['sandbox'] = $_POST[$plugin_slug.'_sandbox'];
@@ -197,6 +200,11 @@ class DukaGate_GateWay_PesaPal extends DukaGate_GateWay_API{
 				<tr>
 				    <th scope="row"><?php _e('PesaPal Merchant Credentials'); ?></th>
 				    <td>
+						<p>
+							<label><?php _e('Custom Checkout Name'); ?><br />
+							  <input value="<?php echo $options['custom_name']; ?>" size="30" name="<?php echo $plugin_slug; ?>_custom_name" type="text" />
+							</label>
+						</p>
 						<p>
 							<label><?php _e('Use PesaPal Sandbox'); ?><br />
 							  <input value="checked" name="<?php echo $plugin_slug; ?>_sandbox" type="checkbox" <?php echo ($options['sandbox'] == 'checked') ? "checked='checked'": ""; ?> />
@@ -255,6 +263,15 @@ class DukaGate_GateWay_PesaPal extends DukaGate_GateWay_API{
 		foreach ($dg_cart as $cart_items => $cart) {	
 			$amount += $cart['total'];
 		}
+		
+		$total_shipping = 0.00;
+		$dg_shipping = $_SESSION['dg_shipping_total'];
+		if(is_array($dg_shipping)){
+			foreach ($dg_shipping as $shipping) {
+				$total_shipping += $shipping;
+			}
+		}
+		$amount = $amount + $total_shipping;
 		if(isset($_SESSION['dg_discount_value'])){
 			$total_discount = $_SESSION['dg_discount_value'];
 			$total_discount = floatval(($total_discount * $amount)/100);

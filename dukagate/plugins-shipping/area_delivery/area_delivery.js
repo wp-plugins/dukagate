@@ -11,7 +11,7 @@ var area_delivery = {
 				success: function(response){
 					if(response.success == 'true'){
 						if(i == "" || i == " "){
-							jQuery('#'+target).prepend(response.html);
+							jQuery('#'+target).prepend(unescape(response.html));
 						}
 						else{
 							jQuery('#area_'+i).html(a);

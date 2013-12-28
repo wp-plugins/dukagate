@@ -118,7 +118,7 @@ class DukaGate_GateWay_PayPal extends DukaGate_GateWay_API{
 			}
 			$dukagate->dg_update_order_log($invoice, $updated_status);
 			
-			$return_path = get_page_link($dp_shopping_cart_settings['thankyou_page']);
+			$return_path = get_page_link($dg_shop_settings['thankyou_page']);
 			$check_return_path = explode('?', $return_path);
 			if (count($check_return_path) > 1) {
 				$return_path .= '&id=' . $invoice;
@@ -246,7 +246,14 @@ class DukaGate_GateWay_PayPal extends DukaGate_GateWay_API{
 					 
 		$count_product = 1;
         $tax_rate = 0;
-        $shipping_total = 0.00;
+		$total_shipping = 0.00;
+		$dg_shipping = $_SESSION['dg_shipping_total'];
+		if(is_array($dg_shipping)){
+			foreach ($dg_shipping as $shipping) {
+				$total_shipping += $shipping;
+			}
+		}
+		$amount = $amount + $total_shipping;
 		foreach ($dg_cart as $cart_items => $cart) {
 			$output .= '<input type="hidden" name="item_name_' . $count_product . '" value="' . $cart['product']. '"/>
                              <input type="hidden" name="amount_' . $count_product . '" value="' . number_format($conversion_rate * $cart['price'], 2) . '"/>
@@ -263,7 +270,7 @@ class DukaGate_GateWay_PayPal extends DukaGate_GateWay_API{
 			}			
 			$count_product++;
 		}
-		$output .= '<input type="hidden" name="handling_cart" value="' . number_format($shipping_total, 2) . '"/></form>';
+		$output .= '<input type="hidden" name="handling_cart" value="' . number_format($total_shipping, 2) . '"/></form>';
 		return $output;
 	}
 }

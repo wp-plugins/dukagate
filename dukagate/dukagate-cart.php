@@ -291,6 +291,36 @@ function dg_cart_min($echo = 'false'){
 		return $cnt;
 }
 
+//Mini cart to just show total
+function dg_mini_cart($echo = 'false', $imgurl = 'false'){
+	$dg_shop_settings = get_option('dukagate_shop_settings');
+	$cnt = '<div class="dg_mini_cart_container">';
+	$dg_cart = '';
+	$total = 0;
+	if(isset($_SESSION['dg_cart']) && !empty($_SESSION['dg_cart'])) {
+		$dg_cart = $_SESSION['dg_cart'];
+	}
+	if (is_array($dg_cart)) {
+		$total = count($dg_cart);
+	}
+	$url = get_page_link($dg_shop_settings['checkout_page']);
+	$cnt .= '<table>';
+	$cnt .= '<tr>';
+	$cnt .= '<td>';
+	$cnt .= '<img src="'.$imgurl.'" />';
+	$cnt .= '</td>';
+	$cnt .= '<td>';
+	$cnt .= '<a href="'.$url.'" class="go_checkout"><span id="mini_cart_total">'.$total.'</span> items in cart. '.__("Checkout").'</a>';
+	$cnt .= '</td>';
+	$cnt .= '</tr>';
+	$cnt .= '</table>';
+	$cnt .= '</div>';
+	if($echo == 'true')
+		echo $cnt;
+	else
+		return $cnt;
+}
+
 add_action( 'wp_ajax_nopriv_shipping_submit', 'dg_shipping_submit');
 add_action( 'wp_ajax_shipping_submit', 'dg_shipping_submit');
 
@@ -405,10 +435,12 @@ function dg_update_cart(){
 		if($dg_shop_settings['up_selling_page_checkout'] == 'true')
 			$url = get_page_link($dg_shop_settings['up_selling_page']);
 	}
+	$html = dg_cart_min();
 	header('Content-type: application/json; charset=utf-8');
-	echo DukaGate::array_to_json(array('url' => $url, 'success' => 'true'));
+	echo DukaGate::array_to_json(array('url' => $url, 'success' => 'true', 'total' => count($dg_cart), 'html' => $html));
 	exit();
 }
+
 
 //Empty cart
 add_action( 'wp_ajax_nopriv_dg_empty_cart', 'dg_empty_cart');
