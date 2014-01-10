@@ -5,7 +5,7 @@ Tags: shopping cart, web shop, cart, shop,Paypal,paypal,Pesapal, e-commerce, eco
 
 Requires at least: 3.0
 Tested up to: 3.8
-Stable tag: 3.5
+Stable tag: 3.5.2.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -68,6 +68,16 @@ We test Dukagate on a large number of different server set-ups and envrionments 
 8. Sample product with a widget product
 
 == Changelog ==
+
+= 3.5.2.1 =
+Ajax javascript for product was missing
+
+= 3.5.2 =
+* Accidentally removed price. Added it back
+* Added shortcode for product page [dg_display_product]
+
+= 3.5.1 =
+Fixed issue of product images not loading sometimes
 
 = 3.5 =
 * Fixed issue where shipping price was not being carried to the payment gateway
