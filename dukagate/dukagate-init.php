@@ -1761,6 +1761,26 @@ if(!class_exists('DukaGate')) {
 		}
 		
 		/**
+		 * Get produt image
+		 */
+		function product_image($productid){
+			$main_image = '';
+			$main_images = wp_get_attachment_image_src( get_post_thumbnail_id( $productid ), 'single-post-thumbnail' );
+			if(is_array($main_images))
+				$main_image =  $main_images[0];
+			if (empty($main_image)){
+				$attachment_images = '';
+				$attachment_images = &get_children('post_type=attachment&post_status=inherit&post_mime_type=image&post_parent=' . $productid);
+				$price = get_post_meta($product->ID, 'price', true);
+                foreach ($attachment_images as $image) {
+                    $main_image = $image->guid;
+                    break;
+                }
+			}
+			return $main_image;
+		}
+		
+		/**
 		 * Resize image
 		 */
 		function resize_image($attach_id = null, $img_url = null, $width, $height, $crop = true){
