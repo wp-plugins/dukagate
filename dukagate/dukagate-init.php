@@ -11,7 +11,7 @@ if(!class_exists('DukaGate')) {
 			$this->dukagate_db();
 			$this->set_up_plugin_info();
 			$this->set_up_directories_and_file_info();
-			update_option('dg_version_info', 3.5);
+			update_option('dg_version_info', 3.47);
 		}
 		
 		
@@ -40,8 +40,8 @@ if(!class_exists('DukaGate')) {
 			add_action('delete_grouped_product', array(&$this,'delete_grouped_product_metadata'), 10, 1);
 			add_action( 'save_post', array(&$this,'product_meta_save'));
 			add_action( 'edit_post', array(&$this,'add_quick_edit_save'), 10, 3);
-			add_action( 'init', array(&$this, 'set_up_styles'));
-			add_action( 'init', array(&$this, 'set_up_js'));
+			add_action( 'wp_enqueue_scripts', array(&$this, 'set_up_styles'));
+			add_action( 'wp_enqueue_scripts', array(&$this, 'set_up_js'));
 			add_action( 'init', array(&$this, 'load_dukagate_plugins'));
 			
 			add_filter('manage_dg_product_posts_columns', array(&$this,'create_post_column'));
@@ -227,6 +227,7 @@ if(!class_exists('DukaGate')) {
 					<td><input type="text" value="<?php echo $affiliate_url; ?>" name="affiliate_url" id="affiliate_url"></td>
 				</tr>
 			</table>
+			
 			<?php
 		}
 		
@@ -1757,6 +1758,26 @@ if(!class_exists('DukaGate')) {
 			$cnt .= '<input type="hidden" name="action" value="dg_process_cart" />';
 			
 			return $cnt;
+		}
+		
+		/**
+		 * Get produt image
+		 */
+		function product_image($productid){
+			$main_image = '';
+			$main_images = wp_get_attachment_image_src( get_post_thumbnail_id( $productid ), 'single-post-thumbnail' );
+			if(is_array($main_images))
+				$main_image =  $main_images[0];
+			if (empty($main_image)){
+				$attachment_images = '';
+				$attachment_images = &get_children('post_type=attachment&post_status=inherit&post_mime_type=image&post_parent=' . $productid);
+				$price = get_post_meta($product->ID, 'price', true);
+                foreach ($attachment_images as $image) {
+                    $main_image = $image->guid;
+                    break;
+                }
+			}
+			return $main_image;
 		}
 		
 		/**

@@ -140,14 +140,7 @@ class DukaGate_Products{
 			$dg_advanced_shop_settings = get_option('dukagate_advanced_shop_settings');
 			$attachment_images = '';
 			foreach ($products as $product) {
-				$attachment_images = '';
-				$attachment_images = &get_children('post_type=attachment&post_status=inherit&post_mime_type=image&post_parent=' . $product->ID);
-                $main_image = '';
-				$price = get_post_meta($product->ID, 'price', true);
-                foreach ($attachment_images as $image) {
-                    $main_image = $image->guid;
-                    break;
-                }
+				$main_image = $dukagate->product_image($product->ID);
 				$prod_permalink = get_permalink($product->ID);
 				if($productlink == 'false'){
 					$prod_permalink= 'javascript:;';
@@ -322,14 +315,10 @@ class DukaGate_Products{
 		$content = '';
 		$dg_shop_settings = get_option('dukagate_shop_settings');
 		$dg_advanced_shop_settings = get_option('dukagate_advanced_shop_settings');
-		$attachment_images = &get_children('post_type=attachment&post_status=inherit&post_mime_type=image&post_parent=' . $product->ID);
-		$main_image = '';
 		$price  = get_post_meta($product->ID, 'price', true);
 		$fixed_price  = get_post_meta($product->ID, 'fixed_price', true);
-		foreach ($attachment_images as $image) {
-			$main_image = $image->guid;
-			break;
-		}
+		$main_image = $dukagate->product_image($product->ID);
+		
 		$fixed_price  = get_post_meta($product->ID, 'fixed_price', true);
 		$prod_permalink = get_permalink($product->ID);
 		$style= 'style="width:'.$dg_width.'px;"';
