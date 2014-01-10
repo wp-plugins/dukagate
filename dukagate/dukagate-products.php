@@ -160,6 +160,7 @@ class DukaGate_Products{
 					$content .= '<a href="' . $prod_permalink . '" title="' . $product->post_title . '"><img src="' . $dukagate->resize_image('', $main_image, $prod_width, $prod_height).'" ></a>';
 					$content .= '</div>';
 				}
+				$price  = get_post_meta($product->ID, 'price', true);
 				$content .= '<div class="dg_prod_info">';
 				$content .= '<p class="title"><a href="' . $prod_permalink . '" title="' . $product->post_title . '">' . __($product->post_title) . '</a></p>';
 				$content .= '<p class="detail">' . $product->post_excerpt . '</p>';
@@ -299,6 +300,37 @@ class DukaGate_Products{
 			} 
 		}
 		
+		return $content;
+	}
+	
+	/**
+	 * Product Details
+	 * Shows price and add to cart button
+	 */
+	static function product_details($id){
+		global $dukagate;
+		$content = '';
+		$product = get_page($id);
+		$main_image = $dukagate->product_image($product->ID);
+		if (empty($main_image)) {
+			$main_image = DG_DUKAGATE_URL.'/images/no.jpg';
+		}
+		$dg_shop_settings = get_option('dukagate_shop_settings');
+		$price  = get_post_meta($product->ID, 'price', true);
+		$content .= '<div class="dg_prod_info">';
+		$content .= '<p class="price">' .__("Price").': '. $dg_shop_settings['currency_symbol'].' '.$price . '</p>';
+		$content .= '<div class="button">';
+		$content .= '<form method="POST" action="" id="dg_prod_'.$product->ID.'">';
+		$content .= '<input type="hidden" name="action" value="dg_update_cart">';
+		$content .= '<input type="hidden" name="product_id" value="'.$product->ID.'">';
+		$content .= '<input type="hidden" name="quantity" id="dg_quantity_'.$product->ID.'" value="">';
+		$content .= '<input type="hidden" name="price" value="'.$price.'">';
+		$content .= '<input type="hidden" name="product" value="'.$product->post_title.'">';
+		$content .= '<input type="hidden" name="product_image" value="'.$main_image.'">';
+		$content .= '<input type="submit" value="'.__('Add To Cart').'" class="dg_make_payment"/>';
+		$content .= '</form>';
+		$content .= '</div>';
+		$content .= '</div>';
 		return $content;
 	}
 	
