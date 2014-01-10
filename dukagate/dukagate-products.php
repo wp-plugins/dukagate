@@ -331,6 +331,11 @@ class DukaGate_Products{
 		$content .= '</form>';
 		$content .= '</div>';
 		$content .= '</div>';
+		$content .= '<script type="text/javascript">';
+		$content .= 'jQuery(document).ready(function(){';
+		$content .= 'dukagate.update_cart("dg_prod_'.$product->ID.'", "'.$ajax_cart.'");';
+		$content .= '});';
+		$content .= '</script>';
 		return $content;
 	}
 	
