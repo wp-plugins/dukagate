@@ -40,13 +40,14 @@ if(!isset($dukagate)){
 	$dukagate = new DukaGate();
 }
 
+$dukagate->init();
+
 //Set up File action
 add_action('dg_daily_file_event', array($dukagate, 'delete_files_daily'));
 
 
 
 
-register_activation_hook(__FILE__,array($dukagate,'init'));
 register_deactivation_hook(__FILE__,array($dukagate,'destroy'));
 
 $dukagate->set_up_directories_and_file_info();

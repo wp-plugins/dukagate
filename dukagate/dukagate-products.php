@@ -148,6 +148,10 @@ class DukaGate_Products{
                     $main_image = $image->guid;
                     break;
                 }
+				if (empty($main_image)){
+					$main_image = wp_get_attachment_image_src( get_post_thumbnail_id( $product->ID ), 'single-post-thumbnail' );
+					$main_image =  $main_image[0];
+				}
 				$prod_permalink = get_permalink($product->ID);
 				if($productlink == 'false'){
 					$prod_permalink= 'javascript:;';
@@ -329,6 +333,10 @@ class DukaGate_Products{
 		foreach ($attachment_images as $image) {
 			$main_image = $image->guid;
 			break;
+		}
+		if (empty($main_image)){
+			$main_image = wp_get_attachment_image_src( get_post_thumbnail_id( $product->ID ), 'single-post-thumbnail' );
+			$main_image =  $main_image[0];
 		}
 		$fixed_price  = get_post_meta($product->ID, 'fixed_price', true);
 		$prod_permalink = get_permalink($product->ID);
