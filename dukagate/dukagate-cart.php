@@ -391,12 +391,15 @@ function dg_update_cart(){
 	
 	$prod = @$dg_cart[$dg_product_id];
 	if(!empty($prod)){
-		if(!empty($dg_product_quantity)){
+		/*if(!empty($dg_product_quantity)){
 			$prod['quantity'] = $dg_product_quantity;
 		}else{
 			if($dg_product_quantity > 0){
 				$prod['quantity'] = intval($prod['quantity']) + 1;
 			}
+		}*/
+		if($dg_product_quantity > 0){
+			$prod['quantity'] = intval($prod['quantity']) + 1;
 		}
 		$total = (floatval($prod['price']) * intval($prod['quantity']));
 		$prod['total'] = $total; 

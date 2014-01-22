@@ -15,6 +15,7 @@ function dg_create_admin_menu(){
 	add_submenu_page('dukagate-order-log', __('DukaGate Shipping Options'), __('Shipping Options'), 'edit_others_posts', 'dukagate-shipping-options', 'dg_dukagate_shipping');
 	add_submenu_page('dukagate-order-log', __('DukaGate CheckOut Settings'), __('Check Out Settings'), 'edit_others_posts', 'dukagate-checkout-options', 'dg_dukagate_checkout');
 	add_submenu_page('dukagate-order-log', __('DukaGate Mail Settings'), __('Mail Settings'), 'edit_others_posts', 'dukagate-mail-options', 'dg_dukagate_mail');
+	add_submenu_page('dukagate-order-log', __('DukaGate Discount Settings'), __('Discounts'), 'edit_others_posts', 'dukagate-discounts', 'dg_dukagate_discounts');
 	add_submenu_page('dukagate-order-log', __('DukaGate Settings'), __('Settings'), 'edit_others_posts', 'dukagate-settings', 'dg_dukagate_settings');
 	add_submenu_page('dukagate-order-log', __('DukaGate Advanced Settings'), __('Advanced Settings'), 'edit_others_posts', 'dukagate-advanced-settings', 'dg_dukagate_advanced_settings');
 	
@@ -999,6 +1000,210 @@ function dg_dukagate_advanced_settings(){
 	<?php
 }
 
+
+/**
+ * Discount Management
+ */
+function dg_dukagate_discounts(){
+	global $dukagate_disc;
+	if(isset($_REQUEST['act'])){
+		if(isset($_REQUEST['edit'])){
+			dg_disc_view($id);
+		}else{
+			if($_REQUEST['act'] == 'new'){
+				dg_disc_add();
+			}
+		}
+		
+	}else{
+		if(isset($_REQUEST['action'])){
+			if($_REQUEST['action'] == 'del'){
+				$dukagate_disc->delete_discount($_REQUEST['id']);
+			}
+		}
+		$form_url = admin_url("admin.php?page=dukagate-discounts&act=new");
+		$del_url = admin_url("admin.php?page=dukagate-discounts");
+		$discounts = $dukagate_disc->list_discounts();
+		$content = '<div class="wrap">';
+		$content .= '<h2>Dukagate Discounts</div></h2>';
+		$content .= '<a class="button-primary" href="'.$form_url.'" title="Add">Add New</a><br/><br/><br/>';
+		if (is_array($discounts) && count($discounts) > 0) {
+			$count = 1;
+			$content .= '<table class="widefat">';
+			$content .= '<thead>';
+			$content .= '<tr>';
+			$content .= '<th>Number</th>';
+			$content .= '<th>Code</th>';
+			$content .= '<th>Amount</th>';
+			$content .= '<th>Type</th>';
+			$content .= '<th>Valid</th>';
+			$content .= '<th>Date Created</th>';
+			$content .= '<th>Actions</th>';
+			$content .= '</tr>';
+			$content .= '</thead>';
+			$content .= '<tfoot>';
+			$content .= '<tr>';
+			$content .= '<th>Number</th>';
+			$content .= '<th>Code</th>';
+			$content .= '<th>Amount</th>';
+			$content .= '<th>Type</th>';
+			$content .= '<th>Valid</th>';
+			$content .= '<th>Date Created</th>';
+			$content .= '<th>Actions</th>';
+			$content .= '</tr>';
+			$content .= '</tfoot>';
+			foreach ($discounts as $discount) {
+				$valid = $discount->valid;
+				if($valid == 0 || $valid = '0'){
+					$valid = 'Valid';
+				}else{
+					$valid = 'Expired';
+				}
+				$content .= '<tbody>';
+				$content .= '<tr>';
+				$content .= '<td>'.$count.'</td>';
+				$content .= '<td>'.$discount->code.'</td>';
+				$content .= '<td>'.$discount->amount.'</td>';
+				$content .= '<td>'.Dukapress_Discounts::get_type($discount->type).'</td>';
+				$content .= '<td>'.$valid.'</td>';
+				$content .= '<td>'.$discount->timestamp.'</td>';
+				$content .= '<td>';
+				$content .= '<a href="'.$form_url.'&edit=true&id='.$discount->id.'" title="Edit">Edit</a> <a href="'.$del_url.'&action=del&id='.$discount->id.'" title="Delete">Delete</a>';
+				$content .= '</td>';
+				$content .= '<tr>';
+				$content .= '</tbody>';
+				$count++;
+			}
+			$content .= '</table>';
+		}else{
+			$content .= '<h4>No Discounts found</h4>';
+		}
+		
+		$content .= '</div>';
+		echo $content;
+	}
+}
+
+
+/**
+ * New discount
+ */
+function dg_disc_add(){
+	global $dukagate_disc;
+	if(isset($_REQUEST['disc_action'])){
+		$dukagate_disc->save_discount($_REQUEST);
+	}
+	?>
+	<div class="wrap">
+		<h2><div class="dp_disc_hd"><div class="dp_dics_img" id="dp_disc_hd_img">&nbsp;</div>New Discount</div></h2>
+		Items marked with <span class="req"> *</span> are required
+		<form method="POST" action="">
+			<ul>
+				<li>
+					<table width="100%" border="0" class="widefat">
+					  <tr>
+						<th width="22%" align="left" scope="row">Amount <span class="req"> *</span></th>
+						<td width="28%"><input type="text" maxlength="45" size="10" name="disc_amount"  /></td>
+						<td width="50%">(Discount amount)</td>
+					  </tr>
+					  <tr>
+						<th align="left" scope="row">Code</th>
+						<td><input type="text" name="disc_code"  value="<?php echo $discount->code; ?>"/> </td>
+						<td>(Optional discount code. If left blank it will be generated)</td>
+					  </tr>
+					  <tr>
+						<th align="left" scope="row">Type <span class="req"> *</span></th>
+						<td>
+							<select name="disc_type" >
+								<option value="" >--Select Type--</option>
+								<?php
+									$types = Dukapress_Discounts::discount_types();
+									foreach ($types as $type => $t) {
+										?>
+										<option value="<?php echo $type; ?>" ><?php echo $t; ?></option>
+										<?php
+									}
+								?>
+							</select>
+						</td>
+						<td>(Discount type, can be a percentage or a fixed value)</td>
+					  </tr>
+					  <tr>
+						<th align="left" scope="row">&nbsp;</th>
+						<td><input type='submit' value='<?php _e("Save"); ?>' class='button-secondary' name="disc_action" /></td>
+						<td>&nbsp;</td>
+					  </tr>
+					</table>
+				</li> 
+			</ul>
+		</form>
+	</div>
+	<?php
+}
+
+
+/**
+ * view discount
+ */
+function dg_disc_view($id){
+	global $dukagate_disc;
+	if(isset($_REQUEST['disc_action_update'])){
+		$dukagate_disc->update_discount($_REQUEST);
+	}
+	$discount = $dukagate_disc->get_discount($id);
+	?>
+	<div class="wrap">
+		<h2>Edit <?php echo $discount->code; ?></h2>
+		Items marked with <span class="req"> *</span> are required
+		<form method="POST" action="">
+			<input type="hidden" name="disc_id" value="<?php echo $discount->id; ?>" />
+			<ul>
+				<li>
+					<table width="100%" border="0" class="widefat">
+					  <tr>
+						<th width="22%" align="left" scope="row">Amount <span class="req"> *</span></th>
+						<td width="28%"><input type="text" maxlength="45" size="10" name="disc_amount"  value="<?php echo $discount->amount; ?>"/></td>
+						<td width="50%">(Discount amount)</td>
+					  </tr>
+					  <tr>
+						<th align="left" scope="row">Code</th>
+						<td><input type="text" name="disc_code"  value="<?php echo $discount->code; ?>"/> </td>
+						<td>(Optional discount code. If left blank it will be generated)</td>
+					  </tr>
+					  <tr>
+						<th align="left" scope="row">Type <span class="req"> *</span></th>
+						<td>
+							<select name="disc_type" >
+								<option value="" >--Select Type--</option>
+								<?php
+									$types = Dukapress_Discounts::discount_types();
+									
+									foreach ($types as $type => $t) {
+										$selected = '';
+										if(intval($type) == intval($discount->type)){
+											$selected = 'selected="selected"';
+										}
+										?>
+										<option value="<?php echo $type; ?>" <?php echo $selected; ?> ><?php echo $t; ?></option>
+										<?php
+									}
+								?>
+							</select>
+						</td>
+						<td>(Discount type, can be a percentage or a fixed value)</td>
+					  </tr>
+					  <tr>
+						<th align="left" scope="row">&nbsp;</th>
+						<td><input type='submit' value='<?php _e("Update"); ?>' class='button-secondary' name="disc_action_update" /></td>
+						<td>&nbsp;</td>
+					  </tr>
+					</table>
+				</li> 
+			</ul>
+		</form>
+	</div>
+	<?php
+}
 
 //Save or delete variation of product
 if (@$_REQUEST['action'] === 'dg_change_variation') {

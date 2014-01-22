@@ -183,7 +183,7 @@ class DukaGate_Products{
 					$content .= '<form method="POST" action="" id="dg_prod_'.$product->ID.'">';
 					$content .= '<input type="hidden" name="action" value="dg_update_cart">';
 					$content .= '<input type="hidden" name="product_id" value="'.$product->ID.'">';
-					$content .= '<input type="hidden" name="quantity" id="dg_quantity_'.$product->ID.'" value="">';
+					$content .= '<input type="hidden" name="quantity" id="dg_quantity_'.$product->ID.'" value="1">';
 					$content .= '<input type="hidden" name="price" value="'.$price.'">';
 					$content .= '<input type="hidden" name="product" value="'.$product->post_title.'">';
 					$content .= '<input type="hidden" name="product_image" value="'.$main_image.'">';
@@ -195,7 +195,7 @@ class DukaGate_Products{
 					$content .= '<form method="POST" action="" id="dg_prod_'.$product->ID.'">';
 					$content .= '<input type="hidden" name="action" value="dg_update_cart">';
 					$content .= '<input type="hidden" name="product_id" value="'.$product->ID.'">';
-					$content .= '<input type="hidden" name="quantity" id="dg_quantity_'.$product->ID.'" value="">';
+					$content .= '<input type="hidden" name="quantity" id="dg_quantity_'.$product->ID.'" value="1">';
 					$content .= '<input type="hidden" name="price" value="'.$price.'">';
 					$content .= '<input type="hidden" name="product" value="'.$product->post_title.'">';
 					$content .= '<input type="hidden" name="product_image" value="'.$main_image.'">';

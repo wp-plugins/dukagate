@@ -75,6 +75,8 @@ if(!class_exists('DukaGate')) {
 						);
 		}
 		
+		
+		
 		/**
 		 * Set up plugin info
 		 */
