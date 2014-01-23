@@ -23,6 +23,7 @@ if(!class_exists('DukaGate')) {
 			require_once(DG_DUKAGATE_DIR.'/dukagate-gateways.php');
 			require_once(DG_DUKAGATE_DIR.'/dukagate-invoice.php');
 			require_once(DG_DUKAGATE_DIR.'/dukagate-shipping.php');
+			require_once(DG_DUKAGATE_DIR.'/dukagate-discounts.php');
 			require_once(DG_DUKAGATE_DIR.'/dukagate-admin.php');
 			require_once(DG_DUKAGATE_DIR.'/dukagate-products.php');
 			require_once(DG_DUKAGATE_DIR.'/dukagate-cart.php');
@@ -300,6 +301,7 @@ if(!class_exists('DukaGate')) {
 		 * Create post columns
 		 */
 		function create_post_column($columns){
+			$columns['image'] = 'Image';
 			$columns['price'] = 'Price';
 			return $columns;
 		}
@@ -309,6 +311,15 @@ if(!class_exists('DukaGate')) {
 		 */
 		function render_post_columns($column_name, $id){
 			switch ($column_name) {
+				case 'image':
+					// show widget set
+					$main_image = $this->product_image($product->ID);
+					$widget_set = NULL;
+					if (!$main_image) 
+						$main_image = DG_DUKAGATE_URL.'/images/no.jpg';    
+					
+					echo '<img src="' . $this->resize_image('', $main_image, 100, 100).'" width="100px" height="100px">';				
+					break;
 				case 'price':
 					// show widget set
 					$price = get_post_meta( $id, 'price', TRUE);

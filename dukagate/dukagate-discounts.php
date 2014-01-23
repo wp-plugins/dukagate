@@ -30,7 +30,6 @@ if(!class_exists('Dukagate_Discounts')) {
 						`id` int(11) NOT NULL AUTO_INCREMENT,
 						`code` varchar(50) NOT NULL,
 						`type` varchar(50) NOT NULL,
-						`email_assigned` varchar(150) DEFAULT NULL,
 						`amount` varchar(50) NOT NULL,
 						`valid` int(1) DEFAULT '0',
 						`timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -49,7 +48,7 @@ if(!class_exists('Dukagate_Discounts')) {
 			if(!empty($request)){
 				global $wpdb;
 				if(empty($request['disc_amount']) && empty($request['disc_type'])){
-					echo dp_disc_message('Both Amount and Type required', 'error');
+					echo dukagate_disc_message('Both Amount and Type required', 'error');
 				}else{
 					$disc_table_name = $this->get_db_name();
 					if(empty($request['disc_code']))
@@ -63,9 +62,9 @@ if(!class_exists('Dukagate_Discounts')) {
 					
 					$wpdb->query($query);
 					if($wpdb->insert_id > 0){
-						echo dp_disc_message('New Discount code '.$discount_code.' generaetd');
+						echo dukagate_disc_message('New Discount code '.$discount_code.' generaetd');
 					}else{
-						echo dp_disc_message('Error saving discount. Please try again', 'error');
+						echo dukagate_disc_message('Error saving discount. Please try again', 'error');
 					}
 				}
 			}
@@ -79,7 +78,7 @@ if(!class_exists('Dukagate_Discounts')) {
 				global $wpdb;
 				
 				if(empty($request['disc_amount']) && empty($request['disc_type'])){
-					echo dp_disc_message('Both Amount and Type required', 'error');
+					echo dukagate_disc_message('Both Amount and Type required', 'error');
 				}else{
 					$disc_table_name = $this->get_db_name();
 					$discount_code = $request['disc_code'];
@@ -90,7 +89,7 @@ if(!class_exists('Dukagate_Discounts')) {
 					$query = "UPDATE `{$disc_table_name}`  SET `code` =  '{$discount_code}', `type` = '{$type}',`amount` = '{$amount}' WHERE id = {$id}";
 					
 					$wpdb->query($query);
-					echo dp_disc_message('Updated Discount code '.$discount_code);
+					echo dukagate_disc_message('Updated Discount code '.$discount_code);
 				}
 			}
 		}
@@ -155,7 +154,7 @@ if(!class_exists('Dukagate_Discounts')) {
 		public function list_discounts(){
 			global $wpdb;
 			$disc_table_name = $this->get_db_name();
-			$sql = 'SELECT `id`, `valid`, `code`, `amount`, `timestamp`, `assigned`, `type` from '.$disc_table_name.' ORDER BY `timestamp` DESC;';
+			$sql = 'SELECT `id`, `valid`, `code`, `amount`, `timestamp`, `type` from '.$disc_table_name.' ORDER BY `timestamp` DESC;';
 			$results = $wpdb->get_results($sql);
 			
 			return $results;
@@ -261,7 +260,18 @@ if(!class_exists('Dukagate_Discounts')) {
 
 global $dukagate_disc;
 if(!isset($dukagate_disc)){
-	$dukagate_disc = new Dukapress_Discounts();
+	$dukagate_disc = new Dukagate_Discounts();
 	$dukagate_disc->set_up();
+}
+
+
+function dukagate_disc_message($message, $type='updated'){
+	$content = '<div id="message" class="'.$type.'">';
+	$content .= '<p>';
+	$content .= $message;
+	$content .= '</p>';
+	$content .= '</div>';
+	
+	return $content;
 }
 ?>

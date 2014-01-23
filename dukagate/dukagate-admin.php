@@ -16,6 +16,7 @@ function dg_create_admin_menu(){
 	add_submenu_page('dukagate-order-log', __('DukaGate CheckOut Settings'), __('Check Out Settings'), 'edit_others_posts', 'dukagate-checkout-options', 'dg_dukagate_checkout');
 	add_submenu_page('dukagate-order-log', __('DukaGate Mail Settings'), __('Mail Settings'), 'edit_others_posts', 'dukagate-mail-options', 'dg_dukagate_mail');
 	add_submenu_page('dukagate-order-log', __('DukaGate Discount Settings'), __('Discounts'), 'edit_others_posts', 'dukagate-discounts', 'dg_dukagate_discounts');
+	add_submenu_page('dukagate-order-log', __('DukaGate Tools'), __('Tools'), 'edit_others_posts', 'dukagate-tools', 'dg_dukagate_tools');
 	add_submenu_page('dukagate-order-log', __('DukaGate Settings'), __('Settings'), 'edit_others_posts', 'dukagate-settings', 'dg_dukagate_settings');
 	add_submenu_page('dukagate-order-log', __('DukaGate Advanced Settings'), __('Advanced Settings'), 'edit_others_posts', 'dukagate-advanced-settings', 'dg_dukagate_advanced_settings');
 	
@@ -1008,7 +1009,7 @@ function dg_dukagate_discounts(){
 	global $dukagate_disc;
 	if(isset($_REQUEST['act'])){
 		if(isset($_REQUEST['edit'])){
-			dg_disc_view($id);
+			dg_disc_view($_REQUEST['id']);
 		}else{
 			if($_REQUEST['act'] == 'new'){
 				dg_disc_add();
@@ -1064,7 +1065,7 @@ function dg_dukagate_discounts(){
 				$content .= '<td>'.$count.'</td>';
 				$content .= '<td>'.$discount->code.'</td>';
 				$content .= '<td>'.$discount->amount.'</td>';
-				$content .= '<td>'.Dukapress_Discounts::get_type($discount->type).'</td>';
+				$content .= '<td>'.Dukagate_Discounts::get_type($discount->type).'</td>';
 				$content .= '<td>'.$valid.'</td>';
 				$content .= '<td>'.$discount->timestamp.'</td>';
 				$content .= '<td>';
@@ -1117,7 +1118,7 @@ function dg_disc_add(){
 							<select name="disc_type" >
 								<option value="" >--Select Type--</option>
 								<?php
-									$types = Dukapress_Discounts::discount_types();
+									$types = Dukagate_Discounts::discount_types();
 									foreach ($types as $type => $t) {
 										?>
 										<option value="<?php echo $type; ?>" ><?php echo $t; ?></option>
@@ -1176,7 +1177,7 @@ function dg_disc_view($id){
 							<select name="disc_type" >
 								<option value="" >--Select Type--</option>
 								<?php
-									$types = Dukapress_Discounts::discount_types();
+									$types = Dukagate_Discounts::discount_types();
 									
 									foreach ($types as $type => $t) {
 										$selected = '';
@@ -1201,6 +1202,14 @@ function dg_disc_view($id){
 				</li> 
 			</ul>
 		</form>
+	</div>
+	<?php
+}
+
+function dg_dukagate_tools(){
+	?>
+	<div class="wrap">
+		<h2>Dukagate Tools</div></h2>
 	</div>
 	<?php
 }
