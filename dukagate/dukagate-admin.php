@@ -1207,11 +1207,193 @@ function dg_disc_view($id){
 }
 
 function dg_dukagate_tools(){
+	if (isset($_POST['dg_import_xml'])) {
+		global $wpdb;
+		$delete_old_products = ($_POST['delete_old_products'] == 'checked') ? "true": "false"; 
+		$post_type = 'dg_product';
+		if($delete_old_products == 'true'){
+			$sql = "SELECT `ID` FROM `{$wpdb->posts}` WHERE `post_type`='{$post_type}'";
+			$post_ids_to_be_deleted = $wpdb->get_col($sql);
+			$count = 0;
+			$failed_to_delete = array();
+			if (is_array($post_ids_to_be_deleted)) {
+				foreach ($post_ids_to_be_deleted as $delete_id) {
+					if (wp_delete_post( intval($delete_id), TRUE )) {
+						$count++;
+					}
+					else {
+						$failed_to_delete[] = $delete_id;
+					}
+				}
+				echo '<h4>' . $count . ' products were deleted successfully.</h4>';
+				if (!empty($failed_to_delete)) {
+					$failed_to_delete = implode(', ', $failed_to_delete);
+					echo '<h4>Failed to delete products with ID(s): ' . $failed_to_delete . '</h4>';
+				}
+			}
+		}
+		
+		$xml = @simplexml_load_file($_FILES['xml_file']['tmp_name']);
+		if($xml){
+			$i = 0;
+			$post_data = '';
+			$post_title = '';
+			$post_content = '';
+			$post_price = '';
+			$fixed_price = '';
+			$main_image = '';
+			$sku = '';
+			$digital_file = '';
+			$affiliate_url = '';
+			$dg_posts = array();
+			foreach($xml->children() as $child){
+				$children = $child->children();
+				if(count($children) > 0){
+					foreach($children as $c){
+						$atts = $c->attributes();
+						if($atts['name'] == 'product_name')
+							$post_title = (string)$c;
+						if($atts['name'] == 'product_content')
+							$post_content = (string)$c;
+						if($atts['name'] == 'product_price')
+							$post_price = (string)$c;
+						if($atts['name'] == 'fixed_price')
+							$fixed_price = (string)$c;
+						if($atts['name'] == 'main_image')
+							$main_image = (string)$c;
+						if($atts['name'] == 'sku')
+							$sku = (string)$c;
+						if($atts['name'] == 'digital_file')
+							$digital_file = (string)$c;
+						if($atts['name'] == 'affiliate_url')
+							$affiliate_url = (string)$c;
+						$post_data = array(
+												'post_title' => $post_title,
+												'post_content' => $post_content,
+												'post_status' => 'publish',
+												'price' => $post_price,
+												'fixed_price' => $fixed_price,
+												'main_image' => $main_image,
+												'sku' => 'sku',
+												'digital_file' => $digital_file,
+												'affiliate_url' => $affiliate_url
+												);
+						$dg_posts[$i] = $post_data;
+					}
+					$i++;
+				}
+			}
+			$i = 0;
+			if(count($dg_posts > 0)){
+				foreach($dg_posts as $dg_post => $post){
+					$post_data = array(
+										'post_title' => html_entity_decode($post['post_title']),
+										'post_content' => html_entity_decode($post['post_content']),
+										'post_status' => 'publish',
+										'post_type' => $post_type
+										);
+					$new_post_id = wp_insert_post($post_data);
+					if ($new_post_id) {
+						update_post_meta($new_post_id, 'price', $post['price']);
+						update_post_meta($post_id, 'fixed_price', $fixed_price);
+						update_post_meta($post_id, 'digital_file', $digital_file);
+						update_post_meta($post_id, 'sku', $sku);
+						update_post_meta($post_id, 'affiliate_url', $affiliate_url);
+						$i++;
+					}
+				}
+			}
+			if ($i > 0) {
+				echo '<h4>' . count($dg_posts) . ' product(s) were created successfully.</h4>';
+			}
+		}else{
+			echo '<h4>No file selected.</h4>';
+		}
+	}
 	?>
 	<div class="wrap">
-		<h2>Dukagate Tools</div></h2>
+		<h2>Dukagate Tools</h2>
+		<form method="POST" enctype="multipart/form-data" action="<?php echo $_SERVER['REQUEST_URI']; ?>">
+			<table width="100%" border="0" class="widefat">
+				<tr>
+					<th align="left" scope="row"><?php _e("Export"); ?></th>
+					<td id="dg_prod_export_td"><a href="javascript:;" class='button-secondary' id="dg_prod_export">Click Here to export products</a></td>
+				</tr>
+				<tr>
+					<th align="left" scope="row"><?php _e("Import"); ?></th>
+					<td>
+						<input id="xml_file" type="file" name="xml_file" /><br/>  
+						<label><?php _e("Delete old products ?"); ?> <input type="checkbox" value="checked" name="delete_old_products"/></label> <br/>
+						<input type="submit" class='button-primary' name="dg_import_xml" value="<?php _e("Import File"); ?>"/>
+					</td>
+				</tr>
+			</table>
+		</form>
+		<script type="text/javascript">
+			jQuery(document).ready(function(){
+				jQuery('#dg_prod_export').on("click", function(){
+					var url = '<?php echo get_bloginfo('url');  ?>';
+					window.location.href= url+'?action=dg_export_products';
+				});
+			});
+		</script>
 	</div>
 	<?php
+}
+
+if (@$_REQUEST['action'] === 'dg_export_products') {
+	add_action( 'init', 'dg_export_products');
+}
+/**
+ * Export products
+ */
+function dg_export_products(){
+	global $dukagate;
+	$args = array();
+	$args['post_type'] = 'dg_product';
+	$get_posts = new WP_Query;
+	$products = $get_posts->query($args);
+	if (is_array($products) && count($products) > 0) {
+		$xml = new SimpleXMLElement("<?xml version=\"1.0\" encoding=\"utf-8\" ?><products></products>");
+		foreach ($products as $product) {
+			$main_image = $dukagate->product_image($product->ID);
+			$content_price = get_post_meta($product->ID, 'price', true);
+			$fixed_price = get_post_meta($product->ID, 'fixed_price', true);
+			$sku = get_post_meta($product->ID, 'sku', true);
+			$digital_file = get_post_meta($product->ID, 'digital_file', true);
+			$affiliate_url = get_post_meta($product->ID, 'affiliate_url', true);
+			
+			$prod = $xml->addChild('product');
+			
+			$column = $prod->addChild('column',htmlspecialchars($product->post_title));
+			$column->addAttribute('name', 'product_name');
+			
+			$column = $prod->addChild('column',$content_price);
+			$column->addAttribute('name', 'product_price');
+			
+			$column = $prod->addChild('column',$fixed_price);
+			$column->addAttribute('name', 'fixed_price');
+			
+			$column = $prod->addChild('column',$main_image);
+			$column->addAttribute('name', 'main_image');
+			
+			$column = $prod->addChild('column',$sku);
+			$column->addAttribute('name', 'sku');
+			
+			$column = $prod->addChild('column',$digital_file);
+			$column->addAttribute('name', 'digital_file');
+			
+			$column = $prod->addChild('column',$affiliate_url);
+			$column->addAttribute('name', 'affiliate_url');
+			
+			$column = $prod->addChild('column',htmlspecialchars($product->post_content));
+			$column->addAttribute('name', 'post_content');
+		}
+		header( 'Content-disposition: attachment; filename=dukagate_products.xml');
+		header('Content-type: text/xml');
+		print($xml->asXML());
+	}
+	die();
 }
 
 //Save or delete variation of product

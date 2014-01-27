@@ -97,6 +97,7 @@ if(!class_exists('DukaGate')) {
 		
 		//Load Javascript
 		function set_up_js(){
+			add_theme_support('html5');
 			if(is_admin()){
 				wp_enqueue_script('dukagate_admin', DG_DUKAGATE_URL.'/js/dukagate_admin.js', array('jquery'), '', false);
 				wp_enqueue_script('wysiwyg_js', DG_DUKAGATE_URL.'/js/wyzz0.65/wyzz.php', array('jquery'), '', false);
@@ -313,7 +314,7 @@ if(!class_exists('DukaGate')) {
 			switch ($column_name) {
 				case 'image':
 					// show widget set
-					$main_image = $this->product_image($product->ID);
+					$main_image = $this->product_image($id);
 					$widget_set = NULL;
 					if (!$main_image) 
 						$main_image = DG_DUKAGATE_URL.'/images/no.jpg';    
