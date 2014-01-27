@@ -4,8 +4,8 @@ Donate link: http://dukagate.info/
 Tags: shopping cart, web shop, cart, shop,Paypal,paypal,Pesapal, e-commerce, ecommerce
 
 Requires at least: 3.0
-Tested up to: 3.8
-Stable tag: 3.5.2.1
+Tested up to: 3.8.1
+Stable tag: 3.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -68,6 +68,13 @@ We test Dukagate on a large number of different server set-ups and envrionments 
 8. Sample product with a widget product
 
 == Changelog ==
+
+= 3.6 =
+* Discount and coupon managment added. You can now create discount codes and use them as coupons
+* Import and export of products. You can now import and export products to different Dukagate Settups.
+* Shortcode cleanups
+
+To come : Working on language translations and a Dukagate theme
 
 = 3.5.2.1 =
 Ajax javascript for product was missing
