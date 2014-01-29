@@ -1119,16 +1119,21 @@ if(!class_exists('DukaGate')) {
 			$order_form_info = array();
 			while($count > 0){
 				if(!empty($order_info[$dg_form_elem[$count]['uname']])){
-					$order_form_info[$count]['key'] = $dg_form_elem[$count]['name'];
-					$order_form_info[$count]['value'] = $order_info[$dg_form_elem[$count]['uname']];
+					$order_form_info[]['key'] = $dg_form_elem[$count]['name'];
+					$order_form_info[]['value'] = $order_info[$dg_form_elem[$count]['uname']];
 				}
 				$count--;
 			}		
-			$order_form_info[]['dg_firstname'] = $order_info['dg_firstname'];
-			$order_form_info[]['dg_lastname'] = $order_info['dg_lastname'];
-			$order_form_info[]['dg_company'] = $order_info['dg_company'];
-			$order_form_info[]['dg_country'] = $order_info['dg_country'];
-			$order_form_info[]['dg_phone'] = $order_info['dg_phone'];
+			$order_form_info[]['key'] = 'First Name';
+			$order_form_info[]['value'] = $order_info['dg_firstname'];
+			$order_form_info[]['key'] = 'Last Name';
+			$order_form_info[]['value'] = $order_info['dg_lastname'];
+			$order_form_info[]['key'] = 'Company';
+			$order_form_info[]['value'] = $order_info['dg_company'];
+			$order_form_info[]['key'] = 'Country';
+			$order_form_info[]['value'] = $order_info['dg_country'];
+			$order_form_info[]['key'] = 'Phone';
+			$order_form_info[]['value'] = $order_info['dg_phone'];
 			
 			$order_info = self::array_to_json($order_form_info);
 			$table_name = $databases['transactions'];
