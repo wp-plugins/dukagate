@@ -1124,6 +1124,12 @@ if(!class_exists('DukaGate')) {
 				}
 				$count--;
 			}		
+			$order_form_info[]['dg_firstname'] = $order_info['dg_firstname'];
+			$order_form_info[]['dg_lastname'] = $order_info['dg_lastname'];
+			$order_form_info[]['dg_company'] = $order_info['dg_company'];
+			$order_form_info[]['dg_country'] = $order_info['dg_country'];
+			$order_form_info[]['dg_phone'] = $order_info['dg_phone'];
+			
 			$order_info = self::array_to_json($order_form_info);
 			$table_name = $databases['transactions'];
 			$sql = "INSERT INTO `$table_name`(`invoice`,`products`, `shipping_info`, `names`, `email`,`order_info`,`payment_gateway`,`discount`,`total`, `shipping`,`payment_status`) 
