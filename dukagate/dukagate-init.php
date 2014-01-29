@@ -11,7 +11,7 @@ if(!class_exists('DukaGate')) {
 			$this->dukagate_db();
 			$this->set_up_plugin_info();
 			$this->set_up_directories_and_file_info();
-			update_option('dg_version_info', 3.5);
+			update_option('dg_version_info', 3.47);
 		}
 		
 		
@@ -23,6 +23,7 @@ if(!class_exists('DukaGate')) {
 			require_once(DG_DUKAGATE_DIR.'/dukagate-gateways.php');
 			require_once(DG_DUKAGATE_DIR.'/dukagate-invoice.php');
 			require_once(DG_DUKAGATE_DIR.'/dukagate-shipping.php');
+			require_once(DG_DUKAGATE_DIR.'/dukagate-discounts.php');
 			require_once(DG_DUKAGATE_DIR.'/dukagate-admin.php');
 			require_once(DG_DUKAGATE_DIR.'/dukagate-products.php');
 			require_once(DG_DUKAGATE_DIR.'/dukagate-cart.php');
@@ -40,8 +41,8 @@ if(!class_exists('DukaGate')) {
 			add_action('delete_grouped_product', array(&$this,'delete_grouped_product_metadata'), 10, 1);
 			add_action( 'save_post', array(&$this,'product_meta_save'));
 			add_action( 'edit_post', array(&$this,'add_quick_edit_save'), 10, 3);
-			add_action( 'init', array(&$this, 'set_up_styles'));
-			add_action( 'init', array(&$this, 'set_up_js'));
+			add_action( 'wp_enqueue_scripts', array(&$this, 'set_up_styles'));
+			add_action( 'wp_enqueue_scripts', array(&$this, 'set_up_js'));
 			add_action( 'init', array(&$this, 'load_dukagate_plugins'));
 			
 			add_filter('manage_dg_product_posts_columns', array(&$this,'create_post_column'));
@@ -75,6 +76,8 @@ if(!class_exists('DukaGate')) {
 						);
 		}
 		
+		
+		
 		/**
 		 * Set up plugin info
 		 */
@@ -94,6 +97,7 @@ if(!class_exists('DukaGate')) {
 		
 		//Load Javascript
 		function set_up_js(){
+			add_theme_support('html5');
 			if(is_admin()){
 				wp_enqueue_script('dukagate_admin', DG_DUKAGATE_URL.'/js/dukagate_admin.js', array('jquery'), '', false);
 				wp_enqueue_script('wysiwyg_js', DG_DUKAGATE_URL.'/js/wyzz0.65/wyzz.php', array('jquery'), '', false);
@@ -227,6 +231,7 @@ if(!class_exists('DukaGate')) {
 					<td><input type="text" value="<?php echo $affiliate_url; ?>" name="affiliate_url" id="affiliate_url"></td>
 				</tr>
 			</table>
+			
 			<?php
 		}
 		
@@ -297,6 +302,7 @@ if(!class_exists('DukaGate')) {
 		 * Create post columns
 		 */
 		function create_post_column($columns){
+			$columns['image'] = 'Image';
 			$columns['price'] = 'Price';
 			return $columns;
 		}
@@ -306,6 +312,15 @@ if(!class_exists('DukaGate')) {
 		 */
 		function render_post_columns($column_name, $id){
 			switch ($column_name) {
+				case 'image':
+					// show widget set
+					$main_image = $this->product_image($id);
+					$widget_set = NULL;
+					if (!$main_image) 
+						$main_image = DG_DUKAGATE_URL.'/images/no.jpg';    
+					
+					echo '<img src="' . $this->resize_image('', $main_image, 100, 100).'" width="100px" height="100px">';				
+					break;
 				case 'price':
 					// show widget set
 					$price = get_post_meta( $id, 'price', TRUE);
@@ -1109,6 +1124,12 @@ if(!class_exists('DukaGate')) {
 				}
 				$count--;
 			}		
+			$order_form_info[]['dg_firstname'] = $order_info['dg_firstname'];
+			$order_form_info[]['dg_lastname'] = $order_info['dg_lastname'];
+			$order_form_info[]['dg_company'] = $order_info['dg_company'];
+			$order_form_info[]['dg_country'] = $order_info['dg_country'];
+			$order_form_info[]['dg_phone'] = $order_info['dg_phone'];
+			
 			$order_info = self::array_to_json($order_form_info);
 			$table_name = $databases['transactions'];
 			$sql = "INSERT INTO `$table_name`(`invoice`,`products`, `shipping_info`, `names`, `email`,`order_info`,`payment_gateway`,`discount`,`total`, `shipping`,`payment_status`) 
@@ -1757,6 +1778,26 @@ if(!class_exists('DukaGate')) {
 			$cnt .= '<input type="hidden" name="action" value="dg_process_cart" />';
 			
 			return $cnt;
+		}
+		
+		/**
+		 * Get produt image
+		 */
+		function product_image($productid){
+			$main_image = '';
+			$main_images = wp_get_attachment_image_src( get_post_thumbnail_id( $productid ), 'single-post-thumbnail' );
+			if(is_array($main_images))
+				$main_image =  $main_images[0];
+			if (empty($main_image)){
+				$attachment_images = '';
+				$attachment_images = &get_children('post_type=attachment&post_status=inherit&post_mime_type=image&post_parent=' . $productid);
+				$price = get_post_meta($product->ID, 'price', true);
+                foreach ($attachment_images as $image) {
+                    $main_image = $image->guid;
+                    break;
+                }
+			}
+			return $main_image;
 		}
 		
 		/**
