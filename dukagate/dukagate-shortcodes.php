@@ -23,6 +23,19 @@ function dg_display_products($atts){
 	return $output;
 }
 
+//Product shortcode
+add_shortcode('dg_display_product', 'dg_display_product');
+function dg_display_product($atts){
+	extract(shortcode_atts(array(
+                'buy_now' => '',
+                'direct' => '',
+				'affiliate' => ''
+                    ), $atts));
+	$product_id = get_the_ID();
+	$output = DukaGate_Products::product_details($product_id);
+	return $output;
+}
+
 //Groped product list
 add_shortcode('dg_group_display', 'dg_group_display');
 function dg_group_display($atts){
