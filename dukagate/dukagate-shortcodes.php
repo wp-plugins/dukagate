@@ -131,7 +131,7 @@ function dg_thankyou_page(){
 				break;
 		}
 		
-		
+		$attachments = array();
 		$products = DukaGate::json_to_array($dg_order->products);
 		if(!empty($products) && count($products) > 0){
 			$total = 0.00;
@@ -146,6 +146,10 @@ function dg_thankyou_page(){
 			$info .= '<th scope="col" width="30%">'.__("Total").'</th>';
 			$info .= '</tr>';
 			foreach ($products as $cart_items => $cart) {
+				$digital_file = get_post_meta($cart['prod_id'], 'digital_file', true);
+				if(!empty($digital_file)){
+					$attachments[] = $digital_file['file'];
+				}
 				$info .= '<tr>';
 				$info .= '<td>'.$cart['product'].' ('.$cart['children'].')</td>';
 				$info .= '<td>'.$cart['quantity'].'</td>';
@@ -195,7 +199,7 @@ function dg_thankyou_page(){
 			$array1 = array('%details%','%inv%','%shop%');
 			$array2 = array($info,$invoice,$shop);
 			$message = str_replace($array1, $array2, $message);
-			$dukagate_mail->send_mail($dg_order->email, $subject, $message);
+			$dukagate_mail->send_mail($dg_order->email, $subject, $message, $attachments);
 		}
 		
 	}else{

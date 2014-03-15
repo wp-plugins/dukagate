@@ -122,6 +122,8 @@ class DukaGate_Products{
 			$post_offset = ($pagenum - 1) * $per_page;
 			$args['offset'] = $post_offset;
 			$page_links = '<div class="dg_pagination">' . $page_links . '</div>';
+		}else{
+			$per_page = $total;
 		}
 		if ($order != 'rand') {
 			$args['orderby'] = 'post_date';
@@ -130,6 +132,7 @@ class DukaGate_Products{
 			$args['order'] = 'rand';
 		}
 		$args['numberposts'] = $per_page;
+		$args['posts_per_page'] = $per_page;
 		$args['post_type'] = 'dg_product';
 		$get_posts = new WP_Query;
 		$products = $get_posts->query($args);

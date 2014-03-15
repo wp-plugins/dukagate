@@ -471,6 +471,7 @@ function dg_update_cart(){
 		$prod['product_image'] = $dg_product_image;
 		$prod['taxonomy'] = $taxonomy_id;
 		$prod['children'] = $dg_children;
+		$prod['prod_id'] = $dg_product_id;
 		$total = (floatval($prod['price']) * intval($prod['quantity']));
 		$prod['total'] = $total;
 		$dg_cart[$dg_product_id] = $prod;

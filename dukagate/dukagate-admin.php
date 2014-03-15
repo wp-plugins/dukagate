@@ -888,17 +888,17 @@ function dg_dukagate_advanced_settings(){
 				<table class="form-table">
 					<tbody>
 						<tr valign="top">
-							<th scope="row"><label for="custom_products"><?php _e("Use Custom Product Posts"); ?>: </label></th>
+							<th scope="row"><label for="custom_products"><?php _e("Use Custom Product Posts","dg-lang"); ?>: </label></th>
 							<td><input type="checkbox" value="checked" name="custom_products" <?php echo ($dg_shop_settings['custom_products'] == 'true') ? "checked='checked'": ""; ?>/></td>
 						</tr>
 						<tr valign="top">
 							<th scope="row">
-								<label for="max_quantity"><?php _e("Maximum product in cart"); ?> <em>(<?php _e("defaults to 30"); ?>)</em>: </label>
+								<label for="max_quantity"><?php _e("Maximum product in cart","dg-lang"); ?> <em>(<?php _e("defaults to 30"); ?>)</em>: </label>
 							</th>
 							<td><input id="max_quantity" type="text" name="max_quantity" value="<?php echo $dg_shop_settings['max_quantity']; ?>" /></td></td>
 						</tr>
 						<tr valign="top">
-							<th scope="row"><label for="products_page"><?php _e("Grouped Products Page"); ?>: </label></th>
+							<th scope="row"><label for="products_page"><?php _e("Grouped Products Page","dg-lang"); ?>: </label></th>
 							<td>
 								<select name="products_page">
 									<?php 
@@ -918,7 +918,7 @@ function dg_dukagate_advanced_settings(){
 							</td>
 						</tr>
 						<tr valign="top">
-							<th scope="row"><label for="up_selling_page"><?php _e("Up Selling Page"); ?>: </label></th>
+							<th scope="row"><label for="up_selling_page"><?php _e("Up Selling Page","dg-lang"); ?>: </label></th>
 							<td>
 								<select name="up_selling_page">
 									<?php 
@@ -938,41 +938,41 @@ function dg_dukagate_advanced_settings(){
 							</td>
 						</tr>
 						<tr valign="top">
-							<th scope="row"><label for="up_selling_page_checkout"><?php _e("Up Selling page before checkout"); ?>: </label></th>
+							<th scope="row"><label for="up_selling_page_checkout"><?php _e("Up Selling page before checkout","dg-lang"); ?>: </label></th>
 							<td>
 								<input type="checkbox" value="checked" name="up_selling_page_checkout" <?php echo ($dg_shop_settings['up_selling_page_checkout'] == 'true') ? "checked='checked'": ""; ?>/>
 							</td>
 						</tr>
 						<tr valign="top">
-							<th scope="row"><label for="checkout_prod_image"><?php _e("Checkout Product Image"); ?> (<em><?php _e("shows product image thumbnail on checkout page"); ?></em>): </label></th>
+							<th scope="row"><label for="checkout_prod_image"><?php _e("Checkout Product Image","dg-lang"); ?> (<em><?php _e("shows product image thumbnail on checkout page"); ?></em>): </label></th>
 							<td><input type="checkbox" value="checked" name="checkout_prod_image" <?php echo ($dg_shop_settings['checkout_prod_image'] == 'true') ? "checked='checked'": ""; ?>/></td>
 						</tr>
 						<tr valign="top">
-							<th scope="row"><label for="checkout_prod_image_url"><?php _e("Checkout Product Image URL"); ?>: </label></th>
+							<th scope="row"><label for="checkout_prod_image_url"><?php _e("Checkout Product Image URL","dg-lang"); ?>: </label></th>
 							<td><input id="checkout_prod_image_url" type="text" name="checkout_prod_image_url" value="<?php echo @$dg_shop_settings['checkout_prod_image_url']; ?>" class="regular-text" /></td>
 						</tr>
 						<tr valign="top">
-							<th scope="row"><label for="checkout_prod_image_width"><?php _e("Checkout Product Image Width"); ?>: </label></th>
+							<th scope="row"><label for="checkout_prod_image_width"><?php _e("Checkout Product Image Width","dg-lang"); ?>: </label></th>
 							<td><input id="checkout_prod_image_width" type="text" name="checkout_prod_image_width" value="<?php echo @$dg_shop_settings['checkout_prod_image_width']; ?>" class="regular-text" /></td>
 						</tr>
 						<tr valign="top">
-							<th scope="row"><label for="checkout_prod_image_height"><?php _e("Checkout Product Image Height"); ?>: </label></th>
+							<th scope="row"><label for="checkout_prod_image_height"><?php _e("Checkout Product Image Height","dg-lang"); ?>: </label></th>
 							<td><input id="checkout_prod_image_height" type="text" name="checkout_prod_image_height" value="<?php echo @$dg_shop_settings['checkout_prod_image_height']; ?>" class="regular-text" /></td>
 						</tr>
 						<tr valign="top">
-							<th scope="row"><label for="checkout_gateway_image"><?php _e("Display Checkout Payment Gateway Image (Not Yet Implemented)"); ?> (<em><?php _e("shows payment gateway image on checkout page instead of text"); ?></em>): </label></th>
+							<th scope="row"><label for="checkout_gateway_image"><?php _e("Display Checkout Payment Gateway Image (Not Yet Implemented)","dg-lang"); ?> (<em><?php _e("shows payment gateway image on checkout page instead of text"); ?></em>): </label></th>
 							<td><input type="checkbox" value="checked" name="checkout_gateway_image" <?php echo ($dg_shop_settings['checkout_gateway_image'] == 'true') ? "checked='checked'": ""; ?>/></td>
 						</tr>
 						<tr valign="top">
-							<th scope="row"><label for="products_image"><?php _e("Show Product Images"); ?> (<em><?php _e("show or hide product images"); ?></em>): </label></th>
+							<th scope="row"><label for="products_image"><?php _e("Show Product Images"); ?> (<em><?php _e("show or hide product images","dg-lang"); ?></em>): </label></th>
 							<td><input type="checkbox" value="checked" name="products_image" <?php echo ($dg_shop_settings['products_image'] == 'true') ? "checked='checked'": ""; ?>/></td>
 						</tr>
 						<tr valign="top">
-							<th scope="row"><label for="pdf_invoices"><?php _e("Enable PDF Invoice"); ?> (<em><?php _e("enable or disable pdf invoices"); ?></em>): </label></th>
+							<th scope="row"><label for="pdf_invoices"><?php _e("Enable PDF Invoice"); ?> (<em><?php _e("enable or disable pdf invoices","dg-lang"); ?></em>): </label></th>
 							<td><input type="checkbox" value="checked" name="pdf_invoices" <?php echo ($dg_shop_settings['pdf_invoices'] == 'true') ? "checked='checked'": ""; ?>/></td>
 						</tr>
 						<tr valign="top">
-							<th scope="row"><label for="pdf_invoice_file"><?php _e("Invoice PDF Template"); ?>: </label></th>
+							<th scope="row"><label for="pdf_invoice_file"><?php _e("Invoice PDF Template","dg-lang"); ?>: </label></th>
 							<td>
 								<select name="pdf_invoice_file">
 									<?php 
@@ -994,7 +994,7 @@ function dg_dukagate_advanced_settings(){
 					</tbody>
 				</table>
 				<p class="submit">
-					<input class='button-primary' type='submit' name='dg_advanced_settings' value='<?php _e('Save Options'); ?>' id='submitbutton' />
+					<input class='button-primary' type='submit' name='dg_advanced_settings' value='<?php _e('Save Options',"dg-lang"); ?>' id='submitbutton' />
 				</p>
 			</form>
 		</div>
