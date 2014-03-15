@@ -345,20 +345,68 @@ add_action( 'wp_ajax_dg_validate_discount_code', 'dg_validate_discount_code');
 function dg_validate_discount_code(){
 	//Validate Dukapress discount plugin code
 	$discount_code = $_REQUEST['dg_code'];
-	global $dp_desc;
 	$dg_valide_code = __('Invalid Code','dg-lang');
-	if(isset($dp_desc)){
-		$dp_discount_percentage = dg_disc_validate_discounts($discount_code);
-		if($dp_discount_percentage['exists'] == 'true'){
-			$dg_valide_code = 'valid';
-			$_SESSION['dg_discount'] = $discount_code;
-			$_SESSION['dg_discount_value'] = $dp_discount_percentage['value'];
-		}
+	$dp_discount_percentage = dg_disc_validate_discounts($discount_code);
+	if($dp_discount_percentage['exists'] == 'true'){
+		$dg_valide_code = 'valid';
+		$_SESSION['dg_discount'] = $discount_code;
+		$_SESSION['dg_discount_value'] = $dp_discount_percentage['value'];
 	}
 	
 	header('Content-type: application/json; charset=utf-8');
 	echo DukaGate::array_to_json(array('response' => $dg_valide_code));
 	exit();
+}
+
+
+
+/**
+ * Validate DukaGate discounts
+ * Process all product ids and category ids
+ */
+function dg_disc_validate_discounts($discount_code){
+	global $dukagate_disc;
+	$dg_cart = $_SESSION['dg_cart'];
+	$prods = 0;
+	$dg_total = 0.00;
+	$allowed_discount = false;	
+    if (is_array($dg_cart) && count($dg_cart) > 0) {
+		foreach ($dg_cart as $cart_items => $cart) {
+			$dg_total += $cart['total'];
+			$prods += $cart['quantity'];
+		}
+	}
+	
+	$discount = $dukagate_disc->verify_code($discount_code, '');
+	
+	$discount_percentage['exists'] = 'false';
+	$discount_percentage['disc'] = $discount;
+	
+	if($discount){
+		if(!empty($_SESSION['dg_disc_disc'])){
+			$discount_set = $_SESSION['dg_disc_disc'];
+			if($discount_set != 0 || $discount_set != '0'){
+				if($discount_set->id == $discount->id){
+					$discount = false;
+				}else if($discount_set->amount > $discount->amount){
+					$discount = false;
+				}
+			}
+		}
+	}
+	
+	if($discount){
+		$dg_ds_amount = intval($discount->amount);
+		$discount_percentage['exists'] = 'true';
+		if(intval($discount->type) == 1){
+			$discount_percentage['value'] = floatval($dg_ds_amount);
+		}
+		else if(intval($discount->type) == 2){
+			$discount_percentage['value'] = floatval(($dg_ds_amount/$dg_total)*100);
+		}
+	}
+	return $discount_percentage;
+	
 }
 
 
@@ -391,12 +439,15 @@ function dg_update_cart(){
 	
 	$prod = @$dg_cart[$dg_product_id];
 	if(!empty($prod)){
-		if(!empty($dg_product_quantity)){
+		/*if(!empty($dg_product_quantity)){
 			$prod['quantity'] = $dg_product_quantity;
 		}else{
 			if($dg_product_quantity > 0){
 				$prod['quantity'] = intval($prod['quantity']) + 1;
 			}
+		}*/
+		if($dg_product_quantity > 0){
+			$prod['quantity'] = intval($prod['quantity']) + 1;
 		}
 		$total = (floatval($prod['price']) * intval($prod['quantity']));
 		$prod['total'] = $total; 
@@ -420,6 +471,7 @@ function dg_update_cart(){
 		$prod['product_image'] = $dg_product_image;
 		$prod['taxonomy'] = $taxonomy_id;
 		$prod['children'] = $dg_children;
+		$prod['prod_id'] = $dg_product_id;
 		$total = (floatval($prod['price']) * intval($prod['quantity']));
 		$prod['total'] = $total;
 		$dg_cart[$dg_product_id] = $prod;

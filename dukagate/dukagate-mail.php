@@ -56,14 +56,14 @@ class DukaGate_Mail{
 	 * @param subject - Mail subject
 	 * @param message - Mail content (Plain text or html)
 	 */
-	function send_mail($to, $subject, $message){
+	function send_mail($to, $subject, $message, $attachments = ''){
 		$site_name = get_bloginfo('name');
 		$defualt_email = get_option('admin_email');
 		$headers  = 'MIME-Version: 1.0' . "\r\n";
 		$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
 		$headers .= "From: $site_name <$defualt_email>" . "\r\n";
 		add_filter('wp_mail_content_type',create_function('', 'return "text/html";'));
-		@wp_mail($to, $subject, $message, $headers);
+		@wp_mail($to, $subject, $message, $headers, $attachments);
 	}
 }
 
