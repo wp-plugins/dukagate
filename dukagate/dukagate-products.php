@@ -323,16 +323,9 @@ class DukaGate_Products{
 		$content .= '</form>';
 		$content .= '</div>';
 		$content .= '</div>';
-		$content .= '<nav class="dg_tab_secondary">';
-		$content .= '<a href="javascript:;" id="songs_tab">Songs</a>';
-		$content .= '</nav>';
-		$content .= '<div class="subsection productinfo cf">';
-		$content .= 'Sample';
-		$content .= '</div>';
 		$content .= '<script type="text/javascript">';
 		$content .= 'jQuery(document).ready(function(){';
 		$content .= 'dukagate.update_cart("dg_prod_'.$product->ID.'", "'.$ajax_cart.'");';
-		$content .= 'dukagate.prod_tab();';
 		$content .= '});';
 		$content .= '</script>';
 		return $content;
