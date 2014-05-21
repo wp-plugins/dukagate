@@ -138,7 +138,7 @@ if(!class_exists('DukaGate')) {
 		 */
 		function set_up_plugin_info($links, $file){
 			if ($file == DG_PLUGIN_BASENAME) {
-				$links[] = '<a href="options-general.php?page=dukagate-settings">'.__('Settings').'</a>';
+				$links[] = '<a href="edit.php?post_type=dg_product&page=dukagate-settings">'.__('Settings').'</a>';
 				$links[] = '<a href="http://dukagate.info/faq/" target="_blank">'.__('FAQ').'</a>';
 				$links[] = '<a href="http://dukagate.info/documentation/" target="_blank">'.__('Documentation').'</a>';
 				$links[] = '<a href="http://dukagate.info/forums/forum/bugs/" target="_blank">'.__('Bugs').'</a>';
@@ -263,7 +263,7 @@ if(!class_exists('DukaGate')) {
 			register_post_type( 'dg_product',
 				array(
 					'labels' => array(
-						'name' => __( 'Products' ,'dukagate'),
+						'name' => __( 'Dukagate' ,'dukagate'),
 						'singular_name' => __( 'Product' ,'dukagate'),
 						'add_new' => __('Add New Product','dukagate'),
 						'add_new_item' => __('Create New Product','dukagate'),
@@ -1975,6 +1975,19 @@ if(!class_exists('DukaGate')) {
 		}
 		
 		/**
+		 * Save user to database
+		 */
+		function save_user($user_name, $password, $email){
+			$user_id = username_exists( $user_name );
+			if ( !$user_id and email_exists($user_email) == false ) {
+				$random_password = wp_generate_password( $length=12, $include_standard_special_chars=false );
+				$user_id = wp_create_user( $user_name, $random_password, $user_email );
+			} else {
+				$random_password = __('User already exists.  Password inherited.');
+			}
+		}
+		
+		/**
 		 * Get produt image
 		 */
 		function product_image($productid){
@@ -1985,7 +1998,6 @@ if(!class_exists('DukaGate')) {
 			if (empty($main_image)){
 				$attachment_images = '';
 				$attachment_images = &get_children('post_type=attachment&post_status=inherit&post_mime_type=image&post_parent=' . $productid);
-				$price = get_post_meta($product->ID, 'price', true);
                 foreach ($attachment_images as $image) {
                     $main_image = $image->guid;
                     break;

@@ -4,8 +4,8 @@ Donate link: http://dukagate.info/
 Tags: shopping cart, web shop, cart, shop,Paypal,paypal,Pesapal, e-commerce, ecommerce
 
 Requires at least: 3.0
-Tested up to: 3.8.1
-Stable tag: 3.6.6
+Tested up to: 3.9.1
+Stable tag: 3.6.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -68,6 +68,20 @@ We test Dukagate on a large number of different server set-ups and envrionments 
 8. Sample product with a widget product
 
 == Changelog ==
+
+
+= 3.6.5 =
+There are afew things we have changes
+* Single menu for Dukagate - The plugin now uses a single menu with other sections tabed under the settings menu
+* Security Fixes - We are working on some security fixes and we will release new versions as they are fixed
+
+Upcoming Features
+* Multisite support
+* More payment gateways including Stripe
+* Inbuilt Page templates to reduce shortcode usage
+* Shop slug rewrite
+* Among others
+
 
 = 3.6.4 =
 There was some html added that was still on test

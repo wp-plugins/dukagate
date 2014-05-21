@@ -9,19 +9,82 @@
 
 add_action('admin_menu', 'dg_create_admin_menu');
 function dg_create_admin_menu(){
-	add_object_page('DukaGate', 'DukaGate', 'edit_others_posts', 'dukagate-order-log', '', DG_DUKAGATE_URL . '/images/dg_icon.png');
-	add_submenu_page('dukagate-order-log', __('DukaGate Order Log'), __('Order Log'), 'edit_others_posts', 'dukagate-order-log', 'dg_dukagate_order_log');
-	add_submenu_page('dukagate-order-log', __('DukaGate Payment Options'), __('Payment Options'), 'edit_others_posts', 'dukagate-payment-options', 'dg_dukagate_paymnet');
-	add_submenu_page('dukagate-order-log', __('DukaGate Shipping Options'), __('Shipping Options'), 'edit_others_posts', 'dukagate-shipping-options', 'dg_dukagate_shipping');
-	add_submenu_page('dukagate-order-log', __('DukaGate CheckOut Settings'), __('Check Out Settings'), 'edit_others_posts', 'dukagate-checkout-options', 'dg_dukagate_checkout');
-	add_submenu_page('dukagate-order-log', __('DukaGate Mail Settings'), __('Mail Settings'), 'edit_others_posts', 'dukagate-mail-options', 'dg_dukagate_mail');
-	add_submenu_page('dukagate-order-log', __('DukaGate Discount Settings'), __('Discounts'), 'edit_others_posts', 'dukagate-discounts', 'dg_dukagate_discounts');
-	add_submenu_page('dukagate-order-log', __('DukaGate Tools'), __('Tools'), 'edit_others_posts', 'dukagate-tools', 'dg_dukagate_tools');
-	add_submenu_page('dukagate-order-log', __('DukaGate Settings'), __('Settings'), 'edit_others_posts', 'dukagate-settings', 'dg_dukagate_settings');
-	add_submenu_page('dukagate-order-log', __('DukaGate Advanced Settings'), __('Advanced Settings'), 'edit_others_posts', 'dukagate-advanced-settings', 'dg_dukagate_advanced_settings');
+	add_submenu_page('edit.php?post_type=dg_product', __('DukaGate Order Log'), __('Order Log'), 'edit_others_posts', 'dukagate-order-log', 'dg_dukagate_order_log');
+	add_submenu_page('edit.php?post_type=dg_product', __('DukaGate Discount Settings'), __('Discounts'), 'edit_others_posts', 'dukagate-discounts', 'dg_dukagate_discounts');
+	add_submenu_page('edit.php?post_type=dg_product', __('DukaGate Settings'), __('Settings'), 'edit_others_posts', 'dukagate-settings', 'dg_admin_settings');
 	
 }
 
+/**
+ * Creats the Admin Tabs
+ *
+ */
+function dg_admin_tabs($current = 'settings'){
+	$tabs = array( 'settings' => __('Settings'), 'payment' => __('Payment Options'), 'shipping' => __('Shipping Options'), 'checkout' => __('Check Out Settings'), 'mail' => __('Mail'), 'tools' => __('Tools'), 'advanced' => __('Advanced Settings') ); 
+    $links = array();
+    echo '<div id="icon-themes" class="icon32"><br></div>';
+    echo '<h2 class="nav-tab-wrapper">';
+    foreach( $tabs as $tab => $name ){
+        $class = ( $tab == $current ) ? ' nav-tab-active' : '';
+        echo "<a class='nav-tab$class' href='".admin_url('edit.php?post_type=dg_product&page=dukagate-settings')."&tab=$tab'>$name</a>";
+    }
+    echo '</h2>';
+}
+
+/**
+ * Admin Settings
+ *
+ */
+function dg_admin_settings(){
+	global $pagenow;
+	?>
+	<div class="wrap">
+		<h2><?php _e("Dukagate Settings"); ?></h2>
+		<?php
+			if ( 'true' == esc_attr( $_GET['updated'] ) ) echo '<div class="updated" ><p>Settings updated.</p></div>';
+			
+			if ( isset ( $_GET['tab'] ) ) dg_admin_tabs($_GET['tab']); else dg_admin_tabs();
+		?>
+		<div id="poststuff">
+			<?php
+			if ( $pagenow == 'edit.php' && $_GET['page'] == 'dukagate-settings' ){ 
+				$tab = 'settings';
+				if ( isset ( $_GET['tab'] ) ) $tab = $_GET['tab']; 
+				switch ( $tab ){
+					case 'settings' :
+						dg_dukagate_settings();
+					break;
+					
+					case 'payment' :
+						dg_dukagate_paymnet();
+					break;
+					
+					case 'shipping' :
+						dg_dukagate_shipping();
+					break;
+					
+					case 'checkout' :
+						dg_dukagate_checkout();
+					break;
+					
+					case 'mail' :
+						dg_dukagate_mail();
+					break;
+					
+					case 'tools' :
+						dg_dukagate_tools();
+					break;
+					
+					case 'advanced' :
+						dg_dukagate_advanced_settings();
+					break;
+				}
+			}
+			?>
+		</div>
+	</div>
+	<?php
+}
 
 
 //Order Log
@@ -95,9 +158,9 @@ function dg_dukagate_order_log_info($id){
 	?>
 	<div class="wrap">
 		<h2><?php _e("Viewing order ").' '._e($order_log->invoice); ?></h2>
-		<div class="csv_export">
+		<!--div class="csv_export">
 			<a href="javascript:;" onclick="dukagate.order_csv_export('<?php echo $order_log->id; ?>');">Export as CSV</a>
-		</div>
+		</div-->
 		<?php
 			$invoice_file = DG_DUKAGATE_INVOICE_DIR. '/invoice_' . $order_log->invoice.'.pdf';
 			if(file_exists($invoice_file)){
@@ -297,8 +360,6 @@ function dg_dukagate_paymnet(){
 	global $dukagate;
 	$dg_gateways = $dukagate->list_all_gateways();
 	?>
-	<div class="wrap">
-		<h2><?php _e("Dukagate Payment Plugins"); ?></h2>
 		<div id="dg_payments">
 			<?php
 			if (is_array($dg_gateways) && count($dg_gateways) > 0) {
@@ -327,7 +388,6 @@ function dg_dukagate_paymnet(){
 			}
 			?>
 		</div>
-	</div>
 	<?php
 }
 
@@ -338,8 +398,6 @@ function dg_dukagate_shipping(){
 	global $dukagate;
 	$dg_gateways = $dukagate->list_all_shipping_gateways();
 	?>
-	<div class="wrap">
-		<h2><?php _e("Dukagate Shipping Plugins","dg-lang"); ?></h2>
 		<div id="dg_payments">
 			<?php
 			if (is_array($dg_gateways) && count($dg_gateways) > 0) {
@@ -368,7 +426,6 @@ function dg_dukagate_shipping(){
 			}
 			?>
 		</div>
-	</div>
 	<?php
 }
 
@@ -414,9 +471,8 @@ function dg_dukagate_checkout(){
 	$dukagate_settings->set_manadatory_forms('dg_email', $dg_form_elem);
 	
 	?>
-	<div class="wrap">
-		<h2><?php _e("Dukagate Check Out Page Settings"); ?></h2>
-		<form method="POST" action="<?php echo $_SERVER['REQUEST_URI']; ?>">
+
+		<form method="POST" action="<?php echo esc_url($_SERVER['REQUEST_URI']); ?>">
 			<div class="dg_settings">
 				<p class="submit">
 					<input class='button-primary' type='submit' name='dg_checkout_settings' value='<?php _e('Save Options'); ?>'/><br/>
@@ -539,7 +595,7 @@ function dg_dukagate_checkout(){
 				</p>
 			</div>
 		</form>
-	</div>
+
 	<?php
 }
 
@@ -549,8 +605,7 @@ function dg_dukagate_mail(){
 	$dukagate_mails = $dukagate_mail->list_mails();
 	$mail_types = DukaGate_Mail::mail_types();
 	?>
-	<div class="wrap paymentwrap">
-		<h2 class="title"><?php _e("Dukagate Mail Settings"); ?></h2>
+
 		<div id="dg_mail_settings">
 			<?php
 			if (is_array($dukagate_mails) && count($dukagate_mails) > 0) {
@@ -638,7 +693,7 @@ function dg_dukagate_mail(){
 			}
 			?>
 		</div>
-	</div>
+
 	<?php
 }
 
@@ -711,9 +766,8 @@ function dg_dukagate_settings(){
 	$dg_currency_codes = $dg_dukagate_settings['currency'];
 	$dg_country_code_name = $dg_dukagate_settings['country'];
 	?>
-		<div class="wrap">
-			<h2><?php _e("Dukagate Settings"); ?></h2>
-			<form method="POST" action="<?php echo $_SERVER['REQUEST_URI']; ?>">
+
+			<form method="POST" action="<?php echo esc_url($_SERVER['REQUEST_URI']); ?>">
 				<table class="form-table">
 					<tbody>
 						<tr valign="top">
@@ -827,8 +881,7 @@ function dg_dukagate_settings(){
 				<p class="submit">
 					<input class='button button-primary' type='submit' name='dg_settings' value='<?php _e('Save Options'); ?>' id='submitbutton' />
 				</p>
-			</form>
-		</div>
+			
 	<?php
 }
 
@@ -882,9 +935,8 @@ function dg_dukagate_advanced_settings(){
 		$dg_shop_settings['products_image'] = 'true';
 	}
 	?>
-		<div class="wrap">
-			<h2><?php _e("Dukagate Advanced Settings"); ?></h2>
-			<form method="POST" action="<?php echo $_SERVER['REQUEST_URI']; ?>">
+
+			<form method="POST" action="<?php echo esc_url($_SERVER['REQUEST_URI']); ?>">
 				<table class="form-table">
 					<tbody>
 						<tr valign="top">
@@ -997,7 +1049,6 @@ function dg_dukagate_advanced_settings(){
 					<input class='button-primary' type='submit' name='dg_advanced_settings' value='<?php _e('Save Options',"dg-lang"); ?>' id='submitbutton' />
 				</p>
 			</form>
-		</div>
 	<?php
 }
 
@@ -1098,7 +1149,7 @@ function dg_disc_add(){
 	<div class="wrap">
 		<h2><div class="dp_disc_hd"><div class="dp_dics_img" id="dp_disc_hd_img">&nbsp;</div>New Discount</div></h2>
 		Items marked with <span class="req"> *</span> are required
-		<form method="POST" action="">
+		<form method="POST" action="<?php echo esc_url($_SERVER['REQUEST_URI']); ?>">
 			<ul>
 				<li>
 					<table width="100%" border="0" class="widefat">
@@ -1156,7 +1207,7 @@ function dg_disc_view($id){
 	<div class="wrap">
 		<h2>Edit <?php echo $discount->code; ?></h2>
 		Items marked with <span class="req"> *</span> are required
-		<form method="POST" action="">
+		<form method="POST" action="<?php echo esc_url($_SERVER['REQUEST_URI']); ?>">
 			<input type="hidden" name="disc_id" value="<?php echo $discount->id; ?>" />
 			<ul>
 				<li>
@@ -1313,7 +1364,7 @@ function dg_dukagate_tools(){
 	?>
 	<div class="wrap">
 		<h2>Dukagate Tools</h2>
-		<form method="POST" enctype="multipart/form-data" action="<?php echo $_SERVER['REQUEST_URI']; ?>">
+		<form method="POST" enctype="multipart/form-data" action="<?php echo esc_url($_SERVER['REQUEST_URI']); ?>">
 			<table width="100%" border="0" class="widefat">
 				<tr>
 					<th align="left" scope="row"><?php _e("Export"); ?></th>
