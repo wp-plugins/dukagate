@@ -1,17 +1,50 @@
 <?php
-
 if(!class_exists('DukaGate')) {
-
+	
+	/**
+	 * Sets up the DukaGate plugin.
+	 *
+	 * Set up Pruducts and load files needed by the plugin. Set up global functions used by the plugin
+	 *
+	 * @since 1.0
+	 */
 	class DukaGate{
+	
+		/**
+		 * Plugin upload directory
+		 *
+		 * @since 1.0
+		 *
+		 * @var string
+		 */
+		public $plugin_upload_directory = '';
+	
+	
+		/**
+		 * Configures the plugin and future actions.
+		 *
+		 * @since 1.0
+		 */
+		public function __construct() {
+			$upload_dir = wp_upload_dir();
+			$this->plugin_upload_directory = $upload_dir['baseurl'].'/dg_download_files/';
+			$this->init();
+			//Set up File action
+			add_action('dg_daily_file_event', array(&$this, 'delete_files_daily'));
+			register_deactivation_hook(__FILE__,array(&$this,'destroy'));
+
+			$this->set_up_directories_and_file_info();
+			//Set up shop
+			$this->set_up();
+		}
 	
 		/**
 		 * Initialize plugin and set it up
 		 */
 		function init(){
 			$this->dukagate_db();
-			$this->set_up_plugin_info();
 			$this->set_up_directories_and_file_info();
-			update_option('dg_version_info', 3.5);
+			update_option('dg_version_info', 3.47);
 		}
 		
 		
@@ -23,6 +56,7 @@ if(!class_exists('DukaGate')) {
 			require_once(DG_DUKAGATE_DIR.'/dukagate-gateways.php');
 			require_once(DG_DUKAGATE_DIR.'/dukagate-invoice.php');
 			require_once(DG_DUKAGATE_DIR.'/dukagate-shipping.php');
+			require_once(DG_DUKAGATE_DIR.'/dukagate-discounts.php');
 			require_once(DG_DUKAGATE_DIR.'/dukagate-admin.php');
 			require_once(DG_DUKAGATE_DIR.'/dukagate-products.php');
 			require_once(DG_DUKAGATE_DIR.'/dukagate-cart.php');
@@ -40,18 +74,37 @@ if(!class_exists('DukaGate')) {
 			add_action('delete_grouped_product', array(&$this,'delete_grouped_product_metadata'), 10, 1);
 			add_action( 'save_post', array(&$this,'product_meta_save'));
 			add_action( 'edit_post', array(&$this,'add_quick_edit_save'), 10, 3);
-			add_action( 'init', array(&$this, 'set_up_styles'));
-			add_action( 'init', array(&$this, 'set_up_js'));
+			add_action('post_edit_form_tag', array(&$this, 'post_form_tag'));
+			add_action( 'admin_print_styles', array($this, 'admin_styles') );
+			add_action( 'admin_print_scripts', array($this, 'admin_scripts') );
+			add_action( 'wp_enqueue_scripts', array(&$this, 'set_up_styles'));
+			add_action( 'wp_enqueue_scripts', array(&$this, 'set_up_js'));
 			add_action( 'init', array(&$this, 'load_dukagate_plugins'));
 			
 			add_filter('manage_dg_product_posts_columns', array(&$this,'create_post_column'));
 			add_action('manage_posts_custom_column', array(&$this,'render_post_columns'), 10, 2);
 			add_action('admin_footer-edit.php', array(&$this,'admin_edit_dg_product_foot'), 11);
 			add_action('quick_edit_custom_box',  array(&$this,'add_quick_edit'), 10, 2);
+			add_action ( 'plugins_loaded', array(&$this,'load_textdomain'), 7 );
+			
+			//Plugin info
+			add_filter('plugin_row_meta', array(&$this,'set_up_plugin_info'),10,2);
+			
+			//Dashboard Widget
+			add_action('wp_dashboard_setup', array(&$this,'revenue_graph'), 1);
 		}
 		
 		
+		/**
+		 * Load Text Domain
+		 */
+		function load_textdomain(){
+			$locale = apply_filters( 'wordpress_locale', get_locale() );
+			$mofile = DG_DUKAGATE_DIR . "/lang/dukagate-$locale.mo";
 
+			if ( file_exists( $mofile ) )
+				load_textdomain( 'dukagate', $mofile );
+		}
 		
 		/**
 		 * Plugin deactivated function
@@ -74,47 +127,112 @@ if(!class_exists('DukaGate')) {
 						'shipping' => $wpdb->prefix . "dkgt_shipping"						
 						);
 		}
+
 		
 		/**
-		 * Set up plugin info
+		 * Register plugin links to allows users to easily access the settings page while on the plugin list
+		 *
+		 * @since 1.0
+		 *
+		 * @return void
 		 */
-		private function set_up_plugin_info(){
-			
+		function set_up_plugin_info($links, $file){
+			if ($file == DG_PLUGIN_BASENAME) {
+				$links[] = '<a href="edit.php?post_type=dg_product&page=dukagate-settings">'.__('Settings').'</a>';
+				$links[] = '<a href="http://dukagate.info/faq/" target="_blank">'.__('FAQ').'</a>';
+				$links[] = '<a href="http://dukagate.info/documentation/" target="_blank">'.__('Documentation').'</a>';
+				$links[] = '<a href="http://dukagate.info/forums/forum/bugs/" target="_blank">'.__('Bugs').'</a>';
+				$links[] = '<a href="http://dukagate.info/contact/" target="_blank">'.__('Contact').'</a>';
+			}
+			return $links;
 		}
 		
+		/**
+		 * Set up revenue widget
+		 */
+		function revenue_graph(){
+			wp_add_dashboard_widget( 'dg_revenue_widget_admin', __( 'Dukagate Revenue Graph','dukagate' ), array(&$this,'draw_revenue_graph') );
+		}
+		
+		/** 
+		 * Draw revenue graph
+		 */
+		function draw_revenue_graph(){
+			$dg_shop_settings = get_option('dukagate_shop_settings');
+			printf(__("Total %d orders sold with total amount of %s %d"),$this->total_sales(),$dg_shop_settings['currency_symbol'],number_format($this->total_revenue(),2));
+			$payment_status = array('Pending', 'Paid', 'Canceled');
+			$days = array();
+			?>
+			<canvas id="revenuedata"></canvas>
+			<script type="text/javascript">
+				var width = jQuery('#dg_revenue_widget_admin').width() - 20;
+				var height = jQuery('#dg_revenue_widget_admin').width() - 200;
+				var g = new Bluff.Line('revenuedata', width+'x'+height);
+				g.title =  '<?php __( 'Transactions Revenue' ); ?>';
+				g.tooltips = true;
+				g.theme_37signals();
+				g.labels = {};
+				<?php
+				foreach($payment_status as $status){
+					$results = $this->sales_summary($status);
+					if(!empty($results)){
+						?>
+						g.data("<?php echo $status; ?>", <?php echo str_replace('"', "", json_encode($results['total'])); ?>);
+						<?php
+						array_push($days,$results['days']);
+					}
+				}
+				$days = array_unique($days);
+				$i=0;
+				foreach($days as $day){
+					foreach($day as $d){
+						?>
+						g.labels[<?php echo $i; ?>] = '<?php echo $d; ?>';
+						<?php
+						$i++;
+					}
+				}
+				?>
+				g.draw();
+			</script>
+			<?php
+		}
+		
+		//Load admin styles
+		function admin_styles(){
+			wp_enqueue_style('dg_admin_css', DG_DUKAGATE_URL.'/css/dukagate_admin.css');
+		}
 		
 		//Load up styles
 		function set_up_styles(){
-			if(is_admin()){
-				wp_enqueue_style('dg_admin_css', DG_DUKAGATE_URL.'/css/dukagate_admin.css');
-			}else{
-				wp_enqueue_style('dukagate_css', DG_DUKAGATE_URL.'/css/dukagate.css');
-			}
+			wp_enqueue_style('dukagate_css', DG_DUKAGATE_URL.'/css/dukagate.css');
+		}
+		
+		//Load admin scripts
+		function admin_scripts(){
+			wp_enqueue_script('dukagate_admin', DG_DUKAGATE_URL.'/js/dukagate_admin.js', array('jquery'), '', false);
+			wp_enqueue_script('wysiwyg_js', DG_DUKAGATE_URL.'/js/wyzz0.65/wyzz.php', array('jquery'), '', false);
+			wp_enqueue_script('js_class', DG_DUKAGATE_URL.'/js/graph/js-class.js',__FILE__);
+			wp_enqueue_script('excanvas', DG_DUKAGATE_URL.'/js/graph/excanvas.js',__FILE__);
+			wp_enqueue_script('bluff_min', DG_DUKAGATE_URL.'/js/graph/bluff-min.js',__FILE__);
+			wp_enqueue_script("dukagate_admin");
+			wp_enqueue_script("wysiwyg_js");
+			wp_enqueue_script("js_class");
+			wp_enqueue_script("excanvas");
+			wp_enqueue_script("bluff_min");
 		}
 		
 		//Load Javascript
 		function set_up_js(){
-			if(is_admin()){
-				wp_enqueue_script('dukagate_admin', DG_DUKAGATE_URL.'/js/dukagate_admin.js', array('jquery'), '', false);
-				wp_enqueue_script('wysiwyg_js', DG_DUKAGATE_URL.'/js/wyzz0.65/wyzz.php', array('jquery'), '', false);
-				wp_enqueue_script('js_class', DG_DUKAGATE_URL.'/js/graph/js-class.js',__FILE__);
-				wp_enqueue_script('excanvas', DG_DUKAGATE_URL.'/js/graph/excanvas.js',__FILE__);
-				wp_enqueue_script('bluff_min', DG_DUKAGATE_URL.'/js/graph/bluff-min.js',__FILE__);
-				wp_enqueue_script("dukagate_admin");
-				wp_enqueue_script("wysiwyg_js");
-				wp_enqueue_script("js_class");
-				wp_enqueue_script("excanvas");
-				wp_enqueue_script("bluff_min");
-			}else{
-				wp_enqueue_script('dukagate_js', DG_DUKAGATE_URL.'/js/dukagate.js', array('jquery'), '', false);
-				wp_enqueue_script('jquery_validate', DG_DUKAGATE_URL.'/js/jquery.validate.js', array('jquery'), '', false);
-				wp_enqueue_script('jquery_form', DG_DUKAGATE_URL.'/js/jquery.form.js', array('jquery'), '', false);
-				
-				wp_enqueue_script("jquery_validate");
-				wp_enqueue_script("jquery_form");
-				wp_enqueue_script("dukagate_js");
-				wp_localize_script('dukagate_js', 'dg_js', array( 'dg_url' => get_bloginfo('url') , 'ajaxurl' => admin_url('admin-ajax.php')) );
-			}
+			add_theme_support('html5');
+			wp_enqueue_script('dukagate_js', DG_DUKAGATE_URL.'/js/dukagate.js', array('jquery'), '', false);
+			wp_enqueue_script('jquery_validate', DG_DUKAGATE_URL.'/js/jquery.validate.js', array('jquery'), '', false);
+			wp_enqueue_script('jquery_form', DG_DUKAGATE_URL.'/js/jquery.form.js', array('jquery'), '', false);
+			wp_enqueue_script("jquery_validate");
+			wp_enqueue_script("jquery_form");
+			wp_enqueue_script("dukagate_js");
+			wp_localize_script('dukagate_js', 'dg_js', array( 'dg_url' => get_bloginfo('url') , 'ajaxurl' => admin_url('admin-ajax.php')) );
+			
 		}
 		
 		/** 
@@ -145,20 +263,20 @@ if(!class_exists('DukaGate')) {
 			register_post_type( 'dg_product',
 				array(
 					'labels' => array(
-						'name' => __( 'Products' ),
-						'singular_name' => __( 'Product' ),
-						'add_new' => __('Add New Product'),
-						'add_new_item' => __('Create New Product'),
-						'edit_item' => __('Edit Products'),
-						'edit' => __('Edit Product'),
-						'new_item' => __('New Product'),
-						'view_item' => __('View Product'),
-						'search_items' => __('Search Products'),
-						'not_found' => __('No Products Found'),
-						'not_found_in_trash' => __('No Products found in Trash'),
-						'view' => __('View Product')
+						'name' => __( 'Dukagate' ,'dukagate'),
+						'singular_name' => __( 'Product' ,'dukagate'),
+						'add_new' => __('Add New Product','dukagate'),
+						'add_new_item' => __('Create New Product','dukagate'),
+						'edit_item' => __('Edit Products','dukagate'),
+						'edit' => __('Edit Product','dukagate'),
+						'new_item' => __('New Product','dukagate'),
+						'view_item' => __('View Product','dukagate'),
+						'search_items' => __('Search Products','dukagate'),
+						'not_found' => __('No Products Found','dukagate'),
+						'not_found_in_trash' => __('No Products found in Trash','dukagate'),
+						'view' => __('View Product','dukagate')
 					),
-					'description' => __('Products for your Dukagate store.'),
+					'description' => __('Products for your Dukagate store.','dukagate'),
 					'menu_icon' => DG_DUKAGATE_URL . '/images/dg_icon.png',
 					'public' => true,
 					'publicly_queryable' => true,
@@ -180,7 +298,7 @@ if(!class_exists('DukaGate')) {
 		public function set_up_product_meta_box(){
 			add_meta_box( 
 				'dukagate_sectionid',
-				__( 'Product Details' ),
+				__( 'Product Details' ,'dukagate'),
 				array(&$this, 'product_inner_custom_box'),
 				'dg_product','side', 'high'
 			);
@@ -192,7 +310,7 @@ if(!class_exists('DukaGate')) {
 		public function product_inner_custom_box( $post ){
 			// Use nonce for verification
 			wp_nonce_field( plugin_basename( __FILE__ ), 'dukagate_noncename' );
-			$post_id = @$_GET['post'];
+			$post_id = $post->ID;
 			$content_price = get_post_meta($post_id, 'price', true);
 			$fixed_price = get_post_meta($post_id, 'fixed_price', true);
 			$sku = get_post_meta($post_id, 'sku', true);
@@ -204,30 +322,48 @@ if(!class_exists('DukaGate')) {
 			?>
 			<table width="100%">
 				<tr>
-					<td><?php _e('Price:');?> :</td>
+					<td><?php _e('Price:','dukagate');?> :</td>
 					<td><input type="text" value="<?php echo $content_price; ?>" name="price" id="price"></td>
 				</tr>
 				<tr>
-					<td><?php _e('Distinct Price:');?> :</td>
+					<td><?php _e('Distinct Price:','dukagate');?> :</td>
 					<td><input type="checkbox" value="checked" name="fixed_price" <?php echo ($fixed_price == 'checked') ? "checked='checked'": ""; ?> /></td>
 				</tr>
 				<tr>
-					<td colspan="2">(<?php _e('if selected the grouped product will use this price ');?>)</td>
+					<td colspan="2">(<?php _e('if selected the grouped product will use this price ','dukagate');?>)</td>
 				</tr>
 				<tr>
-					<td><?php _e('SKU:');?> :</td>
+					<td><?php _e('SKU:','dukagate');?> :</td>
 					<td><input type="text" value="<?php echo $sku; ?>" name="sku" id="sku"></td>
 				</tr>
 				<tr>
-					<td><?php _e('Digital File:');?> :</td>
-					<td><input type="text" value="<?php echo $digital_file; ?>" name="digital_file" id="digital_file"></td>
+					<td><?php _e('Digital File:','dukagate');?> :</td>
+					<td>
+						<?php
+							if(!empty($digital_file)){
+								?>
+								<a href="<?php echo $digital_file['url']; ?>" target="_blank"><?php _e('Download','dukagate');?></a>
+								<?php
+							}else{
+								_e('No file uploaded');
+							}
+						?>
+						<input type="file" id="dg_digifile" name="dg_digifile" value="" size="25" />
+					</td>
 				</tr>
 				<tr>
-					<td><?php _e('Affiliate URL:');?> :</td>
+					<td><?php _e('Affiliate URL:','dukagate');?> :</td>
 					<td><input type="text" value="<?php echo $affiliate_url; ?>" name="affiliate_url" id="affiliate_url"></td>
 				</tr>
 			</table>
 			<?php
+		}
+		
+		/** 
+		 * Post Form Tag
+		 */
+		public function post_form_tag(){
+			echo ' enctype="multipart/form-data"';
 		}
 		
 		/**
@@ -267,13 +403,19 @@ if(!class_exists('DukaGate')) {
 				update_post_meta($post_id, 'fixed_price', $fixed_price);
 			}
 			
-			// for digital_file
-			if (NULL == @$_POST['digital_file']) {
-				//do nothing
-			} else {
-				$digital_file = @$_POST['digital_file'];
-				update_post_meta($post_id, 'digital_file', $digital_file);
+			if(!empty($_FILES['dg_digifile']['name'])) {
+				// Get the file type of the upload
+				$arr_file_type = wp_check_filetype(basename($_FILES['dg_digifile']['name']));
+				$uploaded_type = $arr_file_type['type'];
+				$upload = $this->digital_upload($_FILES['dg_digifile']['name'], file_get_contents($_FILES['dg_digifile']['tmp_name']));
+     
+				if(isset($upload['error']) && $upload['error'] != 0) {
+					wp_die('There was an error uploading your file. The error is: ' . $upload['error'],'dukagate');
+				} else {
+					update_post_meta($post_id, 'digital_file', $upload);     
+				} // end if/else
 			}
+
 			
 			// for sku
 			if (NULL == @$_POST['sku']) {
@@ -297,7 +439,8 @@ if(!class_exists('DukaGate')) {
 		 * Create post columns
 		 */
 		function create_post_column($columns){
-			$columns['price'] = 'Price';
+			$columns['image'] = __('Image','dukagate');
+			$columns['price'] = __('Price','dukagate');
 			return $columns;
 		}
 		
@@ -306,6 +449,15 @@ if(!class_exists('DukaGate')) {
 		 */
 		function render_post_columns($column_name, $id){
 			switch ($column_name) {
+				case 'image':
+					// show widget set
+					$main_image = $this->product_image($id);
+					$widget_set = NULL;
+					if (!$main_image) 
+						$main_image = DG_DUKAGATE_URL.'/images/no.jpg';    
+					
+					echo '<img src="' . $this->resize_image('', $main_image, 100, 100).'" width="100px" height="100px">';				
+					break;
 				case 'price':
 					// show widget set
 					$price = get_post_meta( $id, 'price', TRUE);
@@ -313,7 +465,7 @@ if(!class_exists('DukaGate')) {
 					if ($price) 
 						echo $price;
 					else 
-						echo 'Not Set';               
+						_e('Not Set');               
 					break;
 			}
 		}
@@ -338,7 +490,7 @@ if(!class_exists('DukaGate')) {
 			?>
 			<fieldset class="inline-edit-col-left">
 			<div class="inline-edit-col">
-				<span class="title">Price</span>
+				<span class="title"><?php _e('Price','dukagate');?></span>
 				<input type="hidden" name="dukagate_noncename" id="dukagate_noncename" value="dukagate_noncename" />
 				<input type="text" value="" name="price" id="price" />
 				<input type="hidden" name="is_quickedit" value="true" /></div>
@@ -347,7 +499,9 @@ if(!class_exists('DukaGate')) {
 			<?php
 		}
 		
-		
+		/**
+		 * Quick edit save
+		 */
 		public function add_quick_edit_save($post_id, $post){
 			if( $post->post_type != 'dg_product' ) return;
 			if (isset($_POST['is_quickedit']))
@@ -362,15 +516,15 @@ if(!class_exists('DukaGate')) {
 		  $labels = array(
 			'name' => _x( 'DukaGate Product Categories', 'taxonomy general name' ),
 			'singular_name' => _x( 'DukaGate Product Category', 'taxonomy singular name' ),
-			'search_items' =>  __( 'Search Product Categories' ),
-			'all_items' => __( 'All Product Categories' ),
-			'parent_item' => __( 'Parent Product Category' ),
-			'parent_item_colon' => __( 'Parent Product Category:' ),
-			'edit_item' => __( 'Edit Product Category Name' ), 
-			'update_item' => __( 'Update Product Category Name' ),
-			'add_new_item' => __( 'Add New Product Category Name' ),
-			'new_item_name' => __( 'New Product Category Name' ),
-			'menu_name' => __( 'Product Categories' ),
+			'search_items' =>  __( 'Search Product Categories' ,'dukagate'),
+			'all_items' => __( 'All Product Categories' ,'dukagate'),
+			'parent_item' => __( 'Parent Product Category' ,'dukagate'),
+			'parent_item_colon' => __( 'Parent Product Category:','dukagate' ),
+			'edit_item' => __( 'Edit Product Category Name' ,'dukagate'), 
+			'update_item' => __( 'Update Product Category Name' ,'dukagate'),
+			'add_new_item' => __( 'Add New Product Category Name' ,'dukagate'),
+			'new_item_name' => __( 'New Product Category Name' ,'dukagate'),
+			'menu_name' => __( 'Product Categories' ,'dukagate'),
 		  ); 	
 
 		  register_taxonomy('grouped_product',array('products'), array(
@@ -390,37 +544,37 @@ if(!class_exists('DukaGate')) {
 		 */
 		function grouped_product_metabox_add($tag) { ?>
 			<div class="form-field">
-				<label for="image-url"><?php _e('Image URL') ?></label>
+				<label for="image-url"><?php _e('Image URL','dukagate') ?></label>
 				<input name="image-url" id="image-url" type="text" value="" size="40" />
-				<p class="description"><?php _e('This image will be the thumbnail shown on the group page.'); ?></p>
+				<p class="description"><?php _e('This image will be the thumbnail shown on the group page.','dukagate'); ?></p>
 			</div>
 			<div class="form-field">
-				<label for="product_image_width"><?php _e('Product Image Width') ?></label>
+				<label for="product_image_width"><?php _e('Product Image Width','dukagate') ?></label>
 				<input name="product_image_width" id="product_image_width" type="text" value="" size="40" />
-				<p class="description"><?php _e('This will be the width of the product images. If blank, it will use the default settings'); ?></p>
+				<p class="description"><?php _e('This will be the width of the product images. If blank, it will use the default settings','dukagate'); ?></p>
 			</div>
 			<div class="form-field">
-				<label for="product_image_height"><?php _e('Product Image Height') ?></label>
+				<label for="product_image_height"><?php _e('Product Image Height','dukagate') ?></label>
 				<input name="product_image_height" id="product_image_height" type="text" value="" size="40" />
-				<p class="description"><?php _e('This will be the height of the product images. If blank, it will use the default settings'); ?></p>
+				<p class="description"><?php _e('This will be the height of the product images. If blank, it will use the default settings','dukagate'); ?></p>
 			</div>
 			<div class="form-field">
-				<label for="page-url"><?php _e('Page URL') ?></label>
+				<label for="page-url"><?php _e('Page URL','dukagate') ?></label>
 				<input name="page-url" id="page-url" type="text" value="" size="40" />
-				<p class="description"><?php _e('This will be the group page url.'); ?></p>
+				<p class="description"><?php _e('This will be the group page url.','dukagate'); ?></p>
 			</div>
 			<div class="form-field">
-				<label for="price"><?php _e('Price') ?></label>
+				<label for="price"><?php _e('Price','dukagate') ?></label>
 				<input name="price" id="price" type="text" value="" size="10" />
-				<p class="description"><?php _e('This will be the group price.'); ?></p>
+				<p class="description"><?php _e('This will be the group price.','dukagate'); ?></p>
 			</div>
 			<div class="form-field">
-				<label for="product_select"><?php _e('Product Select') ?></label>
+				<label for="product_select"><?php _e('Product Select','dukagate') ?></label>
 				<select name="product_select" id="product_select">
-					<option value="checkbox" ><?php _e('Use CheckBox', "dg-lang"); ?></option>
-					<option value="radio" ><?php _e('Use Radio', "dg-lang"); ?></option>
+					<option value="checkbox" ><?php _e('Use CheckBox','dukagate'); ?></option>
+					<option value="radio" ><?php _e('Use Radio','dukagate'); ?></option>
 				</select>
-				<p class="description"><?php _e('This will be the select option for the product.'); ?></p>
+				<p class="description"><?php _e('This will be the select option for the product.','dukagate'); ?></p>
 			</div>
 			<?php 
 		} 	
@@ -433,60 +587,60 @@ if(!class_exists('DukaGate')) {
 			?>
 			<tr class="form-field">
 				<th scope="row" valign="top">
-					<label for="image-url"><?php _e('Image URL'); ?></label>
+					<label for="image-url"><?php _e('Image URL','dukagate'); ?></label>
 				</th>
 				<td>
 					<input name="image-url" id="image-url" type="text" value="<?php echo $this->grouped_product_crude($tag->term_id, 'image-url', '', 'get'); ?>" size="40" />
-					<p class="description"><?php _e('This image will be the thumbnail shown on the group page.'); ?></p>
+					<p class="description"><?php _e('This image will be the thumbnail shown on the group page.','dukagate'); ?></p>
 				</td>
 			</tr>
 			<tr class="form-field">
 				<th scope="row" valign="top">
-					<label for="product_image_width"><?php _e('Product Image Width') ?></label>
+					<label for="product_image_width"><?php _e('Product Image Width','dukagate') ?></label>
 				</th>
 				<td>
 					<input name="product_image_width" id="product_image_width" type="text" value="" size="40" />
-					<p class="description"><?php _e('This will be the width of the product images. If blank, it will use the default settings'); ?></p>
+					<p class="description"><?php _e('This will be the width of the product images. If blank, it will use the default settings','dukagate'); ?></p>
 				</td>
 			</tr>
 			<tr class="form-field">
 				<th scope="row" valign="top">
-					<label for="product_image_height"><?php _e('Product Image Height') ?></label>
+					<label for="product_image_height"><?php _e('Product Image Height','dukagate') ?></label>
 				</th>
 				<td>
 					<input name="product_image_height" id="product_image_height" type="text" value="" size="40" />
-					<p class="description"><?php _e('This will be the height of the product images. If blank, it will use the default settings'); ?></p>
+					<p class="description"><?php _e('This will be the height of the product images. If blank, it will use the default settings','dukagate'); ?></p>
 				</td>
 			</tr>
 			<tr class="form-field">
 				<th scope="row" valign="top">
-					<label for="page-url"><?php _e('Page URL'); ?></label>
+					<label for="page-url"><?php _e('Page URL','dukagate'); ?></label>
 				</th>
 				<td>
 					<input name="page-url" id="page-url" type="text" value="<?php echo $this->grouped_product_crude($tag->term_id, 'page-url', '', 'get'); ?>" size="40" />
-					<p class="description"><?php _e('This will be the group page url.'); ?></p>
+					<p class="description"><?php _e('This will be the group page url.','dukagate'); ?></p>
 				</td>
 			</tr>
 			<tr class="form-field">
 				<th scope="row" valign="top">
-					<label for="price"><?php _e('Price'); ?></label>
+					<label for="price"><?php _e('Price','dukagate'); ?></label>
 				</th>
 				<td>
 					<input name="price" id="price" type="text" value="<?php echo $this->grouped_product_crude($tag->term_id, 'price', '', 'get'); ?>" size="40" />
-					<p class="description"><?php _e('This will be the group price.'); ?></p>
+					<p class="description"><?php _e('This will be the group price.','dukagate'); ?></p>
 				</td>
 			</tr>
 			<tr class="form-field">
 				<th scope="row" valign="top">
-					<label for="product_select"><?php _e('Product Select') ?></label>
+					<label for="product_select"><?php _e('Product Select','dukagate'); ?></label>
 				</th>
 				<td>
 					<select name="product_select" id="product_select">
-						<option value="none" <?php selected( $product_select, 'none' ); ?>><?php _e('Simple Click to select'); ?></option>
-						<option value="checkbox" <?php selected( $product_select, 'checkbox' ); ?>><?php _e('Use CheckBox'); ?></option>
-						<option value="radio" <?php selected( $product_select, 'radio' ); ?>><?php _e('Use Radio'); ?></option>
+						<option value="none" <?php selected( $product_select, 'none' ); ?>><?php _e('Simple Click to select','dukagate'); ?></option>
+						<option value="checkbox" <?php selected( $product_select, 'checkbox' ); ?>><?php _e('Use CheckBox','dukagate'); ?></option>
+						<option value="radio" <?php selected( $product_select, 'radio' ); ?>><?php _e('Use Radio','dukagate'); ?></option>
 					</select>
-					<p class="description"><?php _e('This will be the select option for the product.'); ?></p>
+					<p class="description"><?php _e('This will be the select option for the product.','dukagate'); ?></p>
 				</td>
 			</tr>
 			<?php 
@@ -586,6 +740,16 @@ if(!class_exists('DukaGate')) {
 		}
 		
 		/**
+		 * Get array position
+		 */
+		static function array_pos($needle, $haystack){
+			for ($i = 0, $l = count($haystack); $i < $l; ++$i) {
+				if (in_array($needle, $haystack[$i])) return $i;
+			}
+			return false;
+		}
+		
+		/**
 		 * Convert Array To Json
 		 */
 		static function array_to_json($array){
@@ -640,10 +804,10 @@ if(!class_exists('DukaGate')) {
 		}
 		
 		/**
-		 * Delete expired files
+		 * Delete expired downloaded files
 		 */
 		public function delete_files_daily(){
-			$files = glob(DG_DOWNLOAD_FILES_DIR.'/*', GLOB_BRACE);
+			$files = glob(DG_DOWNLOAD_FILES_DIR_TEMP.'/*', GLOB_BRACE);
 
 			if (count($files) > 0) {
 				$delete_time = floatval(get_option('dg_dl_expiration_time'));
@@ -661,6 +825,45 @@ if(!class_exists('DukaGate')) {
 
 				}
 			}
+		}
+		
+		/** 
+		 * This function creates a copy of the uploaded file in the upload directory
+		 *
+		 *
+		 */
+		public function digital_upload($name, $bits, $time = null){
+			if ( empty( $name ) )
+				return array( 'error' => __( 'Empty filename' ) );
+				
+			$wp_filetype = wp_check_filetype( $name );
+			if ( ! $wp_filetype['ext'] && ! current_user_can( 'unfiltered_upload' ) )
+				return array( 'error' => __( 'Invalid file type' ,'dukagate') );
+				
+			
+			$filename = wp_unique_filename( DG_DOWNLOAD_FILES_DIR, $name );
+			
+			$new_file = DG_DOWNLOAD_FILES_DIR . "$filename";
+
+			$ifp = @ fopen( $new_file, 'wb' );
+			if ( ! $ifp )
+				return array( 'error' => sprintf( __( 'Could not write file %s' ), $new_file ) );
+
+			@fwrite( $ifp, $bits );
+			fclose( $ifp );
+			clearstatcache();
+
+			// Set correct file permissions
+			$stat = @ stat( dirname( $new_file ) );
+			$perms = $stat['mode'] & 0007777;
+			$perms = $perms & 0000666;
+			@ chmod( $new_file, $perms );
+			clearstatcache();
+
+			// Compute the URL
+			$url = $this->plugin_upload_directory . "$filename";
+
+			return array( 'file' => $new_file, 'original' => $name, 'url' => $url , 'error' => false );
 		}
 		
 		/**
@@ -804,7 +1007,7 @@ if(!class_exists('DukaGate')) {
 		 */
 		public function set_default_options(){
 			$opts = array(
-							'shopname' => 'DukaGate Shop', 
+							'shopname' => __('DukaGate Shop','dukagate'), 
 							'address' => '',
 							'state_province' => '',
 							'postal' => '',
@@ -1104,11 +1307,22 @@ if(!class_exists('DukaGate')) {
 			$order_form_info = array();
 			while($count > 0){
 				if(!empty($order_info[$dg_form_elem[$count]['uname']])){
-					$order_form_info[$count]['key'] = $dg_form_elem[$count]['name'];
-					$order_form_info[$count]['value'] = $order_info[$dg_form_elem[$count]['uname']];
+					$order_form_info[]['key'] = $dg_form_elem[$count]['name'];
+					$order_form_info[]['value'] = $order_info[$dg_form_elem[$count]['uname']];
 				}
 				$count--;
 			}		
+			$order_form_info[]['key'] = 'First Name';
+			$order_form_info[]['value'] = $order_info['dg_firstname'];
+			$order_form_info[]['key'] = 'Last Name';
+			$order_form_info[]['value'] = $order_info['dg_lastname'];
+			$order_form_info[]['key'] = 'Company';
+			$order_form_info[]['value'] = $order_info['dg_company'];
+			$order_form_info[]['key'] = 'Country';
+			$order_form_info[]['value'] = $order_info['dg_country'];
+			$order_form_info[]['key'] = 'Phone';
+			$order_form_info[]['value'] = $order_info['dg_phone'];
+			
 			$order_info = self::array_to_json($order_form_info);
 			$table_name = $databases['transactions'];
 			$sql = "INSERT INTO `$table_name`(`invoice`,`products`, `shipping_info`, `names`, `email`,`order_info`,`payment_gateway`,`discount`,`total`, `shipping`,`payment_status`) 
@@ -1136,13 +1350,14 @@ if(!class_exists('DukaGate')) {
 			$url = site_url();
 			$total = 0.00;
 			$total_discount = 0.00;
-			$info = 'Products<br/>';
+			$info = __("Products",'dukagate');
+			$info .= '<br/>';
 			$info .= '<table style="text-align:left">';
 			$info .= '<tr>';
-			$info .= '<th scope="col" width="30%">'.__("Product").'</th>';
-			$info .= '<th scope="col" width="10%">'.__("Quantity").'</th>';
-			$info .= '<th scope="col" width="30%">'.__("Price").'</th>';
-			$info .= '<th scope="col" width="30%">'.__("Total").'</th>';
+			$info .= '<th scope="col" width="30%">'.__("Product",'dukagate').'</th>';
+			$info .= '<th scope="col" width="10%">'.__("Quantity",'dukagate').'</th>';
+			$info .= '<th scope="col" width="30%">'.__("Price",'dukagate').'</th>';
+			$info .= '<th scope="col" width="30%">'.__("Total",'dukagate').'</th>';
 			$info .= '</tr>';
 			$cart_products = $_SESSION['dg_cart'];
 			foreach ($cart_products as $cart_items => $cart) {
@@ -1155,26 +1370,26 @@ if(!class_exists('DukaGate')) {
 				$total += $cart['total'];
 			}
 			$info .= '<tr>';
-			$info .= '<td>Total Discount</td>';
+			$info .= '<td>'.__("Total Discount",'dukagate').'</td>';
 			$info .= '<td>&nbsp;</td>';
 			$info .= '<td>&nbsp;</td>';
 			$info .= '<td>'.number_format($discount,2).'</td>';
 			$info .= '</tr>';
 			$info .= '<tr>';
-			$info .= '<td class="total">'.__("Total Shipping").'</td>';
+			$info .= '<td class="total">'.__("Total Shipping",'dukagate').'</td>';
 			$info .= '<td>&nbsp;</td>';
 			$info .= '<td>&nbsp;</td>';
 			$info .= '<td class="total amount">'.$dg_shop_settings['currency_symbol'].' '.number_format($total_shipping,2).'</td>';
 			$info .= '</tr>';
 			$info .= '<tr>';
 			$info .= '<tr>';
-			$info .= '<td>Total</td>';
+			$info .= '<td>'.__("Total",'dukagate').'</td>';
 			$info .= '<td>&nbsp;</td>';
 			$info .= '<td>&nbsp;</td>';
 			$info .= '<td>'.$dg_shop_settings['currency_symbol'].' '.number_format(($total - $discount) + $total_shipping ,2).'</td>';
 			$info .= '</tr>';
 			$info .= '</table>';
-			$info .= 'User Info<br/>';
+			$info .= __("User Info",'dukagate').'<br/>';
 			foreach ($order_form_info as $order_in => $order) {
 				foreach ($order as $key => $value) {
 					$info .= $key.' :: '.$value .='<br/>';
@@ -1480,7 +1695,7 @@ if(!class_exists('DukaGate')) {
 				if(@$dg_form_elem['dg_fullname_visible'] == 'checked'){
 					$cnt .= '<tr>';
 					$cnt .= '<td>';
-					$cnt .= '<label for="dg_fullname" class="dg_fullname">'.__("Full Names ").'</label>';
+					$cnt .= '<label for="dg_fullname" class="dg_fullname">'.__("Full Names ",'dukagate').'</label>';
 					$cnt .= '</td>';
 					$cnt .= '<td>';
 					$mandatory = '';
@@ -1494,7 +1709,7 @@ if(!class_exists('DukaGate')) {
 				if(@$dg_form_elem['dg_firstname_visible'] == 'checked'){
 					$cnt .= '<tr>';
 					$cnt .= '<td>';
-					$cnt .= '<label for="dg_firstname" class="dg_firstname">'.__("First Name ").'</label>';
+					$cnt .= '<label for="dg_firstname" class="dg_firstname">'.__("First Name ",'dukagate').'</label>';
 					$cnt .= '</td>';
 					$cnt .= '<td>';
 					$mandatory = '';
@@ -1508,7 +1723,7 @@ if(!class_exists('DukaGate')) {
 				if(@$dg_form_elem['dg_lastname_visible'] == 'checked'){
 					$cnt .= '<tr>';
 					$cnt .= '<td>';
-					$cnt .= '<label for="dg_lastname" class="dg_lastname">'.__("Last Name ").'</label>';
+					$cnt .= '<label for="dg_lastname" class="dg_lastname">'.__("Last Name ",'dukagate').'</label>';
 					$cnt .= '</td>';
 					$cnt .= '<td>';
 					$mandatory = '';
@@ -1522,7 +1737,7 @@ if(!class_exists('DukaGate')) {
 				if(@$dg_form_elem['dg_email_visible'] == 'checked'){
 					$cnt .= '<tr>';
 					$cnt .= '<td>';
-					$cnt .= '<label for="dg_email" class="dg_email">'.__("Email").'</label>';
+					$cnt .= '<label for="dg_email" class="dg_email">'.__("Email",'dukagate').'</label>';
 					$cnt .= '</td>';
 					$cnt .= '<td>';
 					$mandatory = '';
@@ -1536,7 +1751,7 @@ if(!class_exists('DukaGate')) {
 				if(@$dg_form_elem['dg_phone_visible'] == 'checked'){
 					$cnt .= '<tr>';
 					$cnt .= '<td>';
-					$cnt .= '<label for="dg_phone" class="dg_phone">'.__("Phone").'</label>';
+					$cnt .= '<label for="dg_phone" class="dg_phone">'.__("Phone",'dukagate').'</label>';
 					$cnt .= '</td>';
 					$cnt .= '<td>';
 					$mandatory = '';
@@ -1550,7 +1765,7 @@ if(!class_exists('DukaGate')) {
 				if(@$dg_form_elem['dg_country_visible'] == 'checked'){
 					$cnt .= '<tr>';
 					$cnt .= '<td>';
-					$cnt .= '<label for="dg_country" class="dg_country">'.__("Country").'</label>';
+					$cnt .= '<label for="dg_country" class="dg_country">'.__("Country",'dukagate').'</label>';
 					$cnt .= '</td>';
 					$cnt .= '<td>';
 					$mandatory = '';
@@ -1569,7 +1784,7 @@ if(!class_exists('DukaGate')) {
 				if(@$dg_form_elem['dg_state_visible'] == 'checked'){
 					$cnt .= '<tr>';
 					$cnt .= '<td>';
-					$cnt .= '<label for="dg_state" class="dg_state">'.__("State").'</label>';
+					$cnt .= '<label for="dg_state" class="dg_state">'.__("State",'dukagate').'</label>';
 					$cnt .= '</td>';
 					$cnt .= '<td>';
 					$mandatory = '';
@@ -1616,7 +1831,7 @@ if(!class_exists('DukaGate')) {
 			}else{
 				$cnt .= '<div class="dg_user_info_form">';
 				if(@$dg_form_elem['dg_fullname_visible'] == 'checked'){
-					$cnt .= '<label for="dg_fullname" class="dg_fullname">'.__("Full Names ").'</label>';
+					$cnt .= '<label for="dg_fullname" class="dg_fullname">'.__("Full Names ",'dukagate').'</label>';
 					$mandatory = '';
 					if(@$dg_form_elem['dg_fullname_mandatory'] == 'checked'){
 						$mandatory = 'required';
@@ -1625,7 +1840,7 @@ if(!class_exists('DukaGate')) {
 					$cnt .= '<br/>';
 				}
 				if(@$dg_form_elem['dg_firstname_visible'] == 'checked'){
-					$cnt .= '<label for="dg_firstname" class="dg_firstname">'.__("First Name ").'</label>';
+					$cnt .= '<label for="dg_firstname" class="dg_firstname">'.__("First Name ",'dukagate').'</label>';
 					$mandatory = '';
 					if(@$dg_form_elem['dg_firstname_mandatory'] == 'checked'){
 						$mandatory = 'required';
@@ -1634,7 +1849,7 @@ if(!class_exists('DukaGate')) {
 					$cnt .= '<br/>';
 				}
 				if(@$dg_form_elem['dg_lastname_visible'] == 'checked'){
-					$cnt .= '<label for="dg_lastname" class="dg_lastname">'.__("Last Name ").'</label>';
+					$cnt .= '<label for="dg_lastname" class="dg_lastname">'.__("Last Name ",'dukagate').'</label>';
 					$mandatory = '';
 					if(@$dg_form_elem['dg_lastname_mandatory'] == 'checked'){
 						$mandatory = 'required';
@@ -1643,7 +1858,7 @@ if(!class_exists('DukaGate')) {
 					$cnt .= '<br/>';
 				}
 				if(@$dg_form_elem['dg_email_visible'] == 'checked'){
-					$cnt .= '<label for="dg_email" class="dg_email">'.__("Email").'</label>';
+					$cnt .= '<label for="dg_email" class="dg_email">'.__("Email",'dukagate').'</label>';
 					$mandatory = '';
 					if(@$dg_form_elem['dg_email_mandatory'] == 'checked'){
 						$mandatory = 'required';
@@ -1652,7 +1867,7 @@ if(!class_exists('DukaGate')) {
 					$cnt .= '<br/>';
 				}
 				if(@$dg_form_elem['dg_phone_visible'] == 'checked'){
-					$cnt .= '<label for="dg_phone" class="dg_phone">'.__("Phone").'</label>';
+					$cnt .= '<label for="dg_phone" class="dg_phone">'.__("Phone",'dukagate').'</label>';
 					$mandatory = '';
 					if(@$dg_form_elem['dg_phone_mandatory'] == 'checked'){
 						$mandatory = 'required';
@@ -1661,7 +1876,7 @@ if(!class_exists('DukaGate')) {
 					$cnt .= '<br/>';
 				}
 				if(@$dg_form_elem['dg_country_visible'] == 'checked'){
-					$cnt .= '<label for="dg_country" class="dg_country">'.__("Country").'</label>';
+					$cnt .= '<label for="dg_country" class="dg_country">'.__("Country",'dukagate').'</label>';
 					$mandatory = '';
 					if(@$dg_form_elem['dg_country_mandatory'] == 'checked'){
 						$mandatory = 'required';
@@ -1674,7 +1889,7 @@ if(!class_exists('DukaGate')) {
 					$cnt .= '<br/>';
 				}
 				if(@$dg_form_elem['dg_state_visible'] == 'checked'){
-					$cnt .= '<label for="dg_state" class="dg_state">'.__("State").'</label>';
+					$cnt .= '<label for="dg_state" class="dg_state">'.__("State",'dukagate').'</label>';
 					$mandatory = '';
 					if(@$dg_form_elem['dg_state_mandatory'] == 'checked'){
 						$mandatory = 'required';
@@ -1697,7 +1912,7 @@ if(!class_exists('DukaGate')) {
 							}else if($input_type == 'textarea'){
 								$input_type = '<textarea class="'.$form_class.' '.$dg_form_elem[$total]['uname'].'_input" name="'.$dg_form_elem[$total]['uname'].'" id="'.$dg_form_elem[$total]['uname'].'" >'.$dg_form_elem[$total]['initial'].'</textarea>';
 							}else if($input_type == 'checkbox'){
-								$input_type = '<input type="checkbox" class="'.$form_class.' '.$dg_form_elem[$total]['uname'].'_input" name="'.$dg_form_elem[$total]['uname'].'" id="'.$dg_form_elem[$total]['uname'].'" />';
+								$input_type = '<input type="checkbox" class="'.$form_class.' '.$dg_form_elem[$total]['uname'].'_input" name="'.$dg_form_elem[$total]['uname'].'" id="'.$dg_form_elem[$total]['uname'].'" value="'.$dg_form_elem[$total]['initial'].'"/>'.$dg_form_elem[$total]['initial'];
 							}else if($input_type == 'paragraph'){
 								$input_type = '<p class="'.$form_class.' '.$dg_form_elem[$total]['uname'].'_input">'.$dg_form_elem[$total]['initial'].'</p>';
 							}
@@ -1757,6 +1972,38 @@ if(!class_exists('DukaGate')) {
 			$cnt .= '<input type="hidden" name="action" value="dg_process_cart" />';
 			
 			return $cnt;
+		}
+		
+		/**
+		 * Save user to database
+		 */
+		function save_user($user_name, $password, $email){
+			$user_id = username_exists( $user_name );
+			if ( !$user_id and email_exists($user_email) == false ) {
+				$random_password = wp_generate_password( $length=12, $include_standard_special_chars=false );
+				$user_id = wp_create_user( $user_name, $random_password, $user_email );
+			} else {
+				$random_password = __('User already exists.  Password inherited.');
+			}
+		}
+		
+		/**
+		 * Get produt image
+		 */
+		function product_image($productid){
+			$main_image = '';
+			$main_images = wp_get_attachment_image_src( get_post_thumbnail_id( $productid ), 'single-post-thumbnail' );
+			if(is_array($main_images))
+				$main_image =  $main_images[0];
+			if (empty($main_image)){
+				$attachment_images = '';
+				$attachment_images = &get_children('post_type=attachment&post_status=inherit&post_mime_type=image&post_parent=' . $productid);
+                foreach ($attachment_images as $image) {
+                    $main_image = $image->guid;
+                    break;
+                }
+			}
+			return $main_image;
 		}
 		
 		/**
@@ -1940,4 +2187,17 @@ if(!class_exists('DukaGate')) {
 		}
 	}
 }
+
+/**
+ * Load plugin function during the WordPress init action
+ *
+ * @since 3.6.2
+ *
+ * @return void
+ */
+function dukagate_action_init() {
+	global $dukagate;
+	$dukagate = new DukaGate();
+}
+add_action( 'init', 'dukagate_action_init', 0 ); // load before widgets_init at 1
 ?>

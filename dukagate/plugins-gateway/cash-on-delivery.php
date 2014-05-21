@@ -2,7 +2,7 @@
 	
 /**
  * DukaGate Payment Gateway
- * PayPal Gateway Plugin
+ * Cash On Delivery Gateway Plugin
  */
 class DukaGate_GateWay_CashOnDelivery extends DukaGate_GateWay_API{
 

@@ -122,6 +122,8 @@ class DukaGate_Products{
 			$post_offset = ($pagenum - 1) * $per_page;
 			$args['offset'] = $post_offset;
 			$page_links = '<div class="dg_pagination">' . $page_links . '</div>';
+		}else{
+			$per_page = $total;
 		}
 		if ($order != 'rand') {
 			$args['orderby'] = 'post_date';
@@ -130,6 +132,7 @@ class DukaGate_Products{
 			$args['order'] = 'rand';
 		}
 		$args['numberposts'] = $per_page;
+		$args['posts_per_page'] = $per_page;
 		$args['post_type'] = 'dg_product';
 		$get_posts = new WP_Query;
 		$products = $get_posts->query($args);
@@ -140,14 +143,7 @@ class DukaGate_Products{
 			$dg_advanced_shop_settings = get_option('dukagate_advanced_shop_settings');
 			$attachment_images = '';
 			foreach ($products as $product) {
-				$attachment_images = '';
-				$attachment_images = &get_children('post_type=attachment&post_status=inherit&post_mime_type=image&post_parent=' . $product->ID);
-                $main_image = '';
-				$price = get_post_meta($product->ID, 'price', true);
-                foreach ($attachment_images as $image) {
-                    $main_image = $image->guid;
-                    break;
-                }
+				$main_image = $dukagate->product_image($product->ID);
 				$prod_permalink = get_permalink($product->ID);
 				if($productlink == 'false'){
 					$prod_permalink= 'javascript:;';
@@ -167,6 +163,7 @@ class DukaGate_Products{
 					$content .= '<a href="' . $prod_permalink . '" title="' . $product->post_title . '"><img src="' . $dukagate->resize_image('', $main_image, $prod_width, $prod_height).'" ></a>';
 					$content .= '</div>';
 				}
+				$price  = get_post_meta($product->ID, 'price', true);
 				$content .= '<div class="dg_prod_info">';
 				$content .= '<p class="title"><a href="' . $prod_permalink . '" title="' . $product->post_title . '">' . __($product->post_title) . '</a></p>';
 				$content .= '<p class="detail">' . $product->post_excerpt . '</p>';
@@ -189,19 +186,7 @@ class DukaGate_Products{
 					$content .= '<form method="POST" action="" id="dg_prod_'.$product->ID.'">';
 					$content .= '<input type="hidden" name="action" value="dg_update_cart">';
 					$content .= '<input type="hidden" name="product_id" value="'.$product->ID.'">';
-					$content .= '<input type="hidden" name="quantity" id="dg_quantity_'.$product->ID.'" value="">';
-					$content .= '<input type="hidden" name="price" value="'.$price.'">';
-					$content .= '<input type="hidden" name="product" value="'.$product->post_title.'">';
-					$content .= '<input type="hidden" name="product_image" value="'.$main_image.'">';
-					$content .= '<input type="submit" value="'.__($add_to_cart_text).'" class="dg_make_payment"/>';
-					$content .= '</form>';
-					$content .= '</div>';
-				}else{
-					$content .= '<div class="button">';
-					$content .= '<form method="POST" action="" id="dg_prod_'.$product->ID.'">';
-					$content .= '<input type="hidden" name="action" value="dg_update_cart">';
-					$content .= '<input type="hidden" name="product_id" value="'.$product->ID.'">';
-					$content .= '<input type="hidden" name="quantity" id="dg_quantity_'.$product->ID.'" value="">';
+					$content .= '<input type="hidden" name="quantity" id="dg_quantity_'.$product->ID.'" value="1">';
 					$content .= '<input type="hidden" name="price" value="'.$price.'">';
 					$content .= '<input type="hidden" name="product" value="'.$product->post_title.'">';
 					$content .= '<input type="hidden" name="product_image" value="'.$main_image.'">';
@@ -310,6 +295,43 @@ class DukaGate_Products{
 	}
 	
 	/**
+	 * Product Details
+	 * Shows price and add to cart button
+	 */
+	static function product_details($id){
+		global $dukagate;
+		$content = '';
+		$product = get_page($id);
+		$main_image = $dukagate->product_image($product->ID);
+		if (empty($main_image)) {
+			$main_image = DG_DUKAGATE_URL.'/images/no.jpg';
+		}
+		$dg_shop_settings = get_option('dukagate_shop_settings');
+		$price  = get_post_meta($product->ID, 'price', true);
+		
+		$content .= '<div class="dg_prod_info">';
+		$content .= '<p class="price">' .__("Price").': '. $dg_shop_settings['currency_symbol'].' '.$price . '</p>';
+		$content .= '<div class="button">';
+		$content .= '<form method="POST" action="" id="dg_prod_'.$product->ID.'">';
+		$content .= '<input type="hidden" name="action" value="dg_update_cart">';
+		$content .= '<input type="hidden" name="product_id" value="'.$product->ID.'">';
+		$content .= '<input type="hidden" name="quantity" id="dg_quantity_'.$product->ID.'" value="">';
+		$content .= '<input type="hidden" name="price" value="'.$price.'">';
+		$content .= '<input type="hidden" name="product" value="'.$product->post_title.'">';
+		$content .= '<input type="hidden" name="product_image" value="'.$main_image.'">';
+		$content .= '<input type="submit" value="'.__('Add To Cart').'" class="dg_make_payment"/>';
+		$content .= '</form>';
+		$content .= '</div>';
+		$content .= '</div>';
+		$content .= '<script type="text/javascript">';
+		$content .= 'jQuery(document).ready(function(){';
+		$content .= 'dukagate.update_cart("dg_prod_'.$product->ID.'", "'.$ajax_cart.'");';
+		$content .= '});';
+		$content .= '</script>';
+		return $content;
+	}
+	
+	/**
 	 * Disaply Grouped product
 	 * @param product - product object
 	 * @param term - taxanomy object
@@ -322,14 +344,10 @@ class DukaGate_Products{
 		$content = '';
 		$dg_shop_settings = get_option('dukagate_shop_settings');
 		$dg_advanced_shop_settings = get_option('dukagate_advanced_shop_settings');
-		$attachment_images = &get_children('post_type=attachment&post_status=inherit&post_mime_type=image&post_parent=' . $product->ID);
-		$main_image = '';
 		$price  = get_post_meta($product->ID, 'price', true);
 		$fixed_price  = get_post_meta($product->ID, 'fixed_price', true);
-		foreach ($attachment_images as $image) {
-			$main_image = $image->guid;
-			break;
-		}
+		$main_image = $dukagate->product_image($product->ID);
+		
 		$fixed_price  = get_post_meta($product->ID, 'fixed_price', true);
 		$prod_permalink = get_permalink($product->ID);
 		$style= 'style="width:'.$dg_width.'px;"';

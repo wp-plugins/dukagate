@@ -9,17 +9,82 @@
 
 add_action('admin_menu', 'dg_create_admin_menu');
 function dg_create_admin_menu(){
-	add_object_page('DukaGate', 'DukaGate', 'edit_others_posts', 'dukagate-order-log', '', DG_DUKAGATE_URL . '/images/dg_icon.png');
-	add_submenu_page('dukagate-order-log', __('DukaGate Order Log'), __('Order Log'), 'edit_others_posts', 'dukagate-order-log', 'dg_dukagate_order_log');
-	add_submenu_page('dukagate-order-log', __('DukaGate Payment Options'), __('Payment Options'), 'edit_others_posts', 'dukagate-payment-options', 'dg_dukagate_paymnet');
-	add_submenu_page('dukagate-order-log', __('DukaGate Shipping Options'), __('Shipping Options'), 'edit_others_posts', 'dukagate-shipping-options', 'dg_dukagate_shipping');
-	add_submenu_page('dukagate-order-log', __('DukaGate CheckOut Settings'), __('Check Out Settings'), 'edit_others_posts', 'dukagate-checkout-options', 'dg_dukagate_checkout');
-	add_submenu_page('dukagate-order-log', __('DukaGate Mail Settings'), __('Mail Settings'), 'edit_others_posts', 'dukagate-mail-options', 'dg_dukagate_mail');
-	add_submenu_page('dukagate-order-log', __('DukaGate Settings'), __('Settings'), 'edit_others_posts', 'dukagate-settings', 'dg_dukagate_settings');
-	add_submenu_page('dukagate-order-log', __('DukaGate Advanced Settings'), __('Advanced Settings'), 'edit_others_posts', 'dukagate-advanced-settings', 'dg_dukagate_advanced_settings');
+	add_submenu_page('edit.php?post_type=dg_product', __('DukaGate Order Log'), __('Order Log'), 'edit_others_posts', 'dukagate-order-log', 'dg_dukagate_order_log');
+	add_submenu_page('edit.php?post_type=dg_product', __('DukaGate Discount Settings'), __('Discounts'), 'edit_others_posts', 'dukagate-discounts', 'dg_dukagate_discounts');
+	add_submenu_page('edit.php?post_type=dg_product', __('DukaGate Settings'), __('Settings'), 'edit_others_posts', 'dukagate-settings', 'dg_admin_settings');
 	
 }
 
+/**
+ * Creats the Admin Tabs
+ *
+ */
+function dg_admin_tabs($current = 'settings'){
+	$tabs = array( 'settings' => __('Settings'), 'payment' => __('Payment Options'), 'shipping' => __('Shipping Options'), 'checkout' => __('Check Out Settings'), 'mail' => __('Mail'), 'tools' => __('Tools'), 'advanced' => __('Advanced Settings') ); 
+    $links = array();
+    echo '<div id="icon-themes" class="icon32"><br></div>';
+    echo '<h2 class="nav-tab-wrapper">';
+    foreach( $tabs as $tab => $name ){
+        $class = ( $tab == $current ) ? ' nav-tab-active' : '';
+        echo "<a class='nav-tab$class' href='".admin_url('edit.php?post_type=dg_product&page=dukagate-settings')."&tab=$tab'>$name</a>";
+    }
+    echo '</h2>';
+}
+
+/**
+ * Admin Settings
+ *
+ */
+function dg_admin_settings(){
+	global $pagenow;
+	?>
+	<div class="wrap">
+		<h2><?php _e("Dukagate Settings"); ?></h2>
+		<?php
+			if ( 'true' == esc_attr( $_GET['updated'] ) ) echo '<div class="updated" ><p>Settings updated.</p></div>';
+			
+			if ( isset ( $_GET['tab'] ) ) dg_admin_tabs($_GET['tab']); else dg_admin_tabs();
+		?>
+		<div id="poststuff">
+			<?php
+			if ( $pagenow == 'edit.php' && $_GET['page'] == 'dukagate-settings' ){ 
+				$tab = 'settings';
+				if ( isset ( $_GET['tab'] ) ) $tab = $_GET['tab']; 
+				switch ( $tab ){
+					case 'settings' :
+						dg_dukagate_settings();
+					break;
+					
+					case 'payment' :
+						dg_dukagate_paymnet();
+					break;
+					
+					case 'shipping' :
+						dg_dukagate_shipping();
+					break;
+					
+					case 'checkout' :
+						dg_dukagate_checkout();
+					break;
+					
+					case 'mail' :
+						dg_dukagate_mail();
+					break;
+					
+					case 'tools' :
+						dg_dukagate_tools();
+					break;
+					
+					case 'advanced' :
+						dg_dukagate_advanced_settings();
+					break;
+				}
+			}
+			?>
+		</div>
+	</div>
+	<?php
+}
 
 
 //Order Log
@@ -93,9 +158,9 @@ function dg_dukagate_order_log_info($id){
 	?>
 	<div class="wrap">
 		<h2><?php _e("Viewing order ").' '._e($order_log->invoice); ?></h2>
-		<div class="csv_export">
+		<!--div class="csv_export">
 			<a href="javascript:;" onclick="dukagate.order_csv_export('<?php echo $order_log->id; ?>');">Export as CSV</a>
-		</div>
+		</div-->
 		<?php
 			$invoice_file = DG_DUKAGATE_INVOICE_DIR. '/invoice_' . $order_log->invoice.'.pdf';
 			if(file_exists($invoice_file)){
@@ -295,8 +360,6 @@ function dg_dukagate_paymnet(){
 	global $dukagate;
 	$dg_gateways = $dukagate->list_all_gateways();
 	?>
-	<div class="wrap">
-		<h2><?php _e("Dukagate Payment Plugins"); ?></h2>
 		<div id="dg_payments">
 			<?php
 			if (is_array($dg_gateways) && count($dg_gateways) > 0) {
@@ -325,7 +388,6 @@ function dg_dukagate_paymnet(){
 			}
 			?>
 		</div>
-	</div>
 	<?php
 }
 
@@ -336,8 +398,6 @@ function dg_dukagate_shipping(){
 	global $dukagate;
 	$dg_gateways = $dukagate->list_all_shipping_gateways();
 	?>
-	<div class="wrap">
-		<h2><?php _e("Dukagate Shipping Plugins","dg-lang"); ?></h2>
 		<div id="dg_payments">
 			<?php
 			if (is_array($dg_gateways) && count($dg_gateways) > 0) {
@@ -366,7 +426,6 @@ function dg_dukagate_shipping(){
 			}
 			?>
 		</div>
-	</div>
 	<?php
 }
 
@@ -412,9 +471,8 @@ function dg_dukagate_checkout(){
 	$dukagate_settings->set_manadatory_forms('dg_email', $dg_form_elem);
 	
 	?>
-	<div class="wrap">
-		<h2><?php _e("Dukagate Check Out Page Settings"); ?></h2>
-		<form method="POST" action="<?php echo $_SERVER['REQUEST_URI']; ?>">
+
+		<form method="POST" action="<?php echo esc_url($_SERVER['REQUEST_URI']); ?>">
 			<div class="dg_settings">
 				<p class="submit">
 					<input class='button-primary' type='submit' name='dg_checkout_settings' value='<?php _e('Save Options'); ?>'/><br/>
@@ -537,7 +595,7 @@ function dg_dukagate_checkout(){
 				</p>
 			</div>
 		</form>
-	</div>
+
 	<?php
 }
 
@@ -547,8 +605,7 @@ function dg_dukagate_mail(){
 	$dukagate_mails = $dukagate_mail->list_mails();
 	$mail_types = DukaGate_Mail::mail_types();
 	?>
-	<div class="wrap paymentwrap">
-		<h2 class="title"><?php _e("Dukagate Mail Settings"); ?></h2>
+
 		<div id="dg_mail_settings">
 			<?php
 			if (is_array($dukagate_mails) && count($dukagate_mails) > 0) {
@@ -636,7 +693,7 @@ function dg_dukagate_mail(){
 			}
 			?>
 		</div>
-	</div>
+
 	<?php
 }
 
@@ -709,9 +766,8 @@ function dg_dukagate_settings(){
 	$dg_currency_codes = $dg_dukagate_settings['currency'];
 	$dg_country_code_name = $dg_dukagate_settings['country'];
 	?>
-		<div class="wrap">
-			<h2><?php _e("Dukagate Settings"); ?></h2>
-			<form method="POST" action="<?php echo $_SERVER['REQUEST_URI']; ?>">
+
+			<form method="POST" action="<?php echo esc_url($_SERVER['REQUEST_URI']); ?>">
 				<table class="form-table">
 					<tbody>
 						<tr valign="top">
@@ -825,8 +881,7 @@ function dg_dukagate_settings(){
 				<p class="submit">
 					<input class='button button-primary' type='submit' name='dg_settings' value='<?php _e('Save Options'); ?>' id='submitbutton' />
 				</p>
-			</form>
-		</div>
+			
 	<?php
 }
 
@@ -880,23 +935,22 @@ function dg_dukagate_advanced_settings(){
 		$dg_shop_settings['products_image'] = 'true';
 	}
 	?>
-		<div class="wrap">
-			<h2><?php _e("Dukagate Advanced Settings"); ?></h2>
-			<form method="POST" action="<?php echo $_SERVER['REQUEST_URI']; ?>">
+
+			<form method="POST" action="<?php echo esc_url($_SERVER['REQUEST_URI']); ?>">
 				<table class="form-table">
 					<tbody>
 						<tr valign="top">
-							<th scope="row"><label for="custom_products"><?php _e("Use Custom Product Posts"); ?>: </label></th>
+							<th scope="row"><label for="custom_products"><?php _e("Use Custom Product Posts","dg-lang"); ?>: </label></th>
 							<td><input type="checkbox" value="checked" name="custom_products" <?php echo ($dg_shop_settings['custom_products'] == 'true') ? "checked='checked'": ""; ?>/></td>
 						</tr>
 						<tr valign="top">
 							<th scope="row">
-								<label for="max_quantity"><?php _e("Maximum product in cart"); ?> <em>(<?php _e("defaults to 30"); ?>)</em>: </label>
+								<label for="max_quantity"><?php _e("Maximum product in cart","dg-lang"); ?> <em>(<?php _e("defaults to 30"); ?>)</em>: </label>
 							</th>
 							<td><input id="max_quantity" type="text" name="max_quantity" value="<?php echo $dg_shop_settings['max_quantity']; ?>" /></td></td>
 						</tr>
 						<tr valign="top">
-							<th scope="row"><label for="products_page"><?php _e("Grouped Products Page"); ?>: </label></th>
+							<th scope="row"><label for="products_page"><?php _e("Grouped Products Page","dg-lang"); ?>: </label></th>
 							<td>
 								<select name="products_page">
 									<?php 
@@ -916,7 +970,7 @@ function dg_dukagate_advanced_settings(){
 							</td>
 						</tr>
 						<tr valign="top">
-							<th scope="row"><label for="up_selling_page"><?php _e("Up Selling Page"); ?>: </label></th>
+							<th scope="row"><label for="up_selling_page"><?php _e("Up Selling Page","dg-lang"); ?>: </label></th>
 							<td>
 								<select name="up_selling_page">
 									<?php 
@@ -936,41 +990,41 @@ function dg_dukagate_advanced_settings(){
 							</td>
 						</tr>
 						<tr valign="top">
-							<th scope="row"><label for="up_selling_page_checkout"><?php _e("Up Selling page before checkout"); ?>: </label></th>
+							<th scope="row"><label for="up_selling_page_checkout"><?php _e("Up Selling page before checkout","dg-lang"); ?>: </label></th>
 							<td>
 								<input type="checkbox" value="checked" name="up_selling_page_checkout" <?php echo ($dg_shop_settings['up_selling_page_checkout'] == 'true') ? "checked='checked'": ""; ?>/>
 							</td>
 						</tr>
 						<tr valign="top">
-							<th scope="row"><label for="checkout_prod_image"><?php _e("Checkout Product Image"); ?> (<em><?php _e("shows product image thumbnail on checkout page"); ?></em>): </label></th>
+							<th scope="row"><label for="checkout_prod_image"><?php _e("Checkout Product Image","dg-lang"); ?> (<em><?php _e("shows product image thumbnail on checkout page"); ?></em>): </label></th>
 							<td><input type="checkbox" value="checked" name="checkout_prod_image" <?php echo ($dg_shop_settings['checkout_prod_image'] == 'true') ? "checked='checked'": ""; ?>/></td>
 						</tr>
 						<tr valign="top">
-							<th scope="row"><label for="checkout_prod_image_url"><?php _e("Checkout Product Image URL"); ?>: </label></th>
+							<th scope="row"><label for="checkout_prod_image_url"><?php _e("Checkout Product Image URL","dg-lang"); ?>: </label></th>
 							<td><input id="checkout_prod_image_url" type="text" name="checkout_prod_image_url" value="<?php echo @$dg_shop_settings['checkout_prod_image_url']; ?>" class="regular-text" /></td>
 						</tr>
 						<tr valign="top">
-							<th scope="row"><label for="checkout_prod_image_width"><?php _e("Checkout Product Image Width"); ?>: </label></th>
+							<th scope="row"><label for="checkout_prod_image_width"><?php _e("Checkout Product Image Width","dg-lang"); ?>: </label></th>
 							<td><input id="checkout_prod_image_width" type="text" name="checkout_prod_image_width" value="<?php echo @$dg_shop_settings['checkout_prod_image_width']; ?>" class="regular-text" /></td>
 						</tr>
 						<tr valign="top">
-							<th scope="row"><label for="checkout_prod_image_height"><?php _e("Checkout Product Image Height"); ?>: </label></th>
+							<th scope="row"><label for="checkout_prod_image_height"><?php _e("Checkout Product Image Height","dg-lang"); ?>: </label></th>
 							<td><input id="checkout_prod_image_height" type="text" name="checkout_prod_image_height" value="<?php echo @$dg_shop_settings['checkout_prod_image_height']; ?>" class="regular-text" /></td>
 						</tr>
 						<tr valign="top">
-							<th scope="row"><label for="checkout_gateway_image"><?php _e("Display Checkout Payment Gateway Image (Not Yet Implemented)"); ?> (<em><?php _e("shows payment gateway image on checkout page instead of text"); ?></em>): </label></th>
+							<th scope="row"><label for="checkout_gateway_image"><?php _e("Display Checkout Payment Gateway Image (Not Yet Implemented)","dg-lang"); ?> (<em><?php _e("shows payment gateway image on checkout page instead of text"); ?></em>): </label></th>
 							<td><input type="checkbox" value="checked" name="checkout_gateway_image" <?php echo ($dg_shop_settings['checkout_gateway_image'] == 'true') ? "checked='checked'": ""; ?>/></td>
 						</tr>
 						<tr valign="top">
-							<th scope="row"><label for="products_image"><?php _e("Show Product Images"); ?> (<em><?php _e("show or hide product images"); ?></em>): </label></th>
+							<th scope="row"><label for="products_image"><?php _e("Show Product Images"); ?> (<em><?php _e("show or hide product images","dg-lang"); ?></em>): </label></th>
 							<td><input type="checkbox" value="checked" name="products_image" <?php echo ($dg_shop_settings['products_image'] == 'true') ? "checked='checked'": ""; ?>/></td>
 						</tr>
 						<tr valign="top">
-							<th scope="row"><label for="pdf_invoices"><?php _e("Enable PDF Invoice"); ?> (<em><?php _e("enable or disable pdf invoices"); ?></em>): </label></th>
+							<th scope="row"><label for="pdf_invoices"><?php _e("Enable PDF Invoice"); ?> (<em><?php _e("enable or disable pdf invoices","dg-lang"); ?></em>): </label></th>
 							<td><input type="checkbox" value="checked" name="pdf_invoices" <?php echo ($dg_shop_settings['pdf_invoices'] == 'true') ? "checked='checked'": ""; ?>/></td>
 						</tr>
 						<tr valign="top">
-							<th scope="row"><label for="pdf_invoice_file"><?php _e("Invoice PDF Template"); ?>: </label></th>
+							<th scope="row"><label for="pdf_invoice_file"><?php _e("Invoice PDF Template","dg-lang"); ?>: </label></th>
 							<td>
 								<select name="pdf_invoice_file">
 									<?php 
@@ -992,13 +1046,406 @@ function dg_dukagate_advanced_settings(){
 					</tbody>
 				</table>
 				<p class="submit">
-					<input class='button-primary' type='submit' name='dg_advanced_settings' value='<?php _e('Save Options'); ?>' id='submitbutton' />
+					<input class='button-primary' type='submit' name='dg_advanced_settings' value='<?php _e('Save Options',"dg-lang"); ?>' id='submitbutton' />
 				</p>
 			</form>
-		</div>
 	<?php
 }
 
+
+/**
+ * Discount Management
+ */
+function dg_dukagate_discounts(){
+	global $dukagate_disc;
+	if(isset($_REQUEST['act'])){
+		if(isset($_REQUEST['edit'])){
+			dg_disc_view($_REQUEST['id']);
+		}else{
+			if($_REQUEST['act'] == 'new'){
+				dg_disc_add();
+			}
+		}
+		
+	}else{
+		if(isset($_REQUEST['action'])){
+			if($_REQUEST['action'] == 'del'){
+				$dukagate_disc->delete_discount($_REQUEST['id']);
+			}
+		}
+		$form_url = admin_url("admin.php?page=dukagate-discounts&act=new");
+		$del_url = admin_url("admin.php?page=dukagate-discounts");
+		$discounts = $dukagate_disc->list_discounts();
+		$content = '<div class="wrap">';
+		$content .= '<h2>Dukagate Discounts</div></h2>';
+		$content .= '<a class="button-primary" href="'.$form_url.'" title="Add">Add New</a><br/><br/><br/>';
+		if (is_array($discounts) && count($discounts) > 0) {
+			$count = 1;
+			$content .= '<table class="widefat">';
+			$content .= '<thead>';
+			$content .= '<tr>';
+			$content .= '<th>Number</th>';
+			$content .= '<th>Code</th>';
+			$content .= '<th>Amount</th>';
+			$content .= '<th>Type</th>';
+			$content .= '<th>Valid</th>';
+			$content .= '<th>Date Created</th>';
+			$content .= '<th>Actions</th>';
+			$content .= '</tr>';
+			$content .= '</thead>';
+			$content .= '<tfoot>';
+			$content .= '<tr>';
+			$content .= '<th>Number</th>';
+			$content .= '<th>Code</th>';
+			$content .= '<th>Amount</th>';
+			$content .= '<th>Type</th>';
+			$content .= '<th>Valid</th>';
+			$content .= '<th>Date Created</th>';
+			$content .= '<th>Actions</th>';
+			$content .= '</tr>';
+			$content .= '</tfoot>';
+			foreach ($discounts as $discount) {
+				$valid = $discount->valid;
+				if($valid == 0 || $valid = '0'){
+					$valid = 'Valid';
+				}else{
+					$valid = 'Expired';
+				}
+				$content .= '<tbody>';
+				$content .= '<tr>';
+				$content .= '<td>'.$count.'</td>';
+				$content .= '<td>'.$discount->code.'</td>';
+				$content .= '<td>'.$discount->amount.'</td>';
+				$content .= '<td>'.Dukagate_Discounts::get_type($discount->type).'</td>';
+				$content .= '<td>'.$valid.'</td>';
+				$content .= '<td>'.$discount->timestamp.'</td>';
+				$content .= '<td>';
+				$content .= '<a href="'.$form_url.'&edit=true&id='.$discount->id.'" title="Edit">Edit</a> <a href="'.$del_url.'&action=del&id='.$discount->id.'" title="Delete">Delete</a>';
+				$content .= '</td>';
+				$content .= '<tr>';
+				$content .= '</tbody>';
+				$count++;
+			}
+			$content .= '</table>';
+		}else{
+			$content .= '<h4>No Discounts found</h4>';
+		}
+		
+		$content .= '</div>';
+		echo $content;
+	}
+}
+
+
+/**
+ * New discount
+ */
+function dg_disc_add(){
+	global $dukagate_disc;
+	if(isset($_REQUEST['disc_action'])){
+		$dukagate_disc->save_discount($_REQUEST);
+	}
+	?>
+	<div class="wrap">
+		<h2><div class="dp_disc_hd"><div class="dp_dics_img" id="dp_disc_hd_img">&nbsp;</div>New Discount</div></h2>
+		Items marked with <span class="req"> *</span> are required
+		<form method="POST" action="<?php echo esc_url($_SERVER['REQUEST_URI']); ?>">
+			<ul>
+				<li>
+					<table width="100%" border="0" class="widefat">
+					  <tr>
+						<th width="22%" align="left" scope="row">Amount <span class="req"> *</span></th>
+						<td width="28%"><input type="text" maxlength="45" size="10" name="disc_amount"  /></td>
+						<td width="50%">(Discount amount)</td>
+					  </tr>
+					  <tr>
+						<th align="left" scope="row">Code</th>
+						<td><input type="text" name="disc_code"  value="<?php echo $discount->code; ?>"/> </td>
+						<td>(Optional discount code. If left blank it will be generated)</td>
+					  </tr>
+					  <tr>
+						<th align="left" scope="row">Type <span class="req"> *</span></th>
+						<td>
+							<select name="disc_type" >
+								<option value="" >--Select Type--</option>
+								<?php
+									$types = Dukagate_Discounts::discount_types();
+									foreach ($types as $type => $t) {
+										?>
+										<option value="<?php echo $type; ?>" ><?php echo $t; ?></option>
+										<?php
+									}
+								?>
+							</select>
+						</td>
+						<td>(Discount type, can be a percentage or a fixed value)</td>
+					  </tr>
+					  <tr>
+						<th align="left" scope="row">&nbsp;</th>
+						<td><input type='submit' value='<?php _e("Save"); ?>' class='button-secondary' name="disc_action" /></td>
+						<td>&nbsp;</td>
+					  </tr>
+					</table>
+				</li> 
+			</ul>
+		</form>
+	</div>
+	<?php
+}
+
+
+/**
+ * view discount
+ */
+function dg_disc_view($id){
+	global $dukagate_disc;
+	if(isset($_REQUEST['disc_action_update'])){
+		$dukagate_disc->update_discount($_REQUEST);
+	}
+	$discount = $dukagate_disc->get_discount($id);
+	?>
+	<div class="wrap">
+		<h2>Edit <?php echo $discount->code; ?></h2>
+		Items marked with <span class="req"> *</span> are required
+		<form method="POST" action="<?php echo esc_url($_SERVER['REQUEST_URI']); ?>">
+			<input type="hidden" name="disc_id" value="<?php echo $discount->id; ?>" />
+			<ul>
+				<li>
+					<table width="100%" border="0" class="widefat">
+					  <tr>
+						<th width="22%" align="left" scope="row">Amount <span class="req"> *</span></th>
+						<td width="28%"><input type="text" maxlength="45" size="10" name="disc_amount"  value="<?php echo $discount->amount; ?>"/></td>
+						<td width="50%">(Discount amount)</td>
+					  </tr>
+					  <tr>
+						<th align="left" scope="row">Code</th>
+						<td><input type="text" name="disc_code"  value="<?php echo $discount->code; ?>"/> </td>
+						<td>(Optional discount code. If left blank it will be generated)</td>
+					  </tr>
+					  <tr>
+						<th align="left" scope="row">Type <span class="req"> *</span></th>
+						<td>
+							<select name="disc_type" >
+								<option value="" >--Select Type--</option>
+								<?php
+									$types = Dukagate_Discounts::discount_types();
+									
+									foreach ($types as $type => $t) {
+										$selected = '';
+										if(intval($type) == intval($discount->type)){
+											$selected = 'selected="selected"';
+										}
+										?>
+										<option value="<?php echo $type; ?>" <?php echo $selected; ?> ><?php echo $t; ?></option>
+										<?php
+									}
+								?>
+							</select>
+						</td>
+						<td>(Discount type, can be a percentage or a fixed value)</td>
+					  </tr>
+					  <tr>
+						<th align="left" scope="row">&nbsp;</th>
+						<td><input type='submit' value='<?php _e("Update"); ?>' class='button-secondary' name="disc_action_update" /></td>
+						<td>&nbsp;</td>
+					  </tr>
+					</table>
+				</li> 
+			</ul>
+		</form>
+	</div>
+	<?php
+}
+
+function dg_dukagate_tools(){
+	if (isset($_POST['dg_import_xml'])) {
+		global $wpdb;
+		$delete_old_products = ($_POST['delete_old_products'] == 'checked') ? "true": "false"; 
+		$post_type = 'dg_product';
+		if($delete_old_products == 'true'){
+			$sql = "SELECT `ID` FROM `{$wpdb->posts}` WHERE `post_type`='{$post_type}'";
+			$post_ids_to_be_deleted = $wpdb->get_col($sql);
+			$count = 0;
+			$failed_to_delete = array();
+			if (is_array($post_ids_to_be_deleted)) {
+				foreach ($post_ids_to_be_deleted as $delete_id) {
+					if (wp_delete_post( intval($delete_id), TRUE )) {
+						$count++;
+					}
+					else {
+						$failed_to_delete[] = $delete_id;
+					}
+				}
+				echo '<h4>' . $count . ' products were deleted successfully.</h4>';
+				if (!empty($failed_to_delete)) {
+					$failed_to_delete = implode(', ', $failed_to_delete);
+					echo '<h4>Failed to delete products with ID(s): ' . $failed_to_delete . '</h4>';
+				}
+			}
+		}
+		
+		$xml = @simplexml_load_file($_FILES['xml_file']['tmp_name']);
+		if($xml){
+			$i = 0;
+			$post_data = '';
+			$post_title = '';
+			$post_content = '';
+			$post_price = '';
+			$fixed_price = '';
+			$main_image = '';
+			$sku = '';
+			$digital_file = '';
+			$affiliate_url = '';
+			$dg_posts = array();
+			foreach($xml->children() as $child){
+				$children = $child->children();
+				if(count($children) > 0){
+					foreach($children as $c){
+						$atts = $c->attributes();
+						if($atts['name'] == 'product_name')
+							$post_title = (string)$c;
+						if($atts['name'] == 'product_content')
+							$post_content = (string)$c;
+						if($atts['name'] == 'product_price')
+							$post_price = (string)$c;
+						if($atts['name'] == 'fixed_price')
+							$fixed_price = (string)$c;
+						if($atts['name'] == 'main_image')
+							$main_image = (string)$c;
+						if($atts['name'] == 'sku')
+							$sku = (string)$c;
+						if($atts['name'] == 'digital_file')
+							$digital_file = (string)$c;
+						if($atts['name'] == 'affiliate_url')
+							$affiliate_url = (string)$c;
+						$post_data = array(
+												'post_title' => $post_title,
+												'post_content' => $post_content,
+												'post_status' => 'publish',
+												'price' => $post_price,
+												'fixed_price' => $fixed_price,
+												'main_image' => $main_image,
+												'sku' => 'sku',
+												'digital_file' => $digital_file,
+												'affiliate_url' => $affiliate_url
+												);
+						$dg_posts[$i] = $post_data;
+					}
+					$i++;
+				}
+			}
+			$i = 0;
+			if(count($dg_posts > 0)){
+				foreach($dg_posts as $dg_post => $post){
+					$post_data = array(
+										'post_title' => html_entity_decode($post['post_title']),
+										'post_content' => html_entity_decode($post['post_content']),
+										'post_status' => 'publish',
+										'post_type' => $post_type
+										);
+					$new_post_id = wp_insert_post($post_data);
+					if ($new_post_id) {
+						update_post_meta($new_post_id, 'price', $post['price']);
+						update_post_meta($post_id, 'fixed_price', $fixed_price);
+						update_post_meta($post_id, 'digital_file', $digital_file);
+						update_post_meta($post_id, 'sku', $sku);
+						update_post_meta($post_id, 'affiliate_url', $affiliate_url);
+						$i++;
+					}
+				}
+			}
+			if ($i > 0) {
+				echo '<h4>' . count($dg_posts) . ' product(s) were created successfully.</h4>';
+			}
+		}else{
+			echo '<h4>No file selected.</h4>';
+		}
+	}
+	?>
+	<div class="wrap">
+		<h2>Dukagate Tools</h2>
+		<form method="POST" enctype="multipart/form-data" action="<?php echo esc_url($_SERVER['REQUEST_URI']); ?>">
+			<table width="100%" border="0" class="widefat">
+				<tr>
+					<th align="left" scope="row"><?php _e("Export"); ?></th>
+					<td id="dg_prod_export_td"><a href="javascript:;" class='button-secondary' id="dg_prod_export">Click Here to export products</a></td>
+				</tr>
+				<tr>
+					<th align="left" scope="row"><?php _e("Import"); ?></th>
+					<td>
+						<input id="xml_file" type="file" name="xml_file" /><br/>  
+						<label><?php _e("Delete old products ?"); ?> <input type="checkbox" value="checked" name="delete_old_products"/></label> <br/>
+						<input type="submit" class='button-primary' name="dg_import_xml" value="<?php _e("Import File"); ?>"/>
+					</td>
+				</tr>
+			</table>
+		</form>
+		<script type="text/javascript">
+			jQuery(document).ready(function(){
+				jQuery('#dg_prod_export').on("click", function(){
+					var url = '<?php echo get_bloginfo('url');  ?>';
+					window.location.href= url+'?action=dg_export_products';
+				});
+			});
+		</script>
+	</div>
+	<?php
+}
+
+if (@$_REQUEST['action'] === 'dg_export_products') {
+	add_action( 'init', 'dg_export_products');
+}
+/**
+ * Export products
+ */
+function dg_export_products(){
+	global $dukagate;
+	$args = array();
+	$args['post_type'] = 'dg_product';
+	$get_posts = new WP_Query;
+	$products = $get_posts->query($args);
+	if (is_array($products) && count($products) > 0) {
+		$xml = new SimpleXMLElement("<?xml version=\"1.0\" encoding=\"utf-8\" ?><products></products>");
+		foreach ($products as $product) {
+			$main_image = $dukagate->product_image($product->ID);
+			$content_price = get_post_meta($product->ID, 'price', true);
+			$fixed_price = get_post_meta($product->ID, 'fixed_price', true);
+			$sku = get_post_meta($product->ID, 'sku', true);
+			$digital_file = get_post_meta($product->ID, 'digital_file', true);
+			$affiliate_url = get_post_meta($product->ID, 'affiliate_url', true);
+			
+			$prod = $xml->addChild('product');
+			
+			$column = $prod->addChild('column',htmlspecialchars($product->post_title));
+			$column->addAttribute('name', 'product_name');
+			
+			$column = $prod->addChild('column',$content_price);
+			$column->addAttribute('name', 'product_price');
+			
+			$column = $prod->addChild('column',$fixed_price);
+			$column->addAttribute('name', 'fixed_price');
+			
+			$column = $prod->addChild('column',$main_image);
+			$column->addAttribute('name', 'main_image');
+			
+			$column = $prod->addChild('column',$sku);
+			$column->addAttribute('name', 'sku');
+			
+			$column = $prod->addChild('column',$digital_file);
+			$column->addAttribute('name', 'digital_file');
+			
+			$column = $prod->addChild('column',$affiliate_url);
+			$column->addAttribute('name', 'affiliate_url');
+			
+			$column = $prod->addChild('column',htmlspecialchars($product->post_content));
+			$column->addAttribute('name', 'post_content');
+		}
+		header( 'Content-disposition: attachment; filename=dukagate_products.xml');
+		header('Content-type: text/xml');
+		print($xml->asXML());
+	}
+	die();
+}
 
 //Save or delete variation of product
 if (@$_REQUEST['action'] === 'dg_change_variation') {
