@@ -2,7 +2,7 @@
 /*
 Plugin Name: DukaGate Shopping Cart
 Description: DukaGate Shopping Cart
-Version: 3.6.5
+Version: 3.7
 Author: rixeo
 Author URI: http://dukagate.info/
 Plugin URI: http://dukagate.info/
