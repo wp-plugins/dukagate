@@ -10,9 +10,10 @@ class DukaGate_Mail{
 	 * Mail Types accepted in the system
 	 */
 	static function mail_types(){
-		return array('payment_received'=> __('Payment Received', "dg-lang"), 
-					'order_placed'=> __('Order Placed', "dg-lang"), 
-					'order_canceled'=> __('Order Canceled', "dg-lang"));
+		return array('payment_received'=> __('Payment Received', "dukagate"), 
+					'order_placed'=> __('Order Placed', "dukagate"), 
+					'order_canceled'=> __('Order Canceled', "dukagate"),
+					'new_user'=> __('New User', "dukagate"));
 	}
 	
 	/**

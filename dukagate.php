@@ -20,9 +20,13 @@ define('DG_DOWNLOAD_FILES_DIR_TEMP', WP_CONTENT_DIR. '/uploads/dg_temp_download_
 define('DG_DUKAGATE_URL', DG_PLUGIN_URL.'/dukagate');
 define('DG_DUKAGATE_DIR', DG_PLUGIN_DIR.'/dukagate');
 
+$dg_content_url = content_url();
 
-define('DG_DUKAGATE_INVOICE_URL', DG_PLUGIN_URL.'/invoice');
-define('DG_DUKAGATE_INVOICE_DIR', DG_PLUGIN_DIR.'/invoice');
+define('DG_DUKAGATE_CONTENT_URL', content_url().'/dukagate');
+define('DG_DUKAGATE_CONTENT_DIR', WP_CONTENT_DIR.'/dukagate');
+
+define('DG_DUKAGATE_INVOICE_URL', DG_DUKAGATE_CONTENT_URL.'/invoice');
+define('DG_DUKAGATE_INVOICE_DIR', DG_DUKAGATE_CONTENT_DIR.'/invoice');
 
 define('DG_DUKAGATE_WIDGET_DIR', DG_DUKAGATE_DIR.'/widgets/');
 
