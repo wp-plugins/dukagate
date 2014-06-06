@@ -145,7 +145,7 @@ function dukagate_user_order_log(){
 							<td align="left"><?php echo number_format($log->total,2); ?></td>
 							<td align="left"><?php echo $log->payment_gateway; ?></td>
 							<td align="left"><?php _e($log->payment_status) ; ?></td>
-							<td align="left"><a href="javascript:void(null);" onclick="dukagate.delete_order('<?php echo $log->id; ?>');"><?php _e("Delete"); ?></a>&nbsp;&nbsp; | &nbsp;&nbsp;<a href="<?php echo $form_url.$log->id ;?>"><?php _e("View"); ?></a></td>
+							<td align="left"><a href="<?php echo $form_url.$log->id ;?>"><?php _e("View"); ?></a></td>
 						</tr>
 						<?php
 						$count++;
@@ -208,7 +208,7 @@ function dg_dukagate_order_log(){
 							<td align="left"><?php echo number_format($log->total,2); ?></td>
 							<td align="left"><?php echo $log->payment_gateway; ?></td>
 							<td align="left"><?php _e($log->payment_status) ; ?></td>
-							<td align="left"><a href="javascript:void(null);" onclick="dukagate.delete_order('<?php echo $log->id; ?>');"><?php _e("Delete"); ?></a>&nbsp;&nbsp; | &nbsp;&nbsp;<a href="<?php echo $form_url.$log->id ;?>"><?php _e("View"); ?></a></td>
+							<td align="left"><a href="<?php echo $form_url.$log->id ;?>"><?php _e("View"); ?></a></td>
 						</tr>
 						<?php
 						$count++;

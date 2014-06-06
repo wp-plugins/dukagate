@@ -76,6 +76,12 @@ if(!class_exists('DukaGate_GateWay_API')) {
 		 */
 		function process_payment_form($content, $invoice){
 		}
+		
+		/**
+		 * Action to be done on the order form
+		 */
+		function order_form_action($invoice){
+		}
 	}
 }
 

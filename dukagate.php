@@ -6,6 +6,7 @@ Version: 3.7
 Author: rixeo
 Author URI: http://dukagate.info/
 Plugin URI: http://dukagate.info/
+Domain Path: /dukagate/lang/
 */
 
 define('DG_PLUGIN_BASENAME',plugin_basename(__FILE__));

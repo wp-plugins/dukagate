@@ -87,7 +87,7 @@ if(!class_exists('DukaGate')) {
 			add_action('manage_posts_custom_column', array(&$this,'render_post_columns'), 10, 2);
 			add_action('admin_footer-edit.php', array(&$this,'admin_edit_dg_product_foot'), 11);
 			add_action('quick_edit_custom_box',  array(&$this,'add_quick_edit'), 10, 2);
-			add_action('plugins_loaded', array(&$this,'load_textdomain'), 7 );
+			add_action('init', array(&$this,'load_textdomain'));
 			
 			//Plugin info
 			add_filter('plugin_row_meta', array(&$this,'set_up_plugin_info'),10,2);
@@ -101,11 +101,7 @@ if(!class_exists('DukaGate')) {
 		 * Load Text Domain
 		 */
 		function load_textdomain(){
-			$locale = apply_filters( 'wordpress_locale', get_locale() );
-			$mofile = DG_DUKAGATE_DIR . "/lang/dukagate-$locale.mo";
-
-			if ( file_exists( $mofile ) )
-				load_textdomain( 'dukagate', $mofile );
+			load_plugin_textdomain( 'dukagate', false, DG_DUKAGATE_DIR . '/lang/' );
 		}
 		
 		/**
