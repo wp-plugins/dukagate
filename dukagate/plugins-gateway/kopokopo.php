@@ -28,7 +28,7 @@ class DukaGate_GateWay_KopoKopo extends DukaGate_GateWay_API{
 	function on_create(){
 		
 		
-		$this->plugin_name = __('KopoKopo');
+		$this->plugin_name = __('KopoKopo (Beta)');
 		$this->plugin_slug = __('kopokopo');
 		$this->required_fields = array(
 										'subdomain' => '',
@@ -42,7 +42,7 @@ class DukaGate_GateWay_KopoKopo extends DukaGate_GateWay_API{
 	//Register Plugin
 	function register(){
 		//Register Plugin
-		dg_register_gateway_plugin('DukaGate_GateWay_KopoKopo', $this->plugin_name, $this->plugin_slug, $this->required_fields, $this->currencies);
+		dg_register_gateway_plugin('DukaGate_GateWay_KopoKopo', $this->plugin_name, $this->plugin_slug, $this->required_fields, $this->currencies, false);
 	}
 	
 	/**
@@ -84,7 +84,7 @@ class DukaGate_GateWay_KopoKopo extends DukaGate_GateWay_API{
 				    <th scope="row"><?php _e('KopoKopo Checkout','dukagate') ?></th>
 				    <td>
 						<p>
-							<?php echo sprintf( __('The KopoKopo API Credentials are available on your <a href="%1$s" target="_blank">Merchant account</a> . After you have configured and saved your settings, use the <a href="%2$s" class="inboxact_test">test</a> to make sure the ', 'Merchant account'), 'https://app.kopokopo.com/', admin_url('edit.php?post_type=dg_product&page=dukagate-settings&tab=payment&k_test=t')); ?> 
+							<?php echo sprintf( __('The KopoKopo API Credentials are available on your <a href="%1$s" target="_blank">Merchant account</a> . After you have configured and saved your settings, use the <a href="%2$s" class="inboxact_test">test</a> to make sure the Merchant account works'), 'https://app.kopokopo.com/', admin_url('edit.php?post_type=dg_product&page=dukagate-settings&tab=payment&k_test=t')); ?> 
 						</p>
 							
 						<p>

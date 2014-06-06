@@ -134,5 +134,36 @@ class DukaGate_GateWay_MobilePayments extends DukaGate_GateWay_API{
                      </script>';
 		return $output;
 	}
+	
+	function order_form_action($invoice){
+		if (! empty( $_POST ) && check_admin_referer('dg_mobile_payments','dg_mobile_payments_noncename') ){
+			$dg_mp_codes = get_option('dg_mp_codes');
+			$dg_mp_codes[$invoice]['code'] = sanitize_text_field($_POST['dg_mp_code']);
+			update_option('dg_mp_codes', $dg_mp_codes);
+		}
+		$dg_mp_codes = get_option('dg_mp_codes');
+		?>
+		<tr>
+			<td><strong><?php _e("Input the confirmation code received for verification", "dukagate"); ?></strong></td>
+			<td>
+				<?php
+					if((isset($dg_mp_codes[$invoice]['code'])) && !empty($dg_mp_codes[$invoice]['code'])){
+						echo $dg_mp_codes[$invoice]['code'];
+					}else{
+						?>
+						<form enctype="multipart/form-data" action="<?php echo esc_url($_SERVER['REQUEST_URI']); ?>" method="post">
+							<?php wp_nonce_field('dg_mobile_payments','dg_mobile_payments_noncename'); ?>
+							<input type="text" class="regular-text" value="" id="dg_mp_code" name="dg_mp_code" />
+							<p class="submit">
+								<input class='button-primary' type='submit' value='<?php _e('Save','dukagate'); ?>'/><br/>
+							</p>
+						</form>
+						<?php
+					}
+				?>
+			</td>
+		</tr>
+		<?php
+	}
 }
 ?>

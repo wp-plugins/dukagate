@@ -230,11 +230,15 @@ function dg_dukagate_order_log_info($id){
 	$dg_shop_settings = get_option('dukagate_shop_settings');
 	$order_log = $dukagate->dg_get_order_log_by_id($id);
 	
+	$user_can_change = true;
+	
 	if (!current_user_can('manage_options') && !current_user_can('edit_others_posts')){
 		$user = wp_get_current_user();
+		$user_can_change = false;
 		if(!$dukagate->is_order_for_user($current_user->user, $id)){
 			wp_die(__("You are not allowed to view this order", "dukagate"));
 		}
+		
 	}
 	?>
 	<div class="wrap">
@@ -259,8 +263,14 @@ function dg_dukagate_order_log_info($id){
 			</tr>
 			<tr>
 				<td><strong><?php _e("Status", "dukagate"); ?></strong></td>
-				<td><span id="dg_order_status"><?php _e($order_log->payment_status); ?></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:;" onclick="dukagate.change_order_status('<?php echo $order_log->id; ?>');"><?php _e("Change Status"); ?></a></td>
+				<td>
+					<span id="dg_order_status"><?php _e($order_log->payment_status); ?></span>
+					<?php if($user_can_change){?>
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:;" onclick="dukagate.change_order_status('<?php echo $order_log->id; ?>');"><?php _e("Change Status"); ?></a>
+					<?php } ?>
+				</td>
 			</tr>
+			<?php do_action( 'dg_order_log_'.$order_log->payment_gateway , $order_log->invoice); ?>
 			<tr>
 				<td><strong><?php _e("Date Created", "dukagate"); ?></strong></td>
 				<td><?php echo $order_log->date; ?></td>

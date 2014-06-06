@@ -892,6 +892,44 @@ if(!class_exists('DukaGate')) {
 		}
 		
 		/**
+		 * Upload File
+		 *
+		 */
+		public function upload_file($name, $bits, $destination_dir, $destination_url){
+			if ( empty( $name ) )
+				return array( 'error' => __( 'Empty filename' ) );
+				
+			$wp_filetype = wp_check_filetype( $name );
+			if ( ! $wp_filetype['ext'] && ! current_user_can( 'unfiltered_upload' ) )
+				return array( 'error' => __( 'Invalid file type' ,'dukagate') );
+				
+			
+			$filename = wp_unique_filename( $destination_dir, $name );
+			
+			$new_file = $destination_dir . "/$filename";
+
+			$ifp = @ fopen( $new_file, 'wb' );
+			if ( ! $ifp )
+				return array( 'error' => sprintf( __( 'Could not write file %s' ,'dukagate'), $new_file ) );
+
+			@fwrite( $ifp, $bits );
+			fclose( $ifp );
+			clearstatcache();
+
+			// Set correct file permissions
+			$stat = @ stat( dirname( $new_file ) );
+			$perms = $stat['mode'] & 0007777;
+			$perms = $perms & 0000666;
+			@ chmod( $new_file, $perms );
+			clearstatcache();
+
+			// Compute the URL
+			$url = $destination_url . "/$filename";
+
+			return array( 'file' => $new_file, 'original' => $name, 'url' => $url , 'error' => false );
+		}
+		
+		/**
 		 * Check if database tables are created and create them
 		 */
 		private function dukagate_db(){
@@ -1548,7 +1586,7 @@ if(!class_exists('DukaGate')) {
 				$sql = "INSERT INTO `$table_name`(`gateway_name`,`gateway_slug`,`gateway_class`, `gateway_options`, `currencies`, `active`) 
 				        VALUES('$gateway_name','$gateway_slug','$gateway_class','$gateway_options', '$currencies' ,$active)";
 			}else{
-				$sql = "UPDATE `$table_name` SET `active` = $active WHERE `gateway_slug` = '$gateway_slug'";
+				$sql = "UPDATE `$table_name` SET `active` = $active, `gateway_name` = '$gateway_name' WHERE `gateway_slug` = '$gateway_slug'";
 			}
 			$wpdb->query($sql);
 			

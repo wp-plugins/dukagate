@@ -133,5 +133,45 @@ class DukaGate_GateWay_BankTransfer extends DukaGate_GateWay_API{
                      </script>';
 		return $output;
 	}
+	
+	function order_form_action($invoice){
+		global $dukagate;
+		if (! empty( $_POST ) && check_admin_referer('dg_bank_payments','dg_bank_payments_noncename') ){
+			$dg_bank_files = get_option('dg_bank_files');
+			if(!empty($_FILES['dg_bank_file']['name'])) {
+				// Get the file type of the upload
+				$arr_file_type = wp_check_filetype(basename($_FILES['dg_bank_file']['name']));
+				$uploaded_type = $arr_file_type['type'];
+				$upload = $dukagate->upload_file($_FILES['dg_bank_file']['name'], file_get_contents($_FILES['dg_bank_file']['tmp_name']), DG_DUKAGATE_INVOICE_DIR, DG_DUKAGATE_INVOICE_URL);
+				
+				$dg_bank_files[$invoice]['file'] = $upload['url'];
+				update_option('dg_bank_files', $dg_bank_files);
+			}
+			
+		}
+		$dg_bank_files = get_option('dg_bank_files');
+		?>
+		<tr>
+			<td><strong><?php _e("Upload a copy of successful EFT form", "dukagate"); ?></strong></td>
+			<td>
+				<?php
+					if((isset($dg_bank_files[$invoice]['file'])) && !empty($dg_bank_files[$invoice]['file'])){
+						echo sprintf( __('<a href="%1$s" target="_blank">EFT File</a>'), $dg_bank_files[$invoice]['file']);
+					}else{
+						?>
+						<form enctype="multipart/form-data" action="<?php echo esc_url($_SERVER['REQUEST_URI']); ?>" method="post">
+							<?php wp_nonce_field('dg_bank_payments','dg_bank_payments_noncename'); ?>
+							<input class="button" type="file" id="dg_bank_file" name="dg_bank_file" value="" size="25" />
+							<p class="submit">
+								<input class='button-primary' type='submit' value='<?php _e('Save','dukagate'); ?>'/><br/>
+							</p>
+						</form>
+						<?php
+					}
+				?>
+			</td>
+		</tr>
+		<?php
+	}
 }
 ?>
