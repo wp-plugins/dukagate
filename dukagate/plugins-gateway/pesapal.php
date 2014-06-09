@@ -191,7 +191,7 @@ class DukaGate_GateWay_PesaPal extends DukaGate_GateWay_API{
 				    <td>
 						<p>
 							<?php _e('PesaPal requires Full names and email or  phone number. To handle APN return requests, please set the url '); ?>
-							<strong><?php echo get_bloginfo('url').'?dg_handle_payment_return_pesapal' ; ?></strong>
+							<strong><?php echo admin_url("admin-ajax.php?action=dg_handle_payment_return_pesapal"); ?></strong>
 							<?php _e(' on your <a href="https://www.pesapal.com/merchantdashboard" target="_blank">pesapal</a> account settings'); ?>
 						</p>
 						
