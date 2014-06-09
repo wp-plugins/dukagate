@@ -31,10 +31,8 @@ if(!class_exists('DukaGate_GateWay_API')) {
 			$this->set_up_ipn_url();
 			add_action( 'dg_payment_submit_' . $this->plugin_slug, array(&$this, 'process_payment_form'), 10, 2 ); //Payment process
 			add_action( 'dg_handle_payment_return_' . $this->plugin_slug, array(&$this, 'process_ipn_return') ); //IPN
-			$dg_pw_gw = $dukagate->dg_get_payment_gateway($this->plugin_slug);
-			if(empty($dg_pw_gw)){
-				$this->register();
-			}
+			add_action( 'dg_order_log_'. $this->plugin_slug , array(&$this, 'order_form_action'), 10, 1 );
+			$this->register();
 		}
 		
 		
@@ -75,6 +73,12 @@ if(!class_exists('DukaGate_GateWay_API')) {
 		 * Process Payment
 		 */
 		function process_payment_form($content, $invoice){
+		}
+		
+		/**
+		 * Action to be done on the order form
+		 */
+		function order_form_action($invoice){
 		}
 	}
 }
