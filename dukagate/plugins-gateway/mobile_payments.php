@@ -31,6 +31,9 @@ class DukaGate_GateWay_MobilePayments extends DukaGate_GateWay_API{
 		$this->plugin_slug = __('mobile_money');
 		$this->required_fields = array('none' =>'');
 		$this->currencies = array('instructions' => '');
+		
+		add_action( 'wp_ajax_nopriv_mobile_money_save', array(&$this, 'process_code'));
+		add_action( 'wp_ajax_mobile_money_save', array(&$this, 'process_code'));
 	}
 	
 	//Register Plugin
@@ -126,13 +129,34 @@ class DukaGate_GateWay_MobilePayments extends DukaGate_GateWay_API{
 		
 		$output = $options['instructions'];
 		$output .= '<br/>';
+		$output .= '<label>';
+		$output .= __('Transaction reference','dukagate');
+		$output .= ': <input type="text" name="dg_mobile_ref" id="dg_mobile_ref" />';
+		$output .= '</label>';
+		$output .= '<br/>';
 		$output .= '<button class="mobile_continue_btn" onclick="mobile_continue();">Continue</button>';
 		$output .= '<script type="text/javascript">';
         $output .= 'function mobile_continue(){
-					window.location.href="'.$return_path.'"
+					var code = jQuery("#dg_mobile_ref").val();
+					if($("#dg_mobile_ref").is(":empty")){
+						alert("'.__("Transaction reference Required !!", "dukagate").'");
+					}else{
+						jQuery.ajax({
+							type: "POST",
+							url: dg_js.ajaxurl,
+							data: {action : "mobile_money_save", invoice : "'.$invoice.'", code : code},
+							success: function(response){
+								window.location.href="'.$return_path.'"
+							}
+						});
+					}
 					};
                      </script>';
 		return $output;
+	}
+	
+	function process_code(){
+		
 	}
 	
 	function order_form_action($invoice){
