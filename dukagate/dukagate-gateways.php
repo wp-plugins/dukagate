@@ -30,8 +30,12 @@ if(!class_exists('DukaGate_GateWay_API')) {
 				
 			$this->set_up_ipn_url();
 			add_action( 'dg_payment_submit_' . $this->plugin_slug, array(&$this, 'process_payment_form'), 10, 2 ); //Payment process
-			add_action( 'dg_handle_payment_return_' . $this->plugin_slug, array(&$this, 'process_ipn_return') ); //IPN
+			
+			add_action( 'wp_ajax_nopriv_dg_handle_payment_return_'. $this->plugin_slug, array(&$this, 'process_ipn_return') );
+			add_action( 'wp_ajax_dg_handle_payment_return_'. $this->plugin_slug, array(&$this, 'process_ipn_return') );
+			
 			add_action( 'dg_order_log_'. $this->plugin_slug , array(&$this, 'order_form_action'), 10, 1 );
+			add_action( 'dg_gateway_option_'. $this->plugin_slug , array(&$this, 'set_up_options'), 10, 2 );
 			$this->register();
 		}
 		
@@ -65,7 +69,7 @@ if(!class_exists('DukaGate_GateWay_API')) {
 		/**
 		 * Set Up Payment gateway options
 		 */
-		function set_up_options($plugin_slug){
+		function set_up_options($plugin_slug, $settings){
 		}
 
 		

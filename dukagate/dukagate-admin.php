@@ -449,30 +449,75 @@ function dg_change_order_log_status(){
 //Payment Options
 function dg_dukagate_paymnet(){
 	global $dukagate;
+	if(@$_POST['dg_payment_settings'] && check_admin_referer('dukagate_payment_settings','dukagate_payment_noncename')){
+		$gateways = $_POST['dg_gateway'];
+		update_option('dukagate_gateway_options', $gateways);
+	}
+	
+	if(@$_POST['dg_payment_option_settings'] && check_admin_referer('dukagate_paymentoption_settings','dukagate_paymentoption_noncename')){
+		$gateway_settings = get_option('dukagate_gateway_settings');
+		$setting = $_POST['dg'];
+		foreach($setting as $key => $value) {
+			$gateway_settings[$key] = $value;
+		}
+		update_option('dukagate_gateway_settings', $gateway_settings);
+	}
 	$dg_gateways = $dukagate->list_all_gateways();
+	$alowed_options = get_option('dukagate_gateway_options');
+	$gateway_settings = get_option('dukagate_gateway_settings');
 	?>
 		<div id="dg_payments">
 			<?php
 			if (is_array($dg_gateways) && count($dg_gateways) > 0) {
+				?>
+				<form method="POST" action="<?php echo esc_url($_SERVER['REQUEST_URI']); ?>">
+					<?php wp_nonce_field('dukagate_payment_settings','dukagate_payment_noncename'); ?>
+				<ul>
+				<?php
+				$selected = "";
 				foreach ($dg_gateways as $dg_gateway) {
+					if(is_array($alowed_options))
+						if(in_array($dg_gateway->gateway_slug, $alowed_options)){
+							$selected = "checked='checked'";
+						}else{
+							$selected = "";
+						}
 					?>
-					<div id="dg_<?php echo $dg_gateway->id; ?>" class="dg_payment_gateway">
-						<div id="dg_title_<?php echo $dg_gateway->id; ?>" class="dg_payment_title">
-							<div class="dg_instructions"><?php _e("Click to show/hide settings"); ?></div>
-							<h2><?php _e($dg_gateway->gateway_name); ?></h2>
-						</div>
-						<div class="dg_gateway_options" id="dg_opt_<?php echo $dg_gateway->id; ?>">
-							<?php DukaGate::call_class_function($dg_gateway->gateway_class, 'set_up_options', $dg_gateway->gateway_slug); ?>
-						</div>
-						<script type="text/javascript">
-							jQuery(document).ready(function(){
-								jQuery('#dg_title_<?php echo $dg_gateway->id; ?>').click(function(){
-									jQuery('#dg_opt_<?php echo $dg_gateway->id; ?>').slideToggle();
-								});
-							});
-						</script>
-					</div>
+					<li>
+						<label>
+							<input type="checkbox" name="dg_gateway[]" value="<?php echo $dg_gateway->gateway_slug; ?>" <?php echo $selected;?> />
+							<?php _e($dg_gateway->gateway_name); ?> 
+						</label> 
+					</li>	
 					<?php
+				}
+				?>
+				</ul>
+				<p class="submit">
+					<input class='button-primary' type='submit' name='dg_payment_settings' value='<?php _e('Activate Selected', 'dukagate'); ?>'/><br/>
+				</p>
+				</form>
+				<?php 
+				if(is_array($alowed_options)){
+				?>
+				<form method="POST" action="<?php echo esc_url($_SERVER['REQUEST_URI']); ?>">
+					<?php wp_nonce_field('dukagate_paymentoption_settings','dukagate_paymentoption_noncename'); ?>
+					<div id="dg_<?php echo $dg_gateway->id; ?>" class="dg_payment_gateway">
+						<?php
+							foreach ($alowed_options as $gateway_option) {
+								?>
+								<h2><?php _e($dukagate->dg_get_gateway_name($gateway_option)); ?></h2>
+								<?php
+								do_action( 'dg_gateway_option_'.$gateway_option , $gateway_option, $gateway_settings);
+								?><hr/><?php
+							}
+						?>
+						<p class="submit">
+							<input class='button-primary' type='submit' name='dg_payment_option_settings' value='<?php _e('Save Settings', 'dukagate'); ?>'/><br/>
+						</p>
+					</div>
+				</form>
+				<?php
 				}
 			}else{
 				_e("No Payment Gateways Found!!");

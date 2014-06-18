@@ -78,31 +78,17 @@ class DukaGate_GateWay_WorldPay extends DukaGate_GateWay_API{
 	/**
 	 * Set Up Payment gateway options
 	 */
-	function set_up_options($plugin_slug){
+	function set_up_options($plugin_slug, $settings){
 		global $dukagate;
-		if(@$_POST[$plugin_slug]){
-			$required_fields = array(
-									'installation_id' => '',
-									'sandbox' => '',
-									'currency' => '');
-			$required_fields['currency'] = $_POST[$plugin_slug.'_currency'];
-			$required_fields['installation_id'] = $_POST[$plugin_slug.'_installation_id'];
-			$required_fields['sandbox'] = $_POST[$plugin_slug.'_sandbox'];
-			$enabled = ($_POST[$plugin_slug.'_enable'] == 'checked') ? 1 : 0;
-			$dukagate->dg_save_gateway_options($plugin_slug ,DukaGate::array_to_json($required_fields), $enabled);
-		}
-		$options = DukaGate::json_to_array($dukagate->dg_get_gateway_options($plugin_slug));
 		$currencies = DukaGate::json_to_array($dukagate->dg_get_gateway_currencies($plugin_slug));
-		$enabled = $dukagate->dg_get_enabled_status($plugin_slug);
 		?>
-		<form method="POST" action="">
 			<table class="form-table">
 				<tr>
 				    <th scope="row"><?php _e('WorldPay Settings') ?></th>
 				    <td>
 						<p>
 							<label><?php _e('Test Mode') ?><br />
-							  <input value="checked" name="<?php echo $plugin_slug; ?>_sandbox" type="checkbox" <?php echo ($options['sandbox'] == 'checked') ? "checked='checked'": ""; ?> />
+							  <input value="checked" name="dg[<?php echo $plugin_slug; ?>][sandbox]" type="checkbox" <?php echo ($settings[$plugin_slug]['sandbox'] == 'checked') ? "checked='checked'": ""; ?> />
 							</label>
 						</p>
 				    </td>
@@ -112,14 +98,14 @@ class DukaGate_GateWay_WorldPay extends DukaGate_GateWay_API{
 				    <td>
 						<p>
 							<label><?php _e('Installation ID') ?><br />
-							  <input value="<?php echo $options['installation_id']; ?>" size="30" name="<?php echo $plugin_slug; ?>_installation_id" type="text" />
+							  <input value="<?php echo $settings[$plugin_slug]['installation_id']; ?>" size="30" name="dg[<?php echo $plugin_slug; ?>][installation_id]" type="text" />
 							</label>
 						</p>
 						<p>
 							<label><?php _e('WorldPay Currency') ?><br />
-								<select name="<?php echo $plugin_slug; ?>_currency">
+								<select name="dg[<?php echo $plugin_slug; ?>][currency]">
 									<?php
-									$sel_currency = $options['currency'];
+									$sel_currency = $settings[$plugin_slug]['currency'];
 									foreach ($currencies as $k => $v) {
 										echo '<option value="' . $k . '"' . ($k == $sel_currency ? ' selected' : '') . '>' . wp_specialchars($v, true) . '</option>' . "\n";
 									}
@@ -129,21 +115,8 @@ class DukaGate_GateWay_WorldPay extends DukaGate_GateWay_API{
 						</p>
 				    </td>
 				</tr>
-				<tr>
-				    <th scope="row"><?php _e('Enable') ?></th>
-				    <td>
-						<p>
-							<label><?php _e('Select To enable or disable') ?><br />
-							  <input value="checked" name="<?php echo $plugin_slug; ?>_enable" type="checkbox" <?php echo (intval($enabled) == 1) ? "checked='checked'": ""; ?> />
-							</label>
-						</p>
-						<p>
-							<input type="submit" name="<?php echo $plugin_slug; ?>" value="<?php _e('Save Settings') ?>" />
-						</p>
-				    </td>
-				</tr>
+				
 			</table>
-		</form>
 		<?php
 	}
 	
@@ -156,7 +129,7 @@ class DukaGate_GateWay_WorldPay extends DukaGate_GateWay_API{
 		$dg_cart = $_SESSION['dg_cart'];
 		$dg_shop_settings = get_option('dukagate_shop_settings');
 		$shop_currency = $dg_shop_settings['currency'];
-		$options = DukaGate::json_to_array($dukagate->dg_get_gateway_options($this->plugin_slug));
+		$settings = get_option('dukagate_gateway_settings');
 		
 		$return_path = get_page_link($dg_shop_settings['thankyou_page']);
         $check_return_path = explode('?', $return_path);
@@ -166,9 +139,9 @@ class DukaGate_GateWay_WorldPay extends DukaGate_GateWay_API{
             $return_path .= '?id=' . $invoice_id;
         }
 		$conversion_rate = 1;
-        if ($shop_currency != $options['currency']) {
+        if ($shop_currency != $settings[$this->plugin_slug]['currency']) {
 			$curr = new DG_CURRENCYCONVERTER();
-            $conversion_rate = $curr->convert(1, $options['currency'], $shop_currency);
+            $conversion_rate = $curr->convert(1, $settings[$this->plugin_slug]['currency'], $shop_currency);
 		}
 		$total_tax = 0.00;
         $total_discount = 0.00;
@@ -182,7 +155,7 @@ class DukaGate_GateWay_WorldPay extends DukaGate_GateWay_API{
 		$testModeVal = '0';
 		//Set up return url
 		$action_url = $this->post_url;
-		if($options['sandbox'] == 'checked'){
+		if($settings[$this->plugin_slug]['sandbox'] == 'checked'){
 			$action_url = $this->sandbox_url;
 			$testModeVal = '100';
 			$name = 'AUTHORISED';
@@ -207,13 +180,13 @@ class DukaGate_GateWay_WorldPay extends DukaGate_GateWay_API{
 				$total += $cart['total'];
 			}
 		}
-		$installation_id = $options['installation_id'];
+		$installation_id = $settings[$this->plugin_slug]['installation_id'];
 		$total_amount = ($total + $total_tax + $total_shipping - $total_discount) * $conversion_rate;
         $total_amount = number_format($total_amount, 2, '.', '');
         $lang = (strlen(WPLANG) > 0 ? substr(WPLANG, 0, 2) : 'en');
 		$output = '<form name="dg_worldpay_form" id="dg_payment_form" action="' . $action_url . '" method="post">
 					<input type="hidden" name="instId" value="' . $installation_id . '" />
-					<input type="hidden" name="currency" value="' . $options['currency'] . '" />
+					<input type="hidden" name="currency" value="' . $settings[$this->plugin_slug]['currency'] . '" />
 					<input type="hidden" name="desc" value="Your Order No.: ' . $invoice_id . '" />
 					<input type="hidden" name="cartId" value="101DGK0098" />
 					<input type="hidden" name="amount" value="' . $total_amount . '" />

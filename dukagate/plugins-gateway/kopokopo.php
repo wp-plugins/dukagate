@@ -48,17 +48,9 @@ class DukaGate_GateWay_KopoKopo extends DukaGate_GateWay_API{
 	/**
 	 * Set Up Payment gateway options
 	 */
-	function set_up_options($plugin_slug){
+	function set_up_options($plugin_slug, $settings){
 		global $dukagate;
-		if(@$_POST[$plugin_slug]){
-			$required_fields = array(
-									'subdomain' => '',
-									'authkey' => '');
-			$required_fields['subdomain'] = $_POST[$plugin_slug.'_subdomain'];
-			$required_fields['authkey'] = $_POST[$plugin_slug.'_authkey'];
-			$enabled = (@$_POST[$plugin_slug.'_enable'] == 'checked') ? 1 : 0;
-			$dukagate->dg_save_gateway_options($plugin_slug ,DukaGate::array_to_json($required_fields), $enabled);
-		}
+	
 		if(@$_GET['k_test']){
 			$test_result = DukaGate::call_class_function('DukaGate_GateWay_KopoKopo', 'connection_test', '');
 			if($test_result){
@@ -75,10 +67,7 @@ class DukaGate_GateWay_KopoKopo extends DukaGate_GateWay_API{
 				<?php
 			}
 		}
-		$options = DukaGate::json_to_array($dukagate->dg_get_gateway_options($plugin_slug));
-		$enabled = $dukagate->dg_get_enabled_status($plugin_slug);
 		?>
-		<form method="POST" action="">
 			<table class="form-table">
 				<tr>
 				    <th scope="row"><?php _e('KopoKopo Checkout','dukagate') ?></th>
@@ -99,33 +88,20 @@ class DukaGate_GateWay_KopoKopo extends DukaGate_GateWay_API{
 				    <td>
 						<p>
 							<label><?php _e('Sub Domain','dukagate'); ?><br />
-							  <input value="<?php echo $options['subdomain']; ?>" size="30" name="<?php echo $plugin_slug; ?>_subdomain" type="text" />
+							  <input value="<?php echo $settings[$plugin_slug]['subdomain']; ?>" size="30" name="dg[<?php echo $plugin_slug; ?>][subdomain]" type="text" />
 							</label>
 						</p>
 						
 						<p>
 							<label><?php _e('Auth Key','dukagate') ?><br />
-							  <input value="<?php echo $options['authkey']; ?>" size="30" name="<?php echo $plugin_slug; ?>_authkey" type="text" />
+							  <input value="<?php echo $settings[$plugin_slug]['authkey']; ?>" size="30" name="dg[<?php echo $plugin_slug; ?>][authkey]" type="text" />
 							</label>
 						</p>
 						
 				    </td>
 				</tr>
-				<tr>
-				    <th scope="row"><?php _e('Enable','dukagate') ?></th>
-				    <td>
-						<p>
-							<label><?php _e('Select To enable or disable','dukagate') ?><br />
-							  <input value="checked" name="<?php echo $plugin_slug; ?>_enable" type="checkbox" <?php echo (intval($enabled) == 1) ? "checked='checked'": ""; ?> />
-							</label>
-						</p>
-						<p>
-							<input type="submit" name="<?php echo $plugin_slug; ?>" value="<?php _e('Save Settings','dukagate') ?>" />
-						</p>
-				    </td>
-				</tr>
+				
 			</table>
-		</form>
 		<?php
 	}
 	
@@ -166,7 +142,7 @@ class DukaGate_GateWay_KopoKopo extends DukaGate_GateWay_API{
 		$dg_cart = $_SESSION['dg_cart'];
 		$dg_shop_settings = get_option('dukagate_shop_settings');
 		$shop_currency = $dg_shop_settings['currency'];
-		$options = DukaGate::json_to_array($dukagate->dg_get_gateway_options($this->plugin_slug));
+		$settings = get_option('dukagate_gateway_settings');
 		
 		$return_path = get_page_link($dg_shop_settings['thankyou_page']);
         $check_return_path = explode('?', $return_path);
@@ -194,8 +170,8 @@ class DukaGate_GateWay_KopoKopo extends DukaGate_GateWay_API{
 			$amount = $amount - $total_discount;
 		}
 		
-		$subdomain = $options['subdomain'];
-		$authkey = $options['authkey'];
+		$subdomain = $settings[$this->plugin_slug]['subdomain'];
+		$authkey = $settings[$this->plugin_slug]['authkey'];
 		
 		$output = '<script src="'.DG_GATEWAYS_URL.'/libraries/kopokopo.js"></script>';
 		$output .= '<script type="text/javascript">';

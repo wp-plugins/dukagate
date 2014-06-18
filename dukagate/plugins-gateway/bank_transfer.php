@@ -61,44 +61,22 @@ class DukaGate_GateWay_BankTransfer extends DukaGate_GateWay_API{
 	/**
 	 * Set Up Payment gateway options
 	 */
-	function set_up_options($plugin_slug){
+	function set_up_options($plugin_slug, $settings){
 		global $dukagate;
-		if(@$_POST[$plugin_slug]){
-			$required_fields = array(
-									'instructions' => '');
-			$required_fields['instructions'] = $_POST[$plugin_slug.'_instructions'];
-			$enabled = ($_POST[$plugin_slug.'_enable'] == 'checked') ? 1 : 0;
-			$dukagate->dg_save_gateway_options($plugin_slug ,DukaGate::array_to_json($required_fields), $enabled);
-		}
-		$options = DukaGate::json_to_array($dukagate->dg_get_gateway_options($plugin_slug));
-		$enabled = $dukagate->dg_get_enabled_status($plugin_slug);
-		$editor_id = $plugin_slug.'_instructions';
+		$editor_id = 'dg['.$plugin_slug.'][instructions]';
 		?>
-		<form method="POST" action="">
-			<table class="form-table">
-				<tr>
-				    <th scope="row"><?php _e('Instructions') ?></th>
-				    <td>
-						<p>
-							<?php wp_editor( $options['instructions'], $editor_id ); ?>
-						</p>
-				    </td>
-				</tr>
-				<tr>
-				    <th scope="row"><?php _e('Enable') ?></th>
-				    <td>
-						<p>
-							<label><?php _e('Select To enable or disable') ?><br />
-							  <input value="checked" name="<?php echo $plugin_slug; ?>_enable" type="checkbox" <?php echo (intval($enabled) == 1) ? "checked='checked'": ""; ?> />
-							</label>
-						</p>
-						<p>
-							<input type="submit" name="<?php echo $plugin_slug; ?>" value="<?php _e('Save Settings') ?>" />
-						</p>
-				    </td>
-				</tr>
-			</table>
-		</form>
+		<table class="form-table">
+			<tr>
+				<th scope="row"><?php _e('Instructions','dukagate'); ?></th>
+				<td>
+					<p>
+						<?php wp_editor( $settings[$plugin_slug]['instructions'], $editor_id , array( 'media_buttons' => false )); ?>
+					</p>
+				</td>
+			</tr>
+			
+		</table>
+		
 		<?php
 	}
 	
@@ -109,7 +87,7 @@ class DukaGate_GateWay_BankTransfer extends DukaGate_GateWay_API{
 	function process_payment_form($cart){
 		global $dukagate;
 		
-		$options = DukaGate::json_to_array($dukagate->dg_get_gateway_options($this->plugin_slug));
+		$settings = get_option('dukagate_gateway_settings');
 		
 		$dg_shop_settings = get_option('dukagate_shop_settings');
 		$invoice = $_SESSION['dg_invoice'];
@@ -123,7 +101,7 @@ class DukaGate_GateWay_BankTransfer extends DukaGate_GateWay_API{
 			$return_path .= '?id=' . $invoice;
 		}
 		
-		$output = $options['instructions'];
+		$output = $settings[$this->plugin_slug]['instructions'];
 		$output .= '<br/>';
 		$output .= '<button class="bank_continue_btn" onclick="bank_continue();">Continue</button>';
 		$output .= '<script type="text/javascript">';

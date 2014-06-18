@@ -1581,12 +1581,16 @@ if(!class_exists('DukaGate')) {
 			
 			$dg_gateway = $this->dg_get_payment_gateway($gateway_slug);
 			$table_name = $databases['payment'];
-			$active = ($enabled) ? 1: 0;
-			if(empty($dg_gateway)){
-				$sql = "INSERT INTO `$table_name`(`gateway_name`,`gateway_slug`,`gateway_class`, `gateway_options`, `currencies`, `active`) 
-				        VALUES('$gateway_name','$gateway_slug','$gateway_class','$gateway_options', '$currencies' ,$active)";
+			if($enabled){
+				$active = ($enabled) ? 1: 0;
+				if(empty($dg_gateway)){
+					$sql = "INSERT INTO `$table_name`(`gateway_name`,`gateway_slug`,`gateway_class`, `gateway_options`, `currencies`, `active`) 
+							VALUES('$gateway_name','$gateway_slug','$gateway_class','$gateway_options', '$currencies' ,$active)";
+				}else{
+					$sql = "UPDATE `$table_name` SET `active` = $active, `gateway_name` = '$gateway_name' WHERE `gateway_slug` = '$gateway_slug'";
+				}
 			}else{
-				$sql = "UPDATE `$table_name` SET `active` = $active, `gateway_name` = '$gateway_name' WHERE `gateway_slug` = '$gateway_slug'";
+				$sql = "DELETE FROM `$table_name` WHERE `gateway_slug` = '$gateway_slug'";
 			}
 			$wpdb->query($sql);
 			
@@ -1657,6 +1661,15 @@ if(!class_exists('DukaGate')) {
 			global $wpdb;
 			$table_name = $databases['payment'];
 			$sql = "SELECT `gateway_class` FROM `$table_name` WHERE `gateway_slug` = '$gateway_slug'";
+			return $wpdb->get_var($sql);
+		}
+		
+		//Get Gateway name
+		function dg_get_gateway_name($gateway_slug){
+			$databases = self::db_names();
+			global $wpdb;
+			$table_name = $databases['payment'];
+			$sql = "SELECT `gateway_name` FROM `$table_name` WHERE `gateway_slug` = '$gateway_slug'";
 			return $wpdb->get_var($sql);
 		}
 		
@@ -2039,40 +2052,25 @@ if(!class_exists('DukaGate')) {
 				}
 				$cnt .= '</div>';
 			}
-			$dg_gateways = $this->list_all_active_gateways();
+			$dg_gateways = get_option('dukagate_gateway_options');
 			$active = 0;
 			$gw_name = '';
 			if (is_array($dg_gateways) && count($dg_gateways) > 0) {
 				if(count($dg_gateways) > 1){
 					$cnt .= '<ul>';
 					foreach ($dg_gateways as $dg_gateway) {
-						$gw_name = '';
-						if(intval($dg_gateway->active) == 1){
-							$options = DukaGate::json_to_array($this->dg_get_gateway_options($dg_gateway->gateway_slug));
-							$gw_name = $dg_gateway->gateway_name;
-							if(!empty($options['custom_name'])){
-								$gw_name = $options['custom_name'];
-							}
-							$cnt .= '<li>';
-							$cnt .= '<label for="dg_gateway" class="dg_gateway '.$dg_gateway->gateway_slug.'"><input type="radio" class="required dg_gateway_select '.$dg_gateway->gateway_slug.'" name="dg_gateway_action" value="'.$dg_gateway->gateway_slug.'"/>'.$gw_name.'</label>';
-							$cnt .= '</li>';
-							$active += 1;
-						}
+						$gw_name = $this->dg_get_gateway_name($dg_gateway);
+						$cnt .= '<li>';
+						$cnt .= '<label for="dg_gateway" class="dg_gateway '.$dg_gateway.'"><input type="radio" class="required dg_gateway_select '.$dg_gateway.'" name="dg_gateway_action" value="'.$dg_gateway.'"/>'.$gw_name.'</label>';
+						$cnt .= '</li>';
+						$active += 1;
 					}
 					$cnt .= '</ul>';
 				}else{
 					foreach ($dg_gateways as $dg_gateway) {
-						$gw_name = '';
-						if(intval($dg_gateway->active) == 1){
-							$active += 1;
-							$options = DukaGate::json_to_array($this->dg_get_gateway_options($dg_gateway->gateway_slug));
-							$gw_name = $dg_gateway->gateway_name;
-							if(!empty($options['custom_name'])){
-								$gw_name = $options['custom_name'];
-							}
-							$cnt .= '<label for="dg_gateway" class="dg_gateway '.$dg_gateway->gateway_slug.'">'.__("Pay Using ",'dukagate').$gw_name.'</label>';
-							$cnt .= '<input type="hidden" name="dg_gateway_action" value="'.$dg_gateway->gateway_slug.'"/></label>';
-						}
+						$gw_name = $this->dg_get_gateway_name($dg_gateway);
+						$cnt .= '<label for="dg_gateway" class="dg_gateway '.$dg_gateway.'"><input type="radio" class="required dg_gateway_select '.$dg_gateway.'" name="dg_gateway_action" value="'.$dg_gateway.'"/>'.$gw_name.'</label>';
+						$active += 1;
 					}
 				}
 			}
