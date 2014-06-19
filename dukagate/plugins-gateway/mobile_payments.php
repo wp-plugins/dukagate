@@ -116,7 +116,7 @@ class DukaGate_GateWay_MobilePayments extends DukaGate_GateWay_API{
 		$output .= '<script type="text/javascript">';
         $output .= 'function mobile_continue(){
 					var code = jQuery("#dg_mobile_ref").val();
-					if($("#dg_mobile_ref").is(":empty")){
+					if(jQuery("#dg_mobile_ref").is(":empty")){
 						alert("'.__("Transaction reference Required !!", "dukagate").'");
 					}else{
 						jQuery.ajax({
@@ -134,7 +134,11 @@ class DukaGate_GateWay_MobilePayments extends DukaGate_GateWay_API{
 	}
 	
 	function process_code(){
-		
+		$invoice = $_POST['invoice'];
+		$code = $_POST['code'];
+		$dg_mp_codes = get_option('dg_mp_codes');
+		$dg_mp_codes[$invoice]['code'] = $code;
+		update_option('dg_mp_codes', $dg_mp_codes);
 	}
 	
 	function order_form_action($invoice){
