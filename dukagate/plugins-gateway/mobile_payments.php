@@ -109,25 +109,21 @@ class DukaGate_GateWay_MobilePayments extends DukaGate_GateWay_API{
 		$output .= '<br/>';
 		$output .= '<label>';
 		$output .= __('Transaction reference','dukagate');
-		$output .= ': <input type="text" name="dg_mobile_ref" id="dg_mobile_ref" />';
+		$output .= ': <input type="text" name="dg_mobile_ref" id="dg_mobile_ref" required/>';
 		$output .= '</label>';
 		$output .= '<br/>';
 		$output .= '<button class="mobile_continue_btn" onclick="mobile_continue();">Continue</button>';
 		$output .= '<script type="text/javascript">';
         $output .= 'function mobile_continue(){
 					var code = jQuery("#dg_mobile_ref").val();
-					if(jQuery("#dg_mobile_ref").is(":empty")){
-						alert("'.__("Transaction reference Required !!", "dukagate").'");
-					}else{
-						jQuery.ajax({
-							type: "POST",
-							url: dg_js.ajaxurl,
-							data: {action : "mobile_money_save", invoice : "'.$invoice.'", code : code},
-							success: function(response){
-								window.location.href="'.$return_path.'"
-							}
-						});
-					}
+					jQuery.ajax({
+						type: "POST",
+						url: dg_js.ajaxurl,
+						data: {action : "mobile_money_save", invoice : "'.$invoice.'", code : code},
+						success: function(response){
+							window.location.href="'.$return_path.'"
+						}
+					});
 					};
                      </script>';
 		return $output;
