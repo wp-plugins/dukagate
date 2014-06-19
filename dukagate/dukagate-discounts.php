@@ -204,7 +204,7 @@ if(!class_exists('Dukagate_Discounts')) {
 				if($number){
 					return 0;
 				}else{
-					return 'Not Set';
+					return __('Not Set','dukagate');
 				}
 			}else{
 				if($number){

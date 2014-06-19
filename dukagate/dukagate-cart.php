@@ -521,7 +521,7 @@ function dg_process_cart(){
 	$content = $_REQUEST;
 	session_regenerate_id(true);
 	$_SESSION['dg_invoice'] = $invoice_id;
-	$output = $class->process_payment_form($content); //call_user_func_array(array($class, "process_payment_form"),$content);
+	$output = $class->process_payment_form($content);
 	$output = str_replace(Array("\n", "\r"), Array("\\n", "\\r"), addslashes($output));
 	
 	$products = $_SESSION['dg_cart'];
@@ -558,7 +558,7 @@ function dg_process_cart(){
         }
 		$output = "<script type='text/javascript'> window.location.href='".$return_path."'; </script>";
 		$output = str_replace(Array("\n", "\r"), Array("\\n", "\\r"), addslashes($output));
-		echo "jQuery('div#dpsc_hidden_payment_form').html('$output');";
+		echo "jQuery('div.dg_cart_container').html('$output');";
 	}
 	exit();
 }
