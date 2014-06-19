@@ -1922,7 +1922,7 @@ if(!class_exists('DukaGate')) {
 					$cnt .= '</tr>';
 				}
 				if (is_array($dg_form_elem) && count($dg_form_elem) > 0) {
-					$total = count($dg_form_elem);
+					$total = 20;
 					
 					while($total > 0){
 						if(@$dg_form_elem[$total]['visible'] == 'checked'){
@@ -2024,7 +2024,7 @@ if(!class_exists('DukaGate')) {
 					$cnt .= '<br/>';
 				}
 				if (is_array($dg_form_elem) && count($dg_form_elem) > 0) {
-					$total = count($dg_form_elem);
+					$total = 20;
 					
 					while($total > 0){
 						if(@$dg_form_elem[$total]['visible'] == 'checked'){
