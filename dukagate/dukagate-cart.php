@@ -541,7 +541,7 @@ function dg_process_cart(){
 	session_write_close();
 	if($total > 0){
 		if($class->form_submit){
-			echo "jQuery('div#dg_payment_return').html('$output');";
+			echo "jQuery('div.dg_cart_container').html('$output');";
 			echo "jQuery('#dg_payment_form').submit();";
 		}else{
 			echo "jQuery('div.dg_cart_container').html('$output');";
