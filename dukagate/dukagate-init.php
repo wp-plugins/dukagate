@@ -45,7 +45,7 @@ if(!class_exists('DukaGate')) {
 			$this->dukagate_db();
 			add_action( 'dg_delete_files_daily', array(&$this, 'delete_files_daily') );
 			$this->set_up_directories_and_file_info();
-			update_option('dg_version_info', 3.721);
+			update_option('dg_version_info', 3.724);
 		}
 		
 		
