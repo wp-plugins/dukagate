@@ -9,9 +9,15 @@
 
 add_action('admin_menu', 'dg_create_admin_menu');
 function dg_create_admin_menu(){
-	add_submenu_page('edit.php?post_type=dg_product', __('DukaGate Order Log'), __('Order Log'), 'edit_others_posts', 'dukagate-order-log', 'dg_dukagate_order_log');
-	add_submenu_page('edit.php?post_type=dg_product', __('DukaGate Discount Settings'), __('Discounts'), 'edit_others_posts', 'dukagate-discounts', 'dg_dukagate_discounts');
-	add_submenu_page('edit.php?post_type=dg_product', __('DukaGate Settings'), __('Settings'), 'edit_others_posts', 'dukagate-settings', 'dg_admin_settings');
+	$user = wp_get_current_user();
+	if ( current_user_can('manage_options') && current_user_can('edit_others_posts')){
+		add_submenu_page('edit.php?post_type=dg_product', __('DukaGate Order Log', 'dukagate'), __('Order Log', 'dukagate'), 'edit_others_posts', 'dukagate-order-log', 'dg_dukagate_order_log');
+		add_submenu_page('edit.php?post_type=dg_product', __('DukaGate Discount Settings', 'dukagate'), __('Discounts', 'dukagate'), 'edit_others_posts', 'dukagate-discounts', 'dg_dukagate_discounts');
+		add_submenu_page('edit.php?post_type=dg_product', __('DukaGate Settings', 'dukagate'), __('Settings', 'dukagate'), 'edit_others_posts', 'dukagate-settings', 'dg_admin_settings');
+	}else if(in_array("shopuser",$user->roles)){
+		add_object_page( __('Order Log', 'dukagate'), __('Order Log', 'dukagate'), 'read', 'dukagate-order-log', '', DG_DUKAGATE_URL . '/images/dg_icon.png');
+		add_submenu_page('dukagate-order-log', __('Order Log', 'dukagate'), __('Order Log', 'dukagate'), 'read', 'dukagate-order-log', 'dukagate_user_order_log');
+	}
 	
 }
 
@@ -86,6 +92,74 @@ function dg_admin_settings(){
 	<?php
 }
 
+/** 
+ * User log
+ *
+ */
+function dukagate_user_order_log(){
+	global $dukagate;
+	global $current_user;
+	if(@$_REQUEST['order_id']){
+		dg_dukagate_order_log_info($_REQUEST['order_id']);
+	}else{
+	
+    get_currentuserinfo();
+	$order_logs = $dukagate->dg_list_user_order_logs($current_user->user_email);
+	?>
+	<div class="wrap">
+		<h2><?php _e("Dukagate Order Log"); ?></h2>
+		<?php if (is_array($order_logs) && count($order_logs) > 0) { ?>
+			<table width="100%" border="0" class="widefat">
+				<thead>
+					<tr>
+						<th width="1%" align="left" scope="col">&nbsp;</th>
+						<th width="20%" align="left" scope="col"><?php _e("Invoice"); ?></th>
+						<th width="20%" align="left" scope="col"><?php _e("Date"); ?></th>
+						<th width="10%" align="left" scope="col"><?php _e("Amount"); ?></th>
+						<th width="14%" align="left" scope="col"><?php _e("Mode"); ?></th>
+						<th width="10%" align="left" scope="col"><?php _e("Status"); ?></th>
+						<th width="16%" align="left" scope="col"><?php _e("Actions"); ?></th>
+					</tr>
+				</thead>
+				<tfoot>
+					<tr>
+						<th align="left" scope="col">&nbsp;</th>
+						<th align="left" scope="col"><?php _e("Invoice"); ?></th>
+						<th align="left" scope="col"><?php _e("Date"); ?></th>
+						<th align="left" scope="col"><?php _e("Amount"); ?></th>
+						<th align="left" scope="col"><?php _e("Mode"); ?></th>
+						<th align="left" scope="col"><?php _e("Status"); ?></th>
+						<th align="left" scope="col"><?php _e("Actions"); ?></th>
+					</tr>
+				</tfoot>
+				<tbody>
+					<?php
+					$count = 1;
+					$form_url = admin_url("admin.php?page=dukagate-order-log&order_id=");
+					foreach($order_logs as $order_log => $log){
+						?>
+						<tr id="order_<?php echo $log->id; ?>">
+							<td align="left"><?php echo $count; ?></td>
+							<td align="left"><?php echo $log->invoice; ?></td>
+							<td align="left"><?php echo date("d-m-Y", strtotime($log->date)); ?></td>
+							<td align="left"><?php echo number_format($log->total,2); ?></td>
+							<td align="left"><?php echo $log->payment_gateway; ?></td>
+							<td align="left"><?php _e($log->payment_status) ; ?></td>
+							<td align="left"><a href="<?php echo $form_url.$log->id ;?>"><?php _e("View"); ?></a></td>
+						</tr>
+						<?php
+						$count++;
+					}
+					?>
+				</tbody>
+			</table>
+		<?php } else{
+			_e("No Orders found.");
+		}?>
+	</div>
+	<?php
+	}
+}
 
 //Order Log
 function dg_dukagate_order_log(){
@@ -134,7 +208,7 @@ function dg_dukagate_order_log(){
 							<td align="left"><?php echo number_format($log->total,2); ?></td>
 							<td align="left"><?php echo $log->payment_gateway; ?></td>
 							<td align="left"><?php _e($log->payment_status) ; ?></td>
-							<td align="left"><a href="javascript:void(null);" onclick="dukagate.delete_order('<?php echo $log->id; ?>');"><?php _e("Delete"); ?></a>&nbsp;&nbsp; | &nbsp;&nbsp;<a href="<?php echo $form_url.$log->id ;?>"><?php _e("View"); ?></a></td>
+							<td align="left"><a href="<?php echo $form_url.$log->id ;?>"><?php _e("View"); ?></a></td>
 						</tr>
 						<?php
 						$count++;
@@ -143,7 +217,7 @@ function dg_dukagate_order_log(){
 				</tbody>
 			</table>
 		<?php } else{
-			_e("No Orders found.");
+			_e("No Orders found.", "dukagate");
 		}?>
 	</div>
 	<?php
@@ -155,9 +229,20 @@ function dg_dukagate_order_log_info($id){
 	global $dukagate;
 	$dg_shop_settings = get_option('dukagate_shop_settings');
 	$order_log = $dukagate->dg_get_order_log_by_id($id);
+	
+	$user_can_change = true;
+	
+	if (!current_user_can('manage_options') && !current_user_can('edit_others_posts')){
+		$user = wp_get_current_user();
+		$user_can_change = false;
+		if(!$dukagate->is_order_for_user($current_user->user, $id)){
+			wp_die(__("You are not allowed to view this order", "dukagate"));
+		}
+		
+	}
 	?>
 	<div class="wrap">
-		<h2><?php _e("Viewing order ").' '._e($order_log->invoice); ?></h2>
+		<h2><?php _e("Viewing order ", "dukagate").' '._e($order_log->invoice); ?></h2>
 		<!--div class="csv_export">
 			<a href="javascript:;" onclick="dukagate.order_csv_export('<?php echo $order_log->id; ?>');">Export as CSV</a>
 		</div-->
@@ -173,27 +258,33 @@ function dg_dukagate_order_log_info($id){
 		?>
 		<table width="100%" class="widefat" style="background-color: #FFFFFF;">
 			<tr>
-				<td><strong><?php _e("Invoice"); ?></strong></td>
+				<td><strong><?php _e("Invoice", "dukagate"); ?></strong></td>
 				<td><?php echo $order_log->invoice; ?></td>
 			</tr>
 			<tr>
-				<td><strong><?php _e("Status"); ?></strong></td>
-				<td><span id="dg_order_status"><?php _e($order_log->payment_status); ?></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:;" onclick="dukagate.change_order_status('<?php echo $order_log->id; ?>');"><?php _e("Change Status"); ?></a></td>
+				<td><strong><?php _e("Status", "dukagate"); ?></strong></td>
+				<td>
+					<span id="dg_order_status"><?php _e($order_log->payment_status); ?></span>
+					<?php if($user_can_change){?>
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:;" onclick="dukagate.change_order_status('<?php echo $order_log->id; ?>');"><?php _e("Change Status"); ?></a>
+					<?php } ?>
+				</td>
 			</tr>
+			<?php do_action( 'dg_order_log_'.$order_log->payment_gateway , $order_log->invoice); ?>
 			<tr>
-				<td><strong><?php _e("Date Created"); ?></strong></td>
+				<td><strong><?php _e("Date Created", "dukagate"); ?></strong></td>
 				<td><?php echo $order_log->date; ?></td>
 			</tr>
 			<tr>
-				<td><strong><?php _e("Total Shipping"); ?></strong></td>
+				<td><strong><?php _e("Total Shipping", "dukagate"); ?></strong></td>
 				<td><?php echo $order_log->shipping; ?></td>
 			</tr>
 			<tr>
-				<td><strong><?php _e("Total"); ?></strong></td>
+				<td><strong><?php _e("Total", "dukagate"); ?></strong></td>
 				<td><?php echo $order_log->total; ?></td>
 			</tr>
 			<tr>
-				<td><strong><?php _e("Products"); ?></strong></td>
+				<td><strong><?php _e("Products", "dukagate"); ?></strong></td>
 				<td>
 					<?php 
 					$cnt  = '';
@@ -203,10 +294,10 @@ function dg_dukagate_order_log_info($id){
 						$total_discount = 0.00;
 						$cnt .= '<table style="text-align:left" class="widefat">';
 						$cnt .= '<tr>';
-						$cnt .= '<th scope="col" width="30%">'.__("Product").'</th>';
-						$cnt .= '<th scope="col" width="10%">'.__("Quantity").'</th>';
-						$cnt .= '<th scope="col" width="30%">'.__("Price").'</th>';
-						$cnt .= '<th scope="col" width="30%">'.__("Total").'</th>';
+						$cnt .= '<th scope="col" width="30%">'.__("Product", "dukagate").'</th>';
+						$cnt .= '<th scope="col" width="10%">'.__("Quantity", "dukagate").'</th>';
+						$cnt .= '<th scope="col" width="30%">'.__("Price", "dukagate").'</th>';
+						$cnt .= '<th scope="col" width="30%">'.__("Total", "dukagate").'</th>';
 						$cnt .= '</tr>';
 						foreach ($products as $cart_items => $cart) {
 							$cnt .= '<tr>';
@@ -224,19 +315,19 @@ function dg_dukagate_order_log_info($id){
 						$cnt .= '<td colspan="4">&nbsp;</td>';
 						$cnt .= '</tr>';
 						$cnt .= '<tr>';
-						$cnt .= '<td>'.__("Total Discount").'</td>';
+						$cnt .= '<td>'.__("Total Discount", "dukagate").'</td>';
 						$cnt .= '<td>&nbsp;</td>';
 						$cnt .= '<td>&nbsp;</td>';
 						$cnt .= '<td>'.$dg_shop_settings['currency_symbol'].' '.number_format($order_log->discount,2).'</td>';
 						$cnt .= '</tr>';
 						$cnt .= '<tr>';
-						$cnt .= '<td>'.__("Total Shipping").'</td>';
+						$cnt .= '<td>'.__("Total Shipping", "dukagate").'</td>';
 						$cnt .= '<td>&nbsp;</td>';
 						$cnt .= '<td>&nbsp;</td>';
 						$cnt .= '<td>'.$dg_shop_settings['currency_symbol'].' '.number_format(($order_log->shipping),2).'</td>';
 						$cnt .= '</tr>';
 						$cnt .= '<tr>';
-						$cnt .= '<td>'.__("Total").'</td>';
+						$cnt .= '<td>'.__("Total", "dukagate").'</td>';
 						$cnt .= '<td>&nbsp;</td>';
 						$cnt .= '<td>&nbsp;</td>';
 						$cnt .= '<td>'.$dg_shop_settings['currency_symbol'].' '.number_format(($order_log->total),2).'</td>';
@@ -248,7 +339,7 @@ function dg_dukagate_order_log_info($id){
 				</td>
 			</tr>
 			<tr>
-				<td><strong><?php _e("Order Info"); ?></strong></td>
+				<td><strong><?php _e("Order Info", "dukagate"); ?></strong></td>
 				<td>
 					<table class="widefat">
 						<?php 
@@ -358,30 +449,75 @@ function dg_change_order_log_status(){
 //Payment Options
 function dg_dukagate_paymnet(){
 	global $dukagate;
+	if(@$_POST['dg_payment_settings'] && check_admin_referer('dukagate_payment_settings','dukagate_payment_noncename')){
+		$gateways = $_POST['dg_gateway'];
+		update_option('dukagate_gateway_options', $gateways);
+	}
+	
+	if(@$_POST['dg_payment_option_settings'] && check_admin_referer('dukagate_paymentoption_settings','dukagate_paymentoption_noncename')){
+		$gateway_settings = get_option('dukagate_gateway_settings');
+		$setting = $_POST['dg'];
+		foreach($setting as $key => $value) {
+			$gateway_settings[$key] = $value;
+		}
+		update_option('dukagate_gateway_settings', $gateway_settings);
+	}
 	$dg_gateways = $dukagate->list_all_gateways();
+	$alowed_options = get_option('dukagate_gateway_options');
+	$gateway_settings = get_option('dukagate_gateway_settings');
 	?>
 		<div id="dg_payments">
 			<?php
 			if (is_array($dg_gateways) && count($dg_gateways) > 0) {
+				?>
+				<form method="POST" action="<?php echo esc_url($_SERVER['REQUEST_URI']); ?>">
+					<?php wp_nonce_field('dukagate_payment_settings','dukagate_payment_noncename'); ?>
+				<ul>
+				<?php
+				$selected = "";
 				foreach ($dg_gateways as $dg_gateway) {
+					if(is_array($alowed_options))
+						if(in_array($dg_gateway->gateway_slug, $alowed_options)){
+							$selected = "checked='checked'";
+						}else{
+							$selected = "";
+						}
 					?>
-					<div id="dg_<?php echo $dg_gateway->id; ?>" class="dg_payment_gateway">
-						<div id="dg_title_<?php echo $dg_gateway->id; ?>" class="dg_payment_title">
-							<div class="dg_instructions"><?php _e("Click to show/hide settings"); ?></div>
-							<h2><?php _e($dg_gateway->gateway_name); ?></h2>
-						</div>
-						<div class="dg_gateway_options" id="dg_opt_<?php echo $dg_gateway->id; ?>">
-							<?php DukaGate::call_class_function($dg_gateway->gateway_class, 'set_up_options', $dg_gateway->gateway_slug); ?>
-						</div>
-						<script type="text/javascript">
-							jQuery(document).ready(function(){
-								jQuery('#dg_title_<?php echo $dg_gateway->id; ?>').click(function(){
-									jQuery('#dg_opt_<?php echo $dg_gateway->id; ?>').slideToggle();
-								});
-							});
-						</script>
-					</div>
+					<li>
+						<label>
+							<input type="checkbox" name="dg_gateway[]" value="<?php echo $dg_gateway->gateway_slug; ?>" <?php echo $selected;?> />
+							<?php _e($dg_gateway->gateway_name); ?> 
+						</label> 
+					</li>	
 					<?php
+				}
+				?>
+				</ul>
+				<p class="submit">
+					<input class='button-primary' type='submit' name='dg_payment_settings' value='<?php _e('Activate Selected', 'dukagate'); ?>'/><br/>
+				</p>
+				</form>
+				<?php 
+				if(is_array($alowed_options)){
+				?>
+				<form method="POST" action="<?php echo esc_url($_SERVER['REQUEST_URI']); ?>">
+					<?php wp_nonce_field('dukagate_paymentoption_settings','dukagate_paymentoption_noncename'); ?>
+					<div id="dg_<?php echo $dg_gateway->id; ?>" class="dg_payment_gateway">
+						<?php
+							foreach ($alowed_options as $gateway_option) {
+								?>
+								<h2><?php _e($dukagate->dg_get_gateway_name($gateway_option)); ?></h2>
+								<?php
+								do_action( 'dg_gateway_option_'.$gateway_option , $gateway_option, $gateway_settings);
+								?><hr/><?php
+							}
+						?>
+						<p class="submit">
+							<input class='button-primary' type='submit' name='dg_payment_option_settings' value='<?php _e('Save Settings', 'dukagate'); ?>'/><br/>
+						</p>
+					</div>
+				</form>
+				<?php
 				}
 			}else{
 				_e("No Payment Gateways Found!!");
@@ -435,16 +571,18 @@ function dg_dukagate_checkout(){
 	global $dukagate_settings;
 	$settings = $dukagate_settings->get_settings();
 	
-	if(@$_POST['dg_checkout_settings']){
+	if(@$_POST['dg_checkout_settings'] && check_admin_referer('dukagate_checkout_settings','dukagate_checkout_noncename')){
 		$total = 20;
 		$form_elem = array();
 		while($total > 0){
-			$form_elem[$total]['name'] = @$_POST['name_'.$total];
-			$form_elem[$total]['type'] = @$_POST['type_'.$total];
-			$form_elem[$total]['uname'] = @$_POST['u_name_'.$total];
-			$form_elem[$total]['initial'] = @$_POST['initial_'.$total];
-			$form_elem[$total]['mandatory'] = (empty($_POST['manadatory_'.$total])) ? 'notchecked' : 'checked';
-			$form_elem[$total]['visible'] = (empty($_POST['visible_'.$total])) ? 'notchecked' : 'checked';
+			if(!empty($_POST['name_'.$total])){
+				$form_elem[$total]['name'] = @$_POST['name_'.$total];
+				$form_elem[$total]['type'] = @$_POST['type_'.$total];
+				$form_elem[$total]['uname'] = @$_POST['u_name_'.$total];
+				$form_elem[$total]['initial'] = @$_POST['initial_'.$total];
+				$form_elem[$total]['mandatory'] = (empty($_POST['manadatory_'.$total])) ? 'notchecked' : 'checked';
+				$form_elem[$total]['visible'] = (empty($_POST['visible_'.$total])) ? 'notchecked' : 'checked';
+			}
 			$total--;
 		}
 		$form_elem['dg_fullname_mandatory'] = (empty($_POST['dg_fullname_mandatory'])) ? 'notchecked' : 'checked';
@@ -473,6 +611,7 @@ function dg_dukagate_checkout(){
 	?>
 
 		<form method="POST" action="<?php echo esc_url($_SERVER['REQUEST_URI']); ?>">
+			<?php wp_nonce_field('dukagate_checkout_settings','dukagate_checkout_noncename'); ?>
 			<div class="dg_settings">
 				<p class="submit">
 					<input class='button-primary' type='submit' name='dg_checkout_settings' value='<?php _e('Save Options'); ?>'/><br/>
@@ -611,7 +750,7 @@ function dg_dukagate_mail(){
 			if (is_array($dukagate_mails) && count($dukagate_mails) > 0) {
 				?>
 				<p>
-					<?php _e("Use");?> :<strong>%inv%</strong>, <strong>%shop%</strong>, <strong>%siteurl%</strong>, <strong>%info%</strong>, <strong>%order-log-transaction%</strong> , <strong>%fname%</strong>,  <strong>%lname%</strong>, <strong>%fullnames%</strong>, <strong>%invoice-link%</strong> <?php _e("as");?> <?php _e("Invoice Number, Shop Name, Site URL, Order Form Information, Order URL, First Name, Last Name, Full Names, Invoice link");?>
+					<?php _e("Use");?> :<strong>%inv%</strong>, <strong>%shop%</strong>, <strong>%siteurl%</strong>, <strong>%info%</strong>, <strong>%order-log-transaction%</strong> , <strong>%fname%</strong>,  <strong>%lname%</strong>, <strong>%fullnames%</strong>, <strong>%invoice-link%</strong>, <strong>%username%</strong> , <strong>%password%</strong>  <?php _e("as", "dukagate");?> <?php _e("Invoice Number, Shop Name, Site URL, Order Form Information, Order URL, First Name, Last Name, Full Names, Invoice link, Username, Password", "dukagate");?>
 				</p>
 				<?php
 				foreach ($dukagate_mails as $dukagate_mail) {
@@ -730,6 +869,9 @@ function dg_dukagate_settings(){
 		$country = $_POST['country'];
 		$currency = $_POST['currency'];
 		$currency_symbol = $_POST['currency_symbol'];
+		$currency_position = $_POST['currency_position'];
+		$force_login = $_POST['force_login'];
+		$register_user = $_POST['register_user'];
 		$checkout_page = $_POST['checkout_page'];
 		$thankyou_page = $_POST['thankyou_page'];
 		$discounts = ($_POST['discounts'] == 'checked') ? "true": "false";
@@ -744,6 +886,9 @@ function dg_dukagate_settings(){
 						'country' => $country,
 						'currency' => $currency,
 						'currency_symbol' => $currency_symbol,
+						'currency_position' => 'left',
+						'force_login' => 'false',
+						'register_user' => 'false',
 						'checkout_page' => $checkout_page,
 						'thankyou_page' => $thankyou_page,
 						'discounts' => $discounts,
@@ -823,6 +968,24 @@ function dg_dukagate_settings(){
 						<tr valign="top">
 							<th scope="row"><label for="currency_symbol"><?php _e("Currency Symbol"); ?>: </label></th>
 							<td><input id="currency_symbol" type="text" name="currency_symbol" value="<?php echo $dg_shop_settings['currency_symbol']; ?>" class="regular-text" /></td>
+						</tr>
+						<tr valign="top">
+							<th scope="row"><label for="currency_position"><?php _e("Currency Position"); ?>: </label></th>
+							<td>
+								<select name="currency_position">
+									<option value="left" <?php selected($dg_shop_settings['currency_position'], 'left'); ?>><?php _e('Left', 'dukagate') ?></option>
+									<option value="right" <?php selected($dg_shop_settings['currency_position'], 'right'); ?>><?php _e('Right', 'dukagate') ?></option>
+								</select>
+							</td>
+						</tr>
+						<tr valign="top">
+							<th scope="row"><label for="register_user"><?php _e("Register User"); ?>: </label></th>
+							<td>
+								<select name="register_user">
+									<option value="yes" <?php selected($dg_shop_settings['register_user'], 'yes'); ?>><?php _e('Yes', 'dukagate') ?></option>
+									<option value="no" <?php selected($dg_shop_settings['register_user'], 'no'); ?>><?php _e('No', 'dukagate') ?></option>
+								</select>
+							</td>
 						</tr>
 						<tr valign="top">
 							<th scope="row"><label for="checkout_page"><?php _e("Checkout Page"); ?>: </label></th>
@@ -1380,6 +1543,7 @@ function dg_dukagate_tools(){
 				</tr>
 			</table>
 		</form>
+		<?php do_action('dukagate_tools'); ?>
 		<script type="text/javascript">
 			jQuery(document).ready(function(){
 				jQuery('#dg_prod_export').on("click", function(){
