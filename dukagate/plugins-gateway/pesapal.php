@@ -247,6 +247,14 @@ class DukaGate_GateWay_PesaPal extends DukaGate_GateWay_API{
 			$total_discount = floatval(($total_discount * $amount)/100);
 			$amount = $amount - $total_discount;
 		}
+		$conversion_rate = 1;
+		$allowed_currency = "KES";
+		if ($shop_currency != $allowed_currency) {
+			$curr = new DG_CURRENCYCONVERTER();
+            $conversion_rate = $curr->convert(1, $allowed_currency, $shop_currency);
+		}
+		$amount = $amount * $conversion_rate;
+		
 		$token = $params = NULL;
 		$consumer_key = $settings[$this->plugin_slug]['customer_key'];
 		$consumer_secret = $settings[$this->plugin_slug]['customer_secret'];
