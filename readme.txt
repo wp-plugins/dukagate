@@ -5,7 +5,7 @@ Tags: shopping cart, web shop, cart, shop,Paypal,paypal,Pesapal, e-commerce, eco
 
 Requires at least: 3.0
 Tested up to: 3.9.1
-Stable tag: 3.7.2.4
+Stable tag: 3.7.2.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -68,6 +68,11 @@ We test Dukagate on a large number of different server set-ups and envrionments 
 8. Sample product with a widget product
 
 == Changelog ==
+
+
+= 3.7.2.5 =
+Currency converter cache. We have added a WordPress cache for the currency conversion incase the currency conversion API does not work.
+We have also fixed some issues on user registration
 
 
 = 3.7.2.4 =

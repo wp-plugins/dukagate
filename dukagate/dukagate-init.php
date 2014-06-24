@@ -45,7 +45,7 @@ if(!class_exists('DukaGate')) {
 			$this->dukagate_db();
 			add_action( 'dg_delete_files_daily', array(&$this, 'delete_files_daily') );
 			$this->set_up_directories_and_file_info();
-			update_option('dg_version_info', 3.724);
+			update_option('dg_version_info', 3.725);
 		}
 		
 		
@@ -1439,7 +1439,7 @@ if(!class_exists('DukaGate')) {
 			$order_id =  $wpdb->get_var($sql);
 
 			if($dg_shop_settings['register_user'] === 'yes'){
-				$this->save_user($email, $email); //save user and send mail
+				$this->save_user($email, $email, $fname, $lname); //save user and send mail
 			}
 			
 			//Send order placed mail
@@ -1813,9 +1813,27 @@ if(!class_exists('DukaGate')) {
 		//Generate the checkout form
 		function generate_checkout_form($layout){
 			global $dukagate_settings;
+			$dg_shop_settings = get_option('dukagate_shop_settings');
 			$dg_dukagate_settings = $dukagate_settings->get_settings();
 			$dg_form_elem = get_option('dukagate_checkout_options');
 			$cnt =  '';
+			$get_user = false;
+			$fullnames = "";
+			$firstname = "";
+			$lastname = "";
+			$email = "";
+			if($dg_shop_settings['register_user'] === 'yes'){
+				$get_user = true;
+				if ( is_user_logged_in() ){
+					global $current_user;
+					get_currentuserinfo();
+					$email = $current_user->user_email;
+					$firstname = $current_user->user_firstname;
+					$lastname = $current_user->user_lastname;
+					$fullnames = $firstname.' '.$lastname;
+				}
+			}
+			
 			if($layout == 'fixed'){
 				$cnt = '<table class="dg_checkout_table">';
 				if(@$dg_form_elem['dg_fullname_visible'] == 'checked'){
@@ -1828,7 +1846,7 @@ if(!class_exists('DukaGate')) {
 					if(@$dg_form_elem['dg_fullname_mandatory'] == 'checked'){
 						$mandatory = 'required';
 					}
-					$cnt .= '<input type="text" class="'.$mandatory.' dg_fullname_input" name="dg_fullname" id="dg_fullname" />';
+					$cnt .= '<input type="text" class="'.$mandatory.' dg_fullname_input" name="dg_fullname" id="dg_fullname" value="'.$fullnames.'"/>';
 					$cnt .= '</td>';
 					$cnt .= '</tr>';
 				}
@@ -1842,7 +1860,7 @@ if(!class_exists('DukaGate')) {
 					if(@$dg_form_elem['dg_firstname_mandatory'] == 'checked'){
 						$mandatory = 'required';
 					}
-					$cnt .= '<input type="text" class="'.$mandatory.' dg_firstname_input" name="dg_firstname" id="dg_firstname" />';
+					$cnt .= '<input type="text" class="'.$mandatory.' dg_firstname_input" name="dg_firstname" id="dg_firstname" value="'.$firstname.'" />';
 					$cnt .= '</td>';
 					$cnt .= '</tr>';
 				}
@@ -1856,7 +1874,7 @@ if(!class_exists('DukaGate')) {
 					if(@$dg_form_elem['dg_lastname_mandatory'] == 'checked'){
 						$mandatory = 'required';
 					}
-					$cnt .= '<input type="text" class="'.$mandatory.' dg_fullname_input" name="dg_lastname" id="dg_lastname" />';
+					$cnt .= '<input type="text" class="'.$mandatory.' dg_fullname_input" name="dg_lastname" id="dg_lastname" value="'.$lastname.'" />';
 					$cnt .= '</td>';
 					$cnt .= '</tr>';
 				}
@@ -1870,7 +1888,7 @@ if(!class_exists('DukaGate')) {
 					if(@$dg_form_elem['dg_email_mandatory'] == 'checked'){
 						$mandatory = 'required';
 					}
-					$cnt .= '<input type="text" class="'.$mandatory.' dg_email" name="dg_email" id="dg_email" />';
+					$cnt .= '<input type="text" class="'.$mandatory.' dg_email" name="dg_email" id="dg_email" value="'.$email.'" />';
 					$cnt .= '</td>';
 					$cnt .= '</tr>';
 				}
@@ -1962,7 +1980,7 @@ if(!class_exists('DukaGate')) {
 					if(@$dg_form_elem['dg_fullname_mandatory'] == 'checked'){
 						$mandatory = 'required';
 					}
-					$cnt .= '<input type="text" class="'.$mandatory.' dg_fullname_input" name="dg_fullname" id="dg_fullname" />';
+					$cnt .= '<input type="text" class="'.$mandatory.' dg_fullname_input" name="dg_fullname" id="dg_fullname" value="'.$fullnames.'" />';
 					$cnt .= '<br/>';
 				}
 				if(@$dg_form_elem['dg_firstname_visible'] == 'checked'){
@@ -1971,7 +1989,7 @@ if(!class_exists('DukaGate')) {
 					if(@$dg_form_elem['dg_firstname_mandatory'] == 'checked'){
 						$mandatory = 'required';
 					}
-					$cnt .= '<input type="text" class="'.$mandatory.' dg_firstname_input" name="dg_firstname" id="dg_firstname" />';
+					$cnt .= '<input type="text" class="'.$mandatory.' dg_firstname_input" name="dg_firstname" id="dg_firstname" value="'.$firstname.'" />';
 					$cnt .= '<br/>';
 				}
 				if(@$dg_form_elem['dg_lastname_visible'] == 'checked'){
@@ -1980,7 +1998,7 @@ if(!class_exists('DukaGate')) {
 					if(@$dg_form_elem['dg_lastname_mandatory'] == 'checked'){
 						$mandatory = 'required';
 					}
-					$cnt .= '<input type="text" class="'.$mandatory.' dg_lastname_input" name="dg_lastname" id="dg_lastname" />';
+					$cnt .= '<input type="text" class="'.$mandatory.' dg_lastname_input" name="dg_lastname" id="dg_lastname" value="'.$lastname.'" />';
 					$cnt .= '<br/>';
 				}
 				if(@$dg_form_elem['dg_email_visible'] == 'checked'){
@@ -1989,7 +2007,7 @@ if(!class_exists('DukaGate')) {
 					if(@$dg_form_elem['dg_email_mandatory'] == 'checked'){
 						$mandatory = 'required';
 					}
-					$cnt .= '<input type="text" class="'.$mandatory.' dg_email_input" name="dg_email" id="dg_email" />';
+					$cnt .= '<input type="text" class="'.$mandatory.' dg_email_input" name="dg_email" id="dg_email" value="'.$email.'" />';
 					$cnt .= '<br/>';
 				}
 				if(@$dg_form_elem['dg_phone_visible'] == 'checked'){
@@ -2098,16 +2116,24 @@ if(!class_exists('DukaGate')) {
 		/**
 		 * Save user to database
 		 */
-		function save_user($user_name, $email){
+		function save_user($user_name, $email, $fname, $lname){
 			$user_id = username_exists( $user_name );
 			$dg_shop_settings = get_option('dukagate_shop_settings');
-			if ( !$user_id and email_exists($user_email) == false ) {
+			if ( !$user_id and email_exists($email) == false ) {
 				global $dukagate_mail;
 				$random_password = wp_generate_password( $length=12, $include_standard_special_chars=false );
-				$user_id = wp_create_user( $user_name, $random_password, $user_email );
+				$userdata = array(
+					'user_login'    =>  $user_name,
+					'user_pass'  => $random_password,
+					'user_email' => $email,
+					'first_name' => $fname,
+					'last_name' => $lname,
+					'role' => 'shopuser'
+				);
+				$user_id = wp_insert_user( $userdata ) ;
 
 				$user = new WP_User( $user_id );
-				$user->set_role( 'shopuser' ); //We set the role
+				
 
 				//Send mail
 				$mail = $dukagate_mail->get_mail('new_user');

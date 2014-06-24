@@ -18,6 +18,7 @@ Class DG_CURRENCYCONVERTER {
     }
 
     function convert($amt=NULL, $to="", $from="") {
+		$conversion_rate = 1;
         if ($amt == 0) {
             return 0;
         }
@@ -41,12 +42,23 @@ Class DG_CURRENCYCONVERTER {
 			$response = curl_exec($hCURL);
 			curl_close($hCURL);
 		}
+		$dg_currencies = get_option('dukagate_currency_conversions');
 		if (!empty($response)) {
-			$response = json_decode($response, true);
-			return (double) $response['rate'];
+			$j_response = json_decode($response, true);
+			if(intval($j_response['rate']) > 0){
+				$dg_currencies[$this->_from.''.$this->_to] = $response;
+				update_option('dukagate_currency_conversions', $dg_currencies);
+				$conversion_rate =  (double) $j_response['rate'];
+			}
+			
 		}else{
-			return 1;
+			$saved_rate = $dg_currencies[$this->_from.''.$this->_to];
+			if(!empty($saved_rate)){
+				$j_response = json_decode($saved_rate, true);
+				$conversion_rate =  (double) $j_response['rate'];
+			}
 		}
+		return $conversion_rate;
     }
 
 }
