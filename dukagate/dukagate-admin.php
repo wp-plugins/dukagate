@@ -886,9 +886,9 @@ function dg_dukagate_settings(){
 						'country' => $country,
 						'currency' => $currency,
 						'currency_symbol' => $currency_symbol,
-						'currency_position' => 'left',
-						'force_login' => 'false',
-						'register_user' => 'false',
+						'currency_position' => $currency_position,
+						'force_login' => $force_login,
+						'register_user' => $register_user,
 						'checkout_page' => $checkout_page,
 						'thankyou_page' => $thankyou_page,
 						'discounts' => $discounts,
@@ -898,11 +898,9 @@ function dg_dukagate_settings(){
 		
 	}
 	
-	
-	if(!get_option('dukagate_shop_settings')) {
+	$dg_shop_settings = get_option('dukagate_shop_settings');
+	if(empty($dg_shop_settings)) {
 		$dg_shop_settings = $dukagate->get_default_settings();;
-	}else {
-		$dg_shop_settings = get_option('dukagate_shop_settings');
 	}
 	
 	
