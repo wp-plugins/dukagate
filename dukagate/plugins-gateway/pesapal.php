@@ -78,16 +78,16 @@ class DukaGate_GateWay_PesaPal extends DukaGate_GateWay_API{
 		global $wpdb;
 		global $dukagate;
 		$dg_shop_settings = get_option('dukagate_shop_settings');
-		$options = DukaGate::json_to_array($dukagate->dg_get_gateway_options($this->plugin_slug));
-		$consumer_key = $options['customer_key'];
-		$consumer_secret = $options['customer_secret'];
+		$settings = get_option('dukagate_gateway_settings');
+		$consumer_key = $settings[$this->plugin_slug]['customer_key'];
+		$consumer_secret = $settings[$this->plugin_slug]['customer_secret'];
 		
 		$transaction_tracking_id = $_REQUEST['pesapal_transaction_tracking_id'];
 		$payment_notification = $_REQUEST['pesapal_notification_type'];
 		$invoice = $_REQUEST['pesapal_merchant_reference'];
 		
 		$statusrequestAPI = $this->status_request;
-		if($options['sandbox'] == 'checked'){
+		if($settings[$this->plugin_slug]['sandbox'] == 'checked'){
 			$statusrequestAPI = $this->test_status_request;
 		}
 		$this->ipn_request($transaction_tracking_id , $payment_notification, $invoice, $consumer_key, $consumer_secret,$statusrequestAPI);
@@ -166,32 +166,16 @@ class DukaGate_GateWay_PesaPal extends DukaGate_GateWay_API{
 	/**
 	 * Set Up Payment gateway options
 	 */
-	function set_up_options($plugin_slug){
+	function set_up_options($plugin_slug, $settings){
 		global $dukagate;
-		if(@$_POST[$plugin_slug]){
-			$required_fields = array(
-									'customer_key' => '',
-									'customer_secret' => '',
-									'sandbox' => '',
-									'custom_name' => '');
-			$required_fields['custom_name'] = $_POST[$plugin_slug.'_custom_name'];
-			$required_fields['customer_key'] = $_POST[$plugin_slug.'_customer_key'];
-			$required_fields['customer_secret'] = $_POST[$plugin_slug.'_customer_secret'];
-			$required_fields['sandbox'] = $_POST[$plugin_slug.'_sandbox'];
-			$enabled = (@$_POST[$plugin_slug.'_enable'] == 'checked') ? 1 : 0;
-			$dukagate->dg_save_gateway_options($plugin_slug ,DukaGate::array_to_json($required_fields), $enabled);
-		}
-		$options = DukaGate::json_to_array($dukagate->dg_get_gateway_options($plugin_slug));
-		$enabled = $dukagate->dg_get_enabled_status($plugin_slug);
 		?>
-		<form method="POST" action="">
 			<table class="form-table">
 				<tr>
 				    <th scope="row"><?php _e('PesaPal Checkout') ?></th>
 				    <td>
 						<p>
 							<?php _e('PesaPal requires Full names and email or  phone number. To handle APN return requests, please set the url '); ?>
-							<strong><?php echo get_bloginfo('url').'?dg_handle_payment_return_pesapal' ; ?></strong>
+							<strong><?php echo admin_url("admin-ajax.php?action=dg_handle_payment_return_pesapal"); ?></strong>
 							<?php _e(' on your <a href="https://www.pesapal.com/merchantdashboard" target="_blank">pesapal</a> account settings'); ?>
 						</p>
 						
@@ -202,41 +186,27 @@ class DukaGate_GateWay_PesaPal extends DukaGate_GateWay_API{
 				    <td>
 						<p>
 							<label><?php _e('Custom Checkout Name'); ?><br />
-							  <input value="<?php echo $options['custom_name']; ?>" size="30" name="<?php echo $plugin_slug; ?>_custom_name" type="text" />
+							  <input value="<?php echo $settings[$plugin_slug]['custom_name']; ?>" size="30" name="dg[<?php echo $plugin_slug; ?>][custom_name]" type="text" />
 							</label>
 						</p>
 						<p>
 							<label><?php _e('Use PesaPal Sandbox'); ?><br />
-							  <input value="checked" name="<?php echo $plugin_slug; ?>_sandbox" type="checkbox" <?php echo ($options['sandbox'] == 'checked') ? "checked='checked'": ""; ?> />
+							  <input value="checked" name="dg[<?php echo $plugin_slug; ?>][sandbox]" type="checkbox" <?php echo ($settings[$plugin_slug]['sandbox'] == 'checked') ? "checked='checked'": ""; ?> />
 							</label>
 						</p>
 						<p>
 							<label><?php _e('Customer Key') ?><br />
-							  <input value="<?php echo $options['customer_key']; ?>" size="30" name="<?php echo $plugin_slug; ?>_customer_key" type="text" />
+							  <input value="<?php echo $settings[$plugin_slug]['customer_key']; ?>" size="30" name="dg[<?php echo $plugin_slug; ?>][customer_key]" type="text" />
 							</label>
 						</p>
 						<p>
 							<label><?php _e('Customer Secret') ?><br />
-								 <input value="<?php echo $options['customer_secret']; ?>" size="30" name="<?php echo $plugin_slug; ?>_customer_secret" type="text" />
+								 <input value="<?php echo $settings[$plugin_slug]['customer_secret']; ?>" size="30" name="dg[<?php echo $plugin_slug; ?>][customer_secret]" type="text" />
 							</label>
-						</p>
-				    </td>
-				</tr>
-				<tr>
-				    <th scope="row"><?php _e('Enable') ?></th>
-				    <td>
-						<p>
-							<label><?php _e('Select To enable or disable') ?><br />
-							  <input value="checked" name="<?php echo $plugin_slug; ?>_enable" type="checkbox" <?php echo (intval($enabled) == 1) ? "checked='checked'": ""; ?> />
-							</label>
-						</p>
-						<p>
-							<input type="submit" name="<?php echo $plugin_slug; ?>" value="<?php _e('Save Settings') ?>" />
 						</p>
 				    </td>
 				</tr>
 			</table>
-		</form>
 		<?php
 	}
 	
@@ -250,7 +220,7 @@ class DukaGate_GateWay_PesaPal extends DukaGate_GateWay_API{
 		$dg_cart = $_SESSION['dg_cart'];
 		$dg_shop_settings = get_option('dukagate_shop_settings');
 		$shop_currency = $dg_shop_settings['currency'];
-		$options = DukaGate::json_to_array($dukagate->dg_get_gateway_options($this->plugin_slug));
+		$settings = get_option('dukagate_gateway_settings');
 		
 		$return_path = get_page_link($dg_shop_settings['thankyou_page']);
         $check_return_path = explode('?', $return_path);
@@ -277,9 +247,17 @@ class DukaGate_GateWay_PesaPal extends DukaGate_GateWay_API{
 			$total_discount = floatval(($total_discount * $amount)/100);
 			$amount = $amount - $total_discount;
 		}
+		$conversion_rate = 1;
+		$allowed_currency = "KES";
+		if ($shop_currency != $allowed_currency) {
+			$curr = new DG_CURRENCYCONVERTER();
+            $conversion_rate = $curr->convert(1, $allowed_currency, $shop_currency);
+		}
+		$amount = $amount * $conversion_rate;
+		
 		$token = $params = NULL;
-		$consumer_key = $options['customer_key'];
-		$consumer_secret = $options['customer_secret'];
+		$consumer_key = $settings[$this->plugin_slug]['customer_key'];
+		$consumer_secret = $settings[$this->plugin_slug]['customer_secret'];
 		$signature_method = new OAuthSignatureMethod_HMAC_SHA1();
 		
 		//get form details
@@ -322,10 +300,10 @@ class DukaGate_GateWay_PesaPal extends DukaGate_GateWay_API{
 	 */
 	function pesapal_cron_check($transaction_id){
 		global $dukagate;
-		$options = DukaGate::json_to_array($dukagate->dg_get_gateway_options($this->plugin_slug));
+		$settings = get_option('dukagate_gateway_settings');
 		
-		$consumer_key = $options['customer_key'];
-		$consumer_secret = $options['customer_secret'];
+		$consumer_key = $settings[$this->plugin_slug]['customer_key'];
+		$consumer_secret = $settings[$this->plugin_slug]['customer_secret'];
 		$signature_method = new OAuthSignatureMethod_HMAC_SHA1();
 
 		$token = $params = NULL;

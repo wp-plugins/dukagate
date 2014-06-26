@@ -92,80 +92,50 @@ class DukaGate_GateWay_AuthorizeNet extends DukaGate_GateWay_API{
 	/**
 	 * Set Up Payment gateway options
 	 */
-	function set_up_options($plugin_slug){
+	function set_up_options($plugin_slug, $settings){
 		global $dukagate;
-		if(@$_POST[$plugin_slug]){
-			$required_fields = array(
-									'sandbox' => '',
-									'authorize_api' => '',
-									'authorize_transaction_key' => '',
-									'currency' => '');
-									
-			$required_fields['authorize_transaction_key'] = $_POST[$plugin_slug.'_transaction_key'];
-			$required_fields['authorize_api'] = $_POST[$plugin_slug.'_api'];
-			$required_fields['sandbox'] = $_POST[$plugin_slug.'_sandbox'];
-			$required_fields['currency'] = $_POST[$plugin_slug.'_currency'];
-			$enabled = ($_POST[$plugin_slug.'_enable'] == 'checked') ? 1 : 0;
-			$dukagate->dg_save_gateway_options($plugin_slug ,DukaGate::array_to_json($required_fields), $enabled);
-		}
-		$options = DukaGate::json_to_array($dukagate->dg_get_gateway_options($plugin_slug));
 		$currencies = DukaGate::json_to_array($dukagate->dg_get_gateway_currencies($plugin_slug));
-		$enabled = $dukagate->dg_get_enabled_status($plugin_slug);
 		?>
-		<form method="POST" action="">
-			<table class="form-table">
-				<tr>
-				    <th scope="row"><?php _e('Authorize.Net Settings') ?></th>
-				    <td>
-						<p>
-							<label><?php _e('Use Test Server') ?><br />
-							  <input value="checked" name="<?php echo $plugin_slug; ?>_sandbox" type="checkbox" <?php echo ($options['sandbox'] == 'checked') ? "checked='checked'": ""; ?> />
-							</label>
-						</p>
-				    </td>
-				</tr>
-				<tr>
-				    <th scope="row"><?php _e('Authorize.Net Credentials') ?></th>
-				    <td>
-						<p>
-							<label><?php _e('API Login') ?><br />
-							  <input value="<?php echo $options['authorize_api']; ?>" size="30" name="<?php echo $plugin_slug; ?>_api" type="text" />
-							</label>
-						</p>
-						<p>
-							<label><?php _e('Transaction Key') ?><br />
-							  <input value="<?php echo $options['authorize_transaction_key']; ?>" size="30" name="<?php echo $plugin_slug; ?>_transaction_key" type="text" />
-							</label>
-						</p>
-						<p>
-							<label><?php _e('Currency') ?><br />
-								<select name="<?php echo $plugin_slug; ?>_currency">
-									<?php
-									$sel_currency = $options['currency'];
-									foreach ($currencies as $k => $v) {
-										echo '<option value="' . $k . '"' . ($k == $sel_currency ? ' selected' : '') . '>' . wp_specialchars($v, true) . '</option>' . "\n";
-									}
-									?>
-								</select>
-							</label>
-						</p>
-				    </td>
-				</tr>
-				<tr>
-				    <th scope="row"><?php _e('Enable') ?></th>
-				    <td>
-						<p>
-							<label><?php _e('Select To enable or disable') ?><br />
-							  <input value="checked" name="<?php echo $plugin_slug; ?>_enable" type="checkbox" <?php echo (intval($enabled) == 1) ? "checked='checked'": ""; ?> />
-							</label>
-						</p>
-						<p>
-							<input type="submit" name="<?php echo $plugin_slug; ?>" value="<?php _e('Save Settings') ?>" />
-						</p>
-				    </td>
-				</tr>
-			</table>
-		</form>
+		<table class="form-table">
+			<tr>
+				<th scope="row"><?php _e('Authorize.Net Settings', 'dukagate') ?></th>
+				<td>
+					<p>
+						<label><?php _e('Use Test Server'); ?><br />
+						  <input value="checked" name="dg[<?php echo $plugin_slug; ?>][sandbox]" type="checkbox" <?php echo ($settings[$plugin_slug]['sandbox'] == 'checked') ? "checked='checked'": ""; ?> />
+						</label>
+					</p>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row"><?php _e('Authorize.Net Credentials', 'dukagate'); ?></th>
+				<td>
+					<p>
+						<label><?php _e('API Login', 'dukagate'); ?><br />
+						  <input value="<?php echo $settings[$plugin_slug]['authorize_api']; ?>" size="30" name="dg[<?php echo $plugin_slug; ?>][authorize_api]" type="text" />
+						</label>
+					</p>
+					<p>
+						<label><?php _e('Transaction Key', 'dukagate'); ?><br />
+						  <input value="<?php echo $settings[$plugin_slug]['authorize_transaction_key']; ?>" size="30" name="dg[<?php echo $plugin_slug; ?>][authorize_transaction_key]" type="text" />
+						</label>
+					</p>
+					<p>
+						<label><?php _e('Currency', 'dukagate'); ?><br />
+							<select name="dg[<?php echo $plugin_slug; ?>][currency]">
+								<?php
+								$sel_currency = $settings[$plugin_slug]['currency'];
+								foreach ($currencies as $k => $v) {
+									echo '<option value="' . $k . '"' . ($k == $sel_currency ? ' selected' : '') . '>' . wp_specialchars($v, true) . '</option>' . "\n";
+								}
+								?>
+							</select>
+						</label>
+					</p>
+				</td>
+			</tr>
+			
+		</table>
 		<?php
 	}
 	
@@ -179,7 +149,10 @@ class DukaGate_GateWay_AuthorizeNet extends DukaGate_GateWay_API{
 		$dg_cart = $_SESSION['dg_cart'];
 		$dg_shop_settings = get_option('dukagate_shop_settings');
 		$shop_currency = $dg_shop_settings['currency'];
-		$options = DukaGate::json_to_array($dukagate->dg_get_gateway_options($this->plugin_slug));
+		
+		$settings = get_option('dukagate_gateway_settings');
+		
+		
 		
 		$return_path = get_page_link($dg_shop_settings['thankyou_page']);
         $check_return_path = explode('?', $return_path);
@@ -189,14 +162,15 @@ class DukaGate_GateWay_AuthorizeNet extends DukaGate_GateWay_API{
             $return_path .= '?id=' . $invoice_id;
         }
 		$conversion_rate = 1;
-        if ($shop_currency != $options['currency']) {
+		$currency = $settings[$this->plugin_slug]['currency'];
+        if ($shop_currency != $currency) {
 			$curr = new DG_CURRENCYCONVERTER();
-            $conversion_rate = $curr->convert(1, $options['currency'], $shop_currency);
+            $conversion_rate = $curr->convert(1, $currency, $shop_currency);
 		}
 		
 		//Set up return url
 		$action_url = $this->post_url;
-		if($options['sandbox'] == 'checked'){
+		if($settings[$this->plugin_slug]['sandbox'] == 'checked'){
 			$action_url = $this->sandbox_url;
 		}
 		$sequence = rand(1, 1000);
@@ -214,13 +188,13 @@ class DukaGate_GateWay_AuthorizeNet extends DukaGate_GateWay_API{
 			$dg_total +=  $price * $cart['quantity'];
 		}
 		if (phpversion() >= '5.1.2') {
-            $fingerprint = hash_hmac("md5", $dg_shop_settings['authorize_api'] . "^" . $sequence . "^" . $timeStamp . "^" . $dg_total . "^", $dg_shop_settings['authorize_transaction_key']);
+            $fingerprint = hash_hmac("md5", $dg_shop_settings['authorize_api'] . "^" . $sequence . "^" . $timeStamp . "^" . $dg_total . "^", $settings[$plugin_slug]['authorize_transaction_key']);
         } else {
-            $fingerprint = bin2hex(mhash(MHASH_MD5, $dg_shop_settings['authorize_api'] . "^" . $sequence . "^" . $timeStamp . "^" . $dg_total . "^", $dg_shop_settings['authorize_transaction_key']));
+            $fingerprint = bin2hex(mhash(MHASH_MD5, $dg_shop_settings['authorize_api'] . "^" . $sequence . "^" . $timeStamp . "^" . $dg_total . "^", $settings[$plugin_slug]['authorize_transaction_key']));
         }
 		
 		$output .= '<form name="dpsc_authorize_form" id="dpsc_payment_form" action="' . $action_url . '" method="post">';
-        $output .= '<input type="hidden" name="x_login" value="' . $dg_shop_settings['authorize_api'] . '" />';
+        $output .= '<input type="hidden" name="x_login" value="' . $settings[$plugin_slug]['authorize_api'] . '" />';
         $output .= '<input type="hidden" name="x_version" value="3.1" />';
         $output .= '<input type="hidden" name="x_method" value="CC" />';
         $output .= '<input type="hidden" name="x_type" value="AUTH_CAPTURE" />';

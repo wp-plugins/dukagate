@@ -1,11 +1,11 @@
 === Dukagate ===
 Contributors: rixeo
 Donate link: http://dukagate.info/
-Tags: shopping cart, web shop, cart, shop,Paypal,paypal,Pesapal, e-commerce, ecommerce
+Tags: shopping cart, web shop, cart, shop,Paypal,paypal,Pesapal, e-commerce, ecommerce, worldpay, mpesa, bank, kopokopo, KopoKopo
 
 Requires at least: 3.0
 Tested up to: 3.9.1
-Stable tag: 3.6.5
+Stable tag: 3.7.2.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -69,18 +69,44 @@ We test Dukagate on a large number of different server set-ups and envrionments 
 
 == Changelog ==
 
+= 3.7.2.6 =
+Bug Fix - Setting options for registering users and currency position
+
+= 3.7.2.5 =
+Currency converter cache. We have added a WordPress cache for the currency conversion incase the currency conversion API does not work.
+We have also fixed some issues on user registration
+
+
+= 3.7.2.4 =
+Currency converter fix
+
+= 3.7.2.3 =
+Checkout fixes for paid items
+
+= 3.7.2.2 =
+Fix checkout page issue not loading custom fields
+
+= 3.7.2.1 =
+Fix to mobile payments
+
+= 3.7.2 =
+We have now made it easier to enable and disable payment gateways and also save all settings at once. This update however will require you to re-enter your payment gateway information.
+
+= 3.7.1 =
+* New payment gateways
+* Some code fixes on pesapal IPN
+
+= 3.7 =
+* External directories. We now store files, invoices and uploads in the wp-content directory and not in the plugin directory.
+* User registration. You can now register users and allow them to see their own order logs
+* Bank and mobile money payment options
+* Text domain loading
+* Minor security changes
+
 
 = 3.6.5 =
-There are afew things we have changes
 * Single menu for Dukagate - The plugin now uses a single menu with other sections tabed under the settings menu
 * Security Fixes - We are working on some security fixes and we will release new versions as they are fixed
-
-Upcoming Features
-* Multisite support
-* More payment gateways including Stripe
-* Inbuilt Page templates to reduce shortcode usage
-* Shop slug rewrite
-* Among others
 
 
 = 3.6.4 =
