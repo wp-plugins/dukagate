@@ -167,7 +167,16 @@ function dg_dukagate_order_log(){
 	if(@$_REQUEST['order_id']){
 		dg_dukagate_order_log_info($_REQUEST['order_id']);
 	}else{
-	$order_logs = $dukagate->dg_list_order_logs();
+		if(@$_REQUEST['delete']){
+			$order_id = $_REQUEST['id'];
+			$dukagate->dg_delete_order_log($order_id);
+			?>
+			<div id="message" class="updated fade">
+				<h3><?php _e("Successfully deleted order ID $order_id","dukagate"); ?></h3>
+			</div>
+			<?php
+		}
+		$order_logs = $dukagate->dg_list_order_logs();
 	?>
 	<div class="wrap">
 		<h2><?php _e("Dukagate Order Log"); ?></h2>
@@ -198,7 +207,8 @@ function dg_dukagate_order_log(){
 				<tbody>
 					<?php
 					$count = 1;
-					$form_url = admin_url("admin.php?page=dukagate-order-log&order_id=");
+					$form_url = admin_url("edit.php?post_type=dg_product&page=dukagate-order-log&order_id=");
+					$form_del_url = admin_url("edit.php?post_type=dg_product&page=dukagate-order-log&delete=true&id=");
 					foreach($order_logs as $order_log => $log){
 						?>
 						<tr id="order_<?php echo $log->id; ?>">
@@ -208,7 +218,7 @@ function dg_dukagate_order_log(){
 							<td align="left"><?php echo number_format($log->total,2); ?></td>
 							<td align="left"><?php echo $log->payment_gateway; ?></td>
 							<td align="left"><?php _e($log->payment_status) ; ?></td>
-							<td align="left"><a href="<?php echo $form_url.$log->id ;?>"><?php _e("View"); ?></a></td>
+							<td align="left"><a href="<?php echo $form_url.$log->id ;?>"><?php _e("View","dukagate"); ?></a> | <a href="<?php echo $form_del_url.$log->id; ?>"><?php _e("Delete","dukagate"); ?></a></td>
 						</tr>
 						<?php
 						$count++;
@@ -359,13 +369,17 @@ function dg_dukagate_order_log_info($id){
 					$order_info =  DukaGate::json_to_array($order_log->order_info);
 					if (is_array($order_info) && count($order_info) > 0) {
 						foreach ($order_info as $order_in => $order) {
-							?>
-							<tr>
-								<td><strong><?php _e($order['key']); ?></strong></td>
-								<td><?php echo $order['value']; ?></td>
-							</tr>
-							<?php
+							foreach ($order as $key => $value) {
+								?>
+								<tr>
+									<td><strong><?php _e($key); ?></strong></td>
+									<td><?php echo $value; ?></td>
+								</tr>
+								<?php
+							}
+							
 						}
+						
 					}
 					?>
 					</table>

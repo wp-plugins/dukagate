@@ -167,7 +167,7 @@ class DukaGate_Products{
 				$content .= '<div class="dg_prod_info">';
 				$content .= '<p class="title"><a href="' . $prod_permalink . '" title="' . $product->post_title . '">' . __($product->post_title) . '</a></p>';
 				$content .= '<p class="detail">' . $product->post_excerpt . '</p>';
-				if($dg_shop_settings['currency_symbol'] === 'left'){
+				if($dg_shop_settings['currency_position'] === 'left'){
 					$content .= '<p class="price">' .__("Price", "dukagate").': '. $dg_shop_settings['currency_symbol'].' '.$price . '</p>';
 				}else{
 					$content .= '<p class="price">' .__("Price", "dukagate").': '.$price . ' '.$dg_shop_settings['currency_symbol'].'</p>';
@@ -282,7 +282,7 @@ class DukaGate_Products{
 					$content .= '<p class="dg_title"><a href="' .$prod_permalink . '" title="' . $taxonomy->name . '">' . __($taxonomy->name) . '</a></p>';
 					$price = $dukagate->grouped_product_crude($taxonomy->term_id, 'price', '', 'get');
 					if($price){
-						if($dg_shop_settings['currency_symbol'] === 'left'){
+						if($dg_shop_settings['currency_position'] === 'left'){
 							$content .= '<p class="price">' .__("Price", "dukagate").': '. $dg_shop_settings['currency_symbol'].' '.$price . '</p>';
 						}else{
 							$content .= '<p class="price">' .__("Price", "dukagate").': '.$price . ' '.$dg_shop_settings['currency_symbol'].'</p>';
@@ -385,7 +385,7 @@ class DukaGate_Products{
 			$content .= '<p class="detail">' . $product->post_excerpt . '</p>';
 		if($fixed_price == 'checked'){
 			$content .= '<input type="hidden" name="fixed_price_'.$product->ID.'" id="fixed_price_'.$product->ID.'" value="'.$price.'">';
-			if($dg_shop_settings['currency_symbol'] === 'left'){
+			if($dg_shop_settings['currency_position'] === 'left'){
 				$content .= '<p class="price"><span class="price_label">' .__("Price", "dukagate").':</span> '. $dg_shop_settings['currency_symbol'].' '.$price . '</p>';
 			}else{
 				$content .= '<p class="price"><span class="price_label">' .__("Price", "dukagate").':</span> '.$price . ' '.$dg_shop_settings['currency_symbol'].'</p>';

@@ -45,7 +45,7 @@ if(!class_exists('DukaGate')) {
 			$this->dukagate_db();
 			add_action( 'dg_delete_files_daily', array(&$this, 'delete_files_daily') );
 			$this->set_up_directories_and_file_info();
-			update_option('dg_version_info', 3.726);
+			update_option('dg_version_info', 3.727);
 		}
 		
 		
@@ -1326,6 +1326,15 @@ if(!class_exists('DukaGate')) {
 			return true;
 		}
 		
+		//Delete order log
+		function dg_delete_order_log($id){
+			$databases = self::db_names();
+			global $wpdb;
+			$table_name = $databases['transactions'];
+			$sql = "DELETE FROM `$table_name` WHERE `id` = $id";
+			return $wpdb->get_results($sql);
+		}
+		
 		
 		//List Order Logs
 		function dg_list_order_logs(){
@@ -1413,21 +1422,15 @@ if(!class_exists('DukaGate')) {
 			$order_form_info = array();
 			while($count > 0){
 				if(!empty($order_info[$dg_form_elem[$count]['uname']])){
-					$order_form_info[]['key'] = $dg_form_elem[$count]['name'];
-					$order_form_info[]['value'] = $order_info[$dg_form_elem[$count]['uname']];
+					$order_form_info[][$dg_form_elem[$count]['name']] = $order_info[$dg_form_elem[$count]['uname']];
 				}
 				$count--;
 			}		
-			$order_form_info[]['key'] = 'First Name';
-			$order_form_info[]['value'] = $order_info['dg_firstname'];
-			$order_form_info[]['key'] = 'Last Name';
-			$order_form_info[]['value'] = $order_info['dg_lastname'];
-			$order_form_info[]['key'] = 'Company';
-			$order_form_info[]['value'] = $order_info['dg_company'];
-			$order_form_info[]['key'] = 'Country';
-			$order_form_info[]['value'] = $order_info['dg_country'];
-			$order_form_info[]['key'] = 'Phone';
-			$order_form_info[]['value'] = $order_info['dg_phone'];
+			$order_form_info[]['First Name'] = $order_info['dg_firstname'];
+			$order_form_info[]['Last Name'] = $order_info['dg_lastname'];
+			$order_form_info[]['Company'] = $order_info['dg_company'];
+			$order_form_info[]['Country'] = $order_info['dg_country'];
+			$order_form_info[]['Phone'] = $order_info['dg_phone'];
 			
 			$order_info = self::array_to_json($order_form_info);
 			$table_name = $databases['transactions'];
@@ -1528,14 +1531,6 @@ if(!class_exists('DukaGate')) {
 			return $total;
 		}
 		
-		//Delete order log
-		function dg_delete_order_log($id){
-			$databases = self::db_names();
-			global $wpdb;
-			$table_name = $databases['transactions'];
-			$sql = "DELETE FROM `$table_name` WHERE `id` = '$id';";
-			$wpdb->query($sql);
-		}
 		
 		//Update Order log status
 		function dg_update_order_log($invoice, $status){
