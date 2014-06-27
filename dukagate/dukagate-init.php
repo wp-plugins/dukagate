@@ -43,8 +43,9 @@ if(!class_exists('DukaGate')) {
 		 */
 		function init(){
 			$this->dukagate_db();
+			add_action( 'dg_delete_files_daily', array(&$this, 'delete_files_daily') );
 			$this->set_up_directories_and_file_info();
-			update_option('dg_version_info', 3.47);
+			update_option('dg_version_info', 3.727);
 		}
 		
 		
@@ -64,28 +65,29 @@ if(!class_exists('DukaGate')) {
 			
 			add_filter( 'cron_schedules', array(__CLASS__, 'custom_cron_schedules'));
 			
-			add_action( 'init', array(&$this, 'set_up_product_posts'));
-			add_action( 'init', array(&$this, 'create_product_taxonomies'));
-			add_action( 'add_meta_boxes', array(&$this,'set_up_product_meta_box'));
+			add_action('init', array(&$this, 'customer_role_type'));
+			add_action('init', array(&$this, 'set_up_product_posts'));
+			add_action('init', array(&$this, 'create_product_taxonomies'));
+			add_action('add_meta_boxes', array(&$this,'set_up_product_meta_box'));
 			add_action('grouped_product_add_form_fields', array(&$this,'grouped_product_metabox_add'), 10, 1);
 			add_action('grouped_product_edit_form_fields', array(&$this,'grouped_product_metabox_edit'), 10, 1);
 			add_action('created_grouped_product', array(&$this,'save_grouped_product_metadata'), 10, 1);	
 			add_action('edited_grouped_product', array(&$this,'update_grouped_product_metadata'), 10, 1);
 			add_action('delete_grouped_product', array(&$this,'delete_grouped_product_metadata'), 10, 1);
-			add_action( 'save_post', array(&$this,'product_meta_save'));
-			add_action( 'edit_post', array(&$this,'add_quick_edit_save'), 10, 3);
+			add_action('save_post', array(&$this,'product_meta_save'));
+			add_action('edit_post', array(&$this,'add_quick_edit_save'), 10, 3);
 			add_action('post_edit_form_tag', array(&$this, 'post_form_tag'));
-			add_action( 'admin_print_styles', array($this, 'admin_styles') );
-			add_action( 'admin_print_scripts', array($this, 'admin_scripts') );
-			add_action( 'wp_enqueue_scripts', array(&$this, 'set_up_styles'));
-			add_action( 'wp_enqueue_scripts', array(&$this, 'set_up_js'));
-			add_action( 'init', array(&$this, 'load_dukagate_plugins'));
+			add_action('admin_print_styles', array($this, 'admin_styles') );
+			add_action('admin_print_scripts', array($this, 'admin_scripts') );
+			add_action('wp_enqueue_scripts', array(&$this, 'set_up_styles'));
+			add_action('wp_enqueue_scripts', array(&$this, 'set_up_js'));
+			add_action('init', array(&$this, 'load_dukagate_plugins'));
 			
 			add_filter('manage_dg_product_posts_columns', array(&$this,'create_post_column'));
 			add_action('manage_posts_custom_column', array(&$this,'render_post_columns'), 10, 2);
 			add_action('admin_footer-edit.php', array(&$this,'admin_edit_dg_product_foot'), 11);
 			add_action('quick_edit_custom_box',  array(&$this,'add_quick_edit'), 10, 2);
-			add_action ( 'plugins_loaded', array(&$this,'load_textdomain'), 7 );
+			add_action('init', array(&$this,'load_textdomain'));
 			
 			//Plugin info
 			add_filter('plugin_row_meta', array(&$this,'set_up_plugin_info'),10,2);
@@ -99,11 +101,7 @@ if(!class_exists('DukaGate')) {
 		 * Load Text Domain
 		 */
 		function load_textdomain(){
-			$locale = apply_filters( 'wordpress_locale', get_locale() );
-			$mofile = DG_DUKAGATE_DIR . "/lang/dukagate-$locale.mo";
-
-			if ( file_exists( $mofile ) )
-				load_textdomain( 'dukagate', $mofile );
+			load_plugin_textdomain( 'dukagate', false, DG_DUKAGATE_DIR . '/lang/' );
 		}
 		
 		/**
@@ -138,11 +136,11 @@ if(!class_exists('DukaGate')) {
 		 */
 		function set_up_plugin_info($links, $file){
 			if ($file == DG_PLUGIN_BASENAME) {
-				$links[] = '<a href="edit.php?post_type=dg_product&page=dukagate-settings">'.__('Settings').'</a>';
-				$links[] = '<a href="http://dukagate.info/faq/" target="_blank">'.__('FAQ').'</a>';
-				$links[] = '<a href="http://dukagate.info/documentation/" target="_blank">'.__('Documentation').'</a>';
-				$links[] = '<a href="http://dukagate.info/forums/forum/bugs/" target="_blank">'.__('Bugs').'</a>';
-				$links[] = '<a href="http://dukagate.info/contact/" target="_blank">'.__('Contact').'</a>';
+				$links[] = '<a href="edit.php?post_type=dg_product&page=dukagate-settings">'.__('Settings','dukagate').'</a>';
+				$links[] = '<a href="http://dukagate.info/faq/" target="_blank">'.__('FAQ','dukagate').'</a>';
+				$links[] = '<a href="http://dukagate.info/documentation/" target="_blank">'.__('Documentation','dukagate').'</a>';
+				$links[] = '<a href="http://dukagate.info/forums/forum/bugs/" target="_blank">'.__('Bugs','dukagate').'</a>';
+				$links[] = '<a href="http://dukagate.info/contact/" target="_blank">'.__('Contact','dukagate').'</a>';
 			}
 			return $links;
 		}
@@ -345,7 +343,7 @@ if(!class_exists('DukaGate')) {
 								<a href="<?php echo $digital_file['url']; ?>" target="_blank"><?php _e('Download','dukagate');?></a>
 								<?php
 							}else{
-								_e('No file uploaded');
+								_e('No file uploaded','dukagate');
 							}
 						?>
 						<input type="file" id="dg_digifile" name="dg_digifile" value="" size="25" />
@@ -757,6 +755,14 @@ if(!class_exists('DukaGate')) {
 		}
 		
 		/**
+		 * Make a blank file
+		 */
+		static function blank_file($destination){
+			$dg_file_handle = fopen($destination, 'w') or die("can't open file");
+			fclose($dg_file_handle);
+		}
+		
+		/**
 		 * Set Up directories
 		 */
 		public function set_up_directories_and_file_info(){
@@ -764,32 +770,49 @@ if(!class_exists('DukaGate')) {
 			if (!is_dir(DG_DOWNLOAD_FILES_DIR)) {
 				mkdir(DG_DOWNLOAD_FILES_DIR, 0, true);
 				chmod(DG_DOWNLOAD_FILES_DIR, 0777);
+				self::blank_file(DG_DOWNLOAD_FILES_DIR.'/index.php');
 			}
 			if (!is_dir(DG_DOWNLOAD_FILES_DIR_TEMP)) {
 				mkdir(DG_DOWNLOAD_FILES_DIR_TEMP, 0, true);
 				chmod(DG_DOWNLOAD_FILES_DIR_TEMP, 0777);
+				self::blank_file(DG_DOWNLOAD_FILES_DIR_TEMP.'/index.php');
 			}
-			if(is_dir(DG_PLUGIN_DIR.'/cache')) {
-				chmod(DG_PLUGIN_DIR.'/cache', 0777);
+			if (!is_dir(DG_DUKAGATE_CONTENT_DIR)) {
+				mkdir(DG_DUKAGATE_CONTENT_DIR, 0, true);
+				chmod(DG_DUKAGATE_CONTENT_DIR, 0777);
+				self::blank_file(DG_DUKAGATE_CONTENT_DIR.'/index.php');
 			}
-			else {
-				mkdir(DG_PLUGIN_DIR.'/cache', 0, true);
-				chmod(DG_PLUGIN_DIR.'/cache', 0777);
-			}
-			if(is_dir(DG_PLUGIN_DIR.'/temp')) {
-				chmod(DG_PLUGIN_DIR.'/temp', 0777);
-			}
-			else {
-				mkdir(DG_PLUGIN_DIR.'/temp', 0, true);
-				chmod(DG_PLUGIN_DIR.'/temp', 0777);
-			}
-			if(is_dir(DG_PLUGIN_DIR.'/report')) {
-				chmod(DG_PLUGIN_DIR.'/report', 0777);
+			if(is_dir(DG_DUKAGATE_CONTENT_DIR.'/cache')) {
+				chmod(DG_DUKAGATE_CONTENT_DIR.'/cache', 0777);
 			}
 			else {
-				mkdir(DG_PLUGIN_DIR.'/report');
-				chmod(DG_PLUGIN_DIR.'/report', 0777);
+				mkdir(DG_DUKAGATE_CONTENT_DIR.'/cache', 0, true);
+				chmod(DG_DUKAGATE_CONTENT_DIR.'/cache', 0777);
+				self::blank_file(DG_DUKAGATE_CONTENT_DIR.'/cache/index.php');
 			}
+			if(is_dir(DG_DUKAGATE_CONTENT_DIR.'/temp')) {
+				chmod(DG_DUKAGATE_CONTENT_DIR.'/temp', 0777);
+			}
+			else {
+				mkdir(DG_DUKAGATE_CONTENT_DIR.'/temp', 0, true);
+				chmod(DG_DUKAGATE_CONTENT_DIR.'/temp', 0777);
+				self::blank_file(DG_DUKAGATE_CONTENT_DIR.'/temp/index.php');
+			}
+			if(is_dir(DG_DUKAGATE_CONTENT_DIR.'/report')) {
+				chmod(DG_DUKAGATE_CONTENT_DIR.'/report', 0777);
+			}
+			else {
+				mkdir(DG_DUKAGATE_CONTENT_DIR.'/report');
+				chmod(DG_DUKAGATE_CONTENT_DIR.'/report', 0777);
+				self::blank_file(DG_DUKAGATE_CONTENT_DIR.'/report/index.php');
+			}
+			
+			if (!is_dir(DG_DUKAGATE_INVOICE_DIR)) {
+				mkdir(DG_DUKAGATE_INVOICE_DIR, 0, true);
+				chmod(DG_DUKAGATE_INVOICE_DIR, 0777);
+				self::blank_file(DG_DUKAGATE_INVOICE_DIR.'/index.php');
+			}
+
 			
 			//Download link info
 			$dg_dl_expiration_time = get_option('dg_dl_expiration_time');
@@ -800,7 +823,9 @@ if(!class_exists('DukaGate')) {
 			
 			$date = date('M-d-Y', strtotime("+1 days"));
 			$next_time_stamp = strtotime($date) + 18000;
-			wp_schedule_event($next_time_stamp, 'daily', 'dg_daily_file_event');
+			wp_schedule_event($next_time_stamp, 'daily', 'dg_delete_files_daily');
+			
+			
 		}
 		
 		/**
@@ -847,7 +872,7 @@ if(!class_exists('DukaGate')) {
 
 			$ifp = @ fopen( $new_file, 'wb' );
 			if ( ! $ifp )
-				return array( 'error' => sprintf( __( 'Could not write file %s' ), $new_file ) );
+				return array( 'error' => sprintf( __( 'Could not write file %s' ,'dukagate'), $new_file ) );
 
 			@fwrite( $ifp, $bits );
 			fclose( $ifp );
@@ -862,6 +887,44 @@ if(!class_exists('DukaGate')) {
 
 			// Compute the URL
 			$url = $this->plugin_upload_directory . "$filename";
+
+			return array( 'file' => $new_file, 'original' => $name, 'url' => $url , 'error' => false );
+		}
+		
+		/**
+		 * Upload File
+		 *
+		 */
+		public function upload_file($name, $bits, $destination_dir, $destination_url){
+			if ( empty( $name ) )
+				return array( 'error' => __( 'Empty filename' ) );
+				
+			$wp_filetype = wp_check_filetype( $name );
+			if ( ! $wp_filetype['ext'] && ! current_user_can( 'unfiltered_upload' ) )
+				return array( 'error' => __( 'Invalid file type' ,'dukagate') );
+				
+			
+			$filename = wp_unique_filename( $destination_dir, $name );
+			
+			$new_file = $destination_dir . "/$filename";
+
+			$ifp = @ fopen( $new_file, 'wb' );
+			if ( ! $ifp )
+				return array( 'error' => sprintf( __( 'Could not write file %s' ,'dukagate'), $new_file ) );
+
+			@fwrite( $ifp, $bits );
+			fclose( $ifp );
+			clearstatcache();
+
+			// Set correct file permissions
+			$stat = @ stat( dirname( $new_file ) );
+			$perms = $stat['mode'] & 0007777;
+			$perms = $perms & 0000666;
+			@ chmod( $new_file, $perms );
+			clearstatcache();
+
+			// Compute the URL
+			$url = $destination_url . "/$filename";
 
 			return array( 'file' => $new_file, 'original' => $name, 'url' => $url , 'error' => false );
 		}
@@ -988,10 +1051,13 @@ if(!class_exists('DukaGate')) {
 				$sql = "INSERT INTO `$table_name`(`type`,`to_mail`, `title`, `content_admin`, `content_user`) VALUES ('payment_received','$defualt_email', 'Payment Received', 'Hello<br/>We have received a payment from:<br/>%details%<br/>This payment is for order No. %inv%<br/>Cheers,<br/>%shop%','Hello<br/>We have received a payment from:<br/>%details%<br/>This payment is for order No. %inv%<br/>Cheers,<br/>%shop%')";
 				$wpdb->query($sql);
 				
-				$sql = "INSERT INTO `$table_name`(`type`,`to_mail`, `title`, `content_admin`, `content_user`) VALUES ('order_placed','$defualt_email', 'Order Placed','Hello,<br/>Someone has just placed an order at your shop located at: %siteurl%<br/>Here are the details of the person who placed the order: <br/><p>%info%</p><br/>You can find the order details here: %order-log-transaction%<br/>Warm regards,<br/>%shop%','Hello,<br/>Thank you for placing your order at %shop%.<br/>We will process your order as soon as we receive payment!<br/>Warm regards,<br/>%shop%')";
+				$sql = "INSERT INTO `$table_name`(`type`,`to_mail`, `title`, `content_admin`, `content_user`) VALUES ('order_placed','$defualt_email', 'Order Placed','Hello,<br/>Someone has just placed an order at your shop located at: %siteurl%<br/>Here are the details of the person who placed the order: <br/><p>%info%</p><br/>You can find the order details here: %order-log-transaction%<br/>Warm Regards,<br/>%shop%','Hello,<br/>Thank you for placing your order at %shop%.<br/>We will process your order as soon as we receive payment!<br/>Warm Regards,<br/>%shop%')";
 				$wpdb->query($sql);
 				
-				$sql = "INSERT INTO `$table_name`(`type`,`to_mail`, `title`, `content_admin`, `content_user`) VALUES ('order_canceled','$defualt_email', 'Order Canceled','The order number %inv% has been cancelled!','Hello %fname%<br/>The order number %inv% has been cancelled!<br/>Warm regards,<br/>%shop%')";
+				$sql = "INSERT INTO `$table_name`(`type`,`to_mail`, `title`, `content_admin`, `content_user`) VALUES ('order_canceled','$defualt_email', 'Order Canceled','The order number %inv% has been cancelled!','Hello %fname%<br/>The order number %inv% has been cancelled!<br/>Warm Regards,<br/>%shop%')";
+				$wpdb->query($sql);
+				
+				$sql = "INSERT INTO `$table_name`(`type`,`to_mail`, `title`, `content_admin`, `content_user`) VALUES ('new_user','$defualt_email', 'New User','A new user has registered: %fname% %lname%','Hello %fname%<br/>Your new account has been created. Please log on to %siteurl% with your credentials : <br/> Username : %username% <br/> Password : %password% <br/>Warm Regards,<br/>%shop%')";
 				$wpdb->query($sql);
 			}
 			
@@ -999,6 +1065,13 @@ if(!class_exists('DukaGate')) {
 			//Set up default options
 			if($db_setup){
 				$this->set_default_options();
+			}
+			
+			//update
+			if(get_option('dg_version_info') <= 3.47){
+				$sql = "INSERT INTO `$table_name`(`type`,`to_mail`, `title`, `content_admin`, `content_user`) VALUES ('new_user','$defualt_email', 'New User','A new user has registered: %fname% %lname%','Hello %fname%<br/>Your new account has been created. Please log on to %siteurl% with your credentials : <br/> Username : %username% <br/> Password : %password% <br/>Warm Regards,<br/>%shop%')";
+				$wpdb->query($sql);
+				update_option('dg_version_info', 3.7);
 			}
 		}
 		
@@ -1015,6 +1088,9 @@ if(!class_exists('DukaGate')) {
 							'country' => '',
 							'currency' => 'USD',
 							'currency_symbol' => '$',
+							'currency_position' => 'left',
+							'force_login' => 'false',
+							'register_user' => 'false',
 							'checkout_page' => '',
 							'thankyou_page' => '',
 							'discounts' => 'false',
@@ -1250,6 +1326,15 @@ if(!class_exists('DukaGate')) {
 			return true;
 		}
 		
+		//Delete order log
+		function dg_delete_order_log($id){
+			$databases = self::db_names();
+			global $wpdb;
+			$table_name = $databases['transactions'];
+			$sql = "DELETE FROM `$table_name` WHERE `id` = $id";
+			return $wpdb->get_results($sql);
+		}
+		
 		
 		//List Order Logs
 		function dg_list_order_logs(){
@@ -1257,6 +1342,36 @@ if(!class_exists('DukaGate')) {
 			global $wpdb;
 			$table_name = $databases['transactions'];
 			$sql = "SELECT * FROM `$table_name` ORDER BY `id` DESC;";
+			return $wpdb->get_results($sql);
+		}
+
+		function dg_list_user_order_logs($email){
+			$databases = self::db_names();
+			global $wpdb;
+			$table_name = $databases['transactions'];
+			$sql = "SELECT * FROM `$table_name` WHERE `email` = '$email' ORDER BY `id` DESC;";
+			return $wpdb->get_results($sql);
+		}
+
+		/**
+		 * Check if order is for user
+		 *
+		 */
+		function is_order_for_user($email, $orderid){
+			$databases = self::db_names();
+			global $wpdb;
+			$table_name = $databases['transactions'];
+			$sql = "SELECT * FROM `$table_name` WHERE `email` = '$email' AND `id` = $orderid";
+			return $wpdb->get_row($sql);
+		}
+		
+		
+		//Filter Order Logs
+		function dg_filter_order_logs($startdate, $endate){
+			$databases = self::db_names();
+			global $wpdb;
+			$table_name = $databases['transactions'];
+			$sql = "SELECT * FROM `$table_name` WHERE `date` BETWEEN '$startdate' AND '$endate' ORDER BY `id` DESC;";
 			return $wpdb->get_results($sql);
 		}
 		
@@ -1307,21 +1422,15 @@ if(!class_exists('DukaGate')) {
 			$order_form_info = array();
 			while($count > 0){
 				if(!empty($order_info[$dg_form_elem[$count]['uname']])){
-					$order_form_info[]['key'] = $dg_form_elem[$count]['name'];
-					$order_form_info[]['value'] = $order_info[$dg_form_elem[$count]['uname']];
+					$order_form_info[][$dg_form_elem[$count]['name']] = $order_info[$dg_form_elem[$count]['uname']];
 				}
 				$count--;
 			}		
-			$order_form_info[]['key'] = 'First Name';
-			$order_form_info[]['value'] = $order_info['dg_firstname'];
-			$order_form_info[]['key'] = 'Last Name';
-			$order_form_info[]['value'] = $order_info['dg_lastname'];
-			$order_form_info[]['key'] = 'Company';
-			$order_form_info[]['value'] = $order_info['dg_company'];
-			$order_form_info[]['key'] = 'Country';
-			$order_form_info[]['value'] = $order_info['dg_country'];
-			$order_form_info[]['key'] = 'Phone';
-			$order_form_info[]['value'] = $order_info['dg_phone'];
+			$order_form_info[]['First Name'] = $order_info['dg_firstname'];
+			$order_form_info[]['Last Name'] = $order_info['dg_lastname'];
+			$order_form_info[]['Company'] = $order_info['dg_company'];
+			$order_form_info[]['Country'] = $order_info['dg_country'];
+			$order_form_info[]['Phone'] = $order_info['dg_phone'];
 			
 			$order_info = self::array_to_json($order_form_info);
 			$table_name = $databases['transactions'];
@@ -1331,6 +1440,10 @@ if(!class_exists('DukaGate')) {
 						
 			$sql = "SELECT `id` FROM `$table_name` WHERE `invoice` = '$invoice'";
 			$order_id =  $wpdb->get_var($sql);
+
+			if($dg_shop_settings['register_user'] === 'yes'){
+				$this->save_user($email, $email, $fname, $lname); //save user and send mail
+			}
 			
 			//Send order placed mail
 			$mail = $dukagate_mail->get_mail('order_placed');
@@ -1398,31 +1511,26 @@ if(!class_exists('DukaGate')) {
 			}
 			
 			
-			$transaction_url = admin_url("admin.php?page=dukagate-order-log&order_id=".$order_id);
+			$transaction_url = admin_url("edit.php?post_type=dg_product&page=dukagate-order-log&order_id=".$order_id);
+			$user_transaction_url = admin_url("admin.php?page=dukagate-order-log&order_id=".$order_id);
 			$message = $mail->content_admin;
 			
 			$array1 = array('%siteurl%', '%info%', '%shop%', '%order-log-transaction%','%fname%','%lname%','%fullnames%','%invoice-link%');
 			$array2 = array($url, $info, $shop, $transaction_url,$fname,$lname,$name,$file_path);
+			$u_array2 = array($url, $info, $shop, $user_transaction_url,$fname,$lname,$name,$file_path);
+
 			$message = str_replace($array1, $array2, $message);
 			
 			$dukagate_mail->send_mail($to, $subject, $message);
 			
 			//To user
 			$message = $mail->content_user;
-			$message = str_replace($array1, $array2, $message);
+			$message = str_replace($array1, $u_array2, $message);
 			$dukagate_mail->send_mail($email, $subject, $message);
 			
 			return $total;
 		}
 		
-		//Delete order log
-		function dg_delete_order_log($id){
-			$databases = self::db_names();
-			global $wpdb;
-			$table_name = $databases['transactions'];
-			$sql = "DELETE FROM `$table_name` WHERE `id` = '$id';";
-			$wpdb->query($sql);
-		}
 		
 		//Update Order log status
 		function dg_update_order_log($invoice, $status){
@@ -1468,12 +1576,16 @@ if(!class_exists('DukaGate')) {
 			
 			$dg_gateway = $this->dg_get_payment_gateway($gateway_slug);
 			$table_name = $databases['payment'];
-			$active = ($enabled) ? 1: 0;
-			if(empty($dg_gateway)){
-				$sql = "INSERT INTO `$table_name`(`gateway_name`,`gateway_slug`,`gateway_class`, `gateway_options`, `currencies`, `active`) 
-				        VALUES('$gateway_name','$gateway_slug','$gateway_class','$gateway_options', '$currencies' ,$active)";
+			if($enabled){
+				$active = ($enabled) ? 1: 0;
+				if(empty($dg_gateway)){
+					$sql = "INSERT INTO `$table_name`(`gateway_name`,`gateway_slug`,`gateway_class`, `gateway_options`, `currencies`, `active`) 
+							VALUES('$gateway_name','$gateway_slug','$gateway_class','$gateway_options', '$currencies' ,$active)";
+				}else{
+					$sql = "UPDATE `$table_name` SET `active` = $active, `gateway_name` = '$gateway_name' WHERE `gateway_slug` = '$gateway_slug'";
+				}
 			}else{
-				$sql = "UPDATE `$table_name` SET `active` = $active WHERE `gateway_slug` = '$gateway_slug'";
+				$sql = "DELETE FROM `$table_name` WHERE `gateway_slug` = '$gateway_slug'";
 			}
 			$wpdb->query($sql);
 			
@@ -1544,6 +1656,15 @@ if(!class_exists('DukaGate')) {
 			global $wpdb;
 			$table_name = $databases['payment'];
 			$sql = "SELECT `gateway_class` FROM `$table_name` WHERE `gateway_slug` = '$gateway_slug'";
+			return $wpdb->get_var($sql);
+		}
+		
+		//Get Gateway name
+		function dg_get_gateway_name($gateway_slug){
+			$databases = self::db_names();
+			global $wpdb;
+			$table_name = $databases['payment'];
+			$sql = "SELECT `gateway_name` FROM `$table_name` WHERE `gateway_slug` = '$gateway_slug'";
 			return $wpdb->get_var($sql);
 		}
 		
@@ -1687,9 +1808,27 @@ if(!class_exists('DukaGate')) {
 		//Generate the checkout form
 		function generate_checkout_form($layout){
 			global $dukagate_settings;
+			$dg_shop_settings = get_option('dukagate_shop_settings');
 			$dg_dukagate_settings = $dukagate_settings->get_settings();
 			$dg_form_elem = get_option('dukagate_checkout_options');
 			$cnt =  '';
+			$get_user = false;
+			$fullnames = "";
+			$firstname = "";
+			$lastname = "";
+			$email = "";
+			if($dg_shop_settings['register_user'] === 'yes'){
+				$get_user = true;
+				if ( is_user_logged_in() ){
+					global $current_user;
+					get_currentuserinfo();
+					$email = $current_user->user_email;
+					$firstname = $current_user->user_firstname;
+					$lastname = $current_user->user_lastname;
+					$fullnames = $firstname.' '.$lastname;
+				}
+			}
+			
 			if($layout == 'fixed'){
 				$cnt = '<table class="dg_checkout_table">';
 				if(@$dg_form_elem['dg_fullname_visible'] == 'checked'){
@@ -1702,7 +1841,7 @@ if(!class_exists('DukaGate')) {
 					if(@$dg_form_elem['dg_fullname_mandatory'] == 'checked'){
 						$mandatory = 'required';
 					}
-					$cnt .= '<input type="text" class="'.$mandatory.' dg_fullname_input" name="dg_fullname" id="dg_fullname" />';
+					$cnt .= '<input type="text" class="'.$mandatory.' dg_fullname_input" name="dg_fullname" id="dg_fullname" value="'.$fullnames.'"/>';
 					$cnt .= '</td>';
 					$cnt .= '</tr>';
 				}
@@ -1716,7 +1855,7 @@ if(!class_exists('DukaGate')) {
 					if(@$dg_form_elem['dg_firstname_mandatory'] == 'checked'){
 						$mandatory = 'required';
 					}
-					$cnt .= '<input type="text" class="'.$mandatory.' dg_firstname_input" name="dg_firstname" id="dg_firstname" />';
+					$cnt .= '<input type="text" class="'.$mandatory.' dg_firstname_input" name="dg_firstname" id="dg_firstname" value="'.$firstname.'" />';
 					$cnt .= '</td>';
 					$cnt .= '</tr>';
 				}
@@ -1730,7 +1869,7 @@ if(!class_exists('DukaGate')) {
 					if(@$dg_form_elem['dg_lastname_mandatory'] == 'checked'){
 						$mandatory = 'required';
 					}
-					$cnt .= '<input type="text" class="'.$mandatory.' dg_fullname_input" name="dg_lastname" id="dg_lastname" />';
+					$cnt .= '<input type="text" class="'.$mandatory.' dg_fullname_input" name="dg_lastname" id="dg_lastname" value="'.$lastname.'" />';
 					$cnt .= '</td>';
 					$cnt .= '</tr>';
 				}
@@ -1744,7 +1883,7 @@ if(!class_exists('DukaGate')) {
 					if(@$dg_form_elem['dg_email_mandatory'] == 'checked'){
 						$mandatory = 'required';
 					}
-					$cnt .= '<input type="text" class="'.$mandatory.' dg_email" name="dg_email" id="dg_email" />';
+					$cnt .= '<input type="text" class="'.$mandatory.' dg_email" name="dg_email" id="dg_email" value="'.$email.'" />';
 					$cnt .= '</td>';
 					$cnt .= '</tr>';
 				}
@@ -1796,7 +1935,7 @@ if(!class_exists('DukaGate')) {
 					$cnt .= '</tr>';
 				}
 				if (is_array($dg_form_elem) && count($dg_form_elem) > 0) {
-					$total = count($dg_form_elem);
+					$total = 20;
 					
 					while($total > 0){
 						if(@$dg_form_elem[$total]['visible'] == 'checked'){
@@ -1836,7 +1975,7 @@ if(!class_exists('DukaGate')) {
 					if(@$dg_form_elem['dg_fullname_mandatory'] == 'checked'){
 						$mandatory = 'required';
 					}
-					$cnt .= '<input type="text" class="'.$mandatory.' dg_fullname_input" name="dg_fullname" id="dg_fullname" />';
+					$cnt .= '<input type="text" class="'.$mandatory.' dg_fullname_input" name="dg_fullname" id="dg_fullname" value="'.$fullnames.'" />';
 					$cnt .= '<br/>';
 				}
 				if(@$dg_form_elem['dg_firstname_visible'] == 'checked'){
@@ -1845,7 +1984,7 @@ if(!class_exists('DukaGate')) {
 					if(@$dg_form_elem['dg_firstname_mandatory'] == 'checked'){
 						$mandatory = 'required';
 					}
-					$cnt .= '<input type="text" class="'.$mandatory.' dg_firstname_input" name="dg_firstname" id="dg_firstname" />';
+					$cnt .= '<input type="text" class="'.$mandatory.' dg_firstname_input" name="dg_firstname" id="dg_firstname" value="'.$firstname.'" />';
 					$cnt .= '<br/>';
 				}
 				if(@$dg_form_elem['dg_lastname_visible'] == 'checked'){
@@ -1854,7 +1993,7 @@ if(!class_exists('DukaGate')) {
 					if(@$dg_form_elem['dg_lastname_mandatory'] == 'checked'){
 						$mandatory = 'required';
 					}
-					$cnt .= '<input type="text" class="'.$mandatory.' dg_lastname_input" name="dg_lastname" id="dg_lastname" />';
+					$cnt .= '<input type="text" class="'.$mandatory.' dg_lastname_input" name="dg_lastname" id="dg_lastname" value="'.$lastname.'" />';
 					$cnt .= '<br/>';
 				}
 				if(@$dg_form_elem['dg_email_visible'] == 'checked'){
@@ -1863,7 +2002,7 @@ if(!class_exists('DukaGate')) {
 					if(@$dg_form_elem['dg_email_mandatory'] == 'checked'){
 						$mandatory = 'required';
 					}
-					$cnt .= '<input type="text" class="'.$mandatory.' dg_email_input" name="dg_email" id="dg_email" />';
+					$cnt .= '<input type="text" class="'.$mandatory.' dg_email_input" name="dg_email" id="dg_email" value="'.$email.'" />';
 					$cnt .= '<br/>';
 				}
 				if(@$dg_form_elem['dg_phone_visible'] == 'checked'){
@@ -1898,7 +2037,7 @@ if(!class_exists('DukaGate')) {
 					$cnt .= '<br/>';
 				}
 				if (is_array($dg_form_elem) && count($dg_form_elem) > 0) {
-					$total = count($dg_form_elem);
+					$total = 20;
 					
 					while($total > 0){
 						if(@$dg_form_elem[$total]['visible'] == 'checked'){
@@ -1926,46 +2065,31 @@ if(!class_exists('DukaGate')) {
 				}
 				$cnt .= '</div>';
 			}
-			$dg_gateways = $this->list_all_active_gateways();
+			$dg_gateways = get_option('dukagate_gateway_options');
 			$active = 0;
 			$gw_name = '';
 			if (is_array($dg_gateways) && count($dg_gateways) > 0) {
 				if(count($dg_gateways) > 1){
 					$cnt .= '<ul>';
 					foreach ($dg_gateways as $dg_gateway) {
-						$gw_name = '';
-						if(intval($dg_gateway->active) == 1){
-							$options = DukaGate::json_to_array($this->dg_get_gateway_options($dg_gateway->gateway_slug));
-							$gw_name = $dg_gateway->gateway_name;
-							if(!empty($options['custom_name'])){
-								$gw_name = $options['custom_name'];
-							}
-							$cnt .= '<li>';
-							$cnt .= '<label for="dg_gateway"><input type="radio" class="required" name="dg_gateway_action" value="'.$dg_gateway->gateway_slug.'"/>'.$gw_name.'</label>';
-							$cnt .= '</li>';
-							$active += 1;
-						}
+						$gw_name = $this->dg_get_gateway_name($dg_gateway);
+						$cnt .= '<li>';
+						$cnt .= '<label for="dg_gateway" class="dg_gateway '.$dg_gateway.'"><input type="radio" class="required dg_gateway_select '.$dg_gateway.'" name="dg_gateway_action" value="'.$dg_gateway.'"/>'.$gw_name.'</label>';
+						$cnt .= '</li>';
+						$active += 1;
 					}
 					$cnt .= '</ul>';
 				}else{
 					foreach ($dg_gateways as $dg_gateway) {
-						$gw_name = '';
-						if(intval($dg_gateway->active) == 1){
-							$active += 1;
-							$options = DukaGate::json_to_array($this->dg_get_gateway_options($dg_gateway->gateway_slug));
-							$gw_name = $dg_gateway->gateway_name;
-							if(!empty($options['custom_name'])){
-								$gw_name = $options['custom_name'];
-							}
-							$cnt .= '<label for="dg_gateway" class="'.$dg_gateway->gateway_slug.'">'.__("Pay Using ").$gw_name.'</label>';
-							$cnt .= '<input type="hidden" name="dg_gateway_action" value="'.$dg_gateway->gateway_slug.'"/></label>';
-						}
+						$gw_name = $this->dg_get_gateway_name($dg_gateway);
+						$cnt .= '<label for="dg_gateway" class="dg_gateway '.$dg_gateway.'"><input type="radio" class="required dg_gateway_select '.$dg_gateway.'" name="dg_gateway_action" value="'.$dg_gateway.'"/>'.$gw_name.'</label>';
+						$active += 1;
 					}
 				}
 			}
 			if($active > 0){
-				$cnt .= '<p>';
-				$cnt .= '<input type="submit" name="dg_process_payment_form" id="dg_process_payment_form" value="'.__("Process Payment").'" />';
+				$cnt .= '<p class="dg_process">';
+				$cnt .= '<input type="submit" name="dg_process_payment_form" id="dg_process_payment_form" value="'.__("Process Payment",'dukagate').'" />';
 				$cnt .= '</p>';
 			}
 			$cnt .= '<input type="hidden" name="ajax" value="true" />';
@@ -1973,15 +2097,55 @@ if(!class_exists('DukaGate')) {
 			
 			return $cnt;
 		}
+
+		/**
+		 * Add a custom user role
+		 *
+		 */
+		function customer_role_type(){
+			add_role('shopuser', __('Shop User','dukagate'), array(
+				'read' => true,
+			));
+		}
 		
 		/**
 		 * Save user to database
 		 */
-		function save_user($user_name, $password, $email){
+		function save_user($user_name, $email, $fname, $lname){
 			$user_id = username_exists( $user_name );
-			if ( !$user_id and email_exists($user_email) == false ) {
+			$dg_shop_settings = get_option('dukagate_shop_settings');
+			if ( !$user_id and email_exists($email) == false ) {
+				global $dukagate_mail;
 				$random_password = wp_generate_password( $length=12, $include_standard_special_chars=false );
-				$user_id = wp_create_user( $user_name, $random_password, $user_email );
+				$userdata = array(
+					'user_login'    =>  $user_name,
+					'user_pass'  => $random_password,
+					'user_email' => $email,
+					'first_name' => $fname,
+					'last_name' => $lname,
+					'role' => 'shopuser'
+				);
+				$user_id = wp_insert_user( $userdata ) ;
+
+				$user = new WP_User( $user_id );
+				
+
+				//Send mail
+				$mail = $dukagate_mail->get_mail('new_user');
+				$shop = $dg_shop_settings['shopname'];
+				$to =  $mail->to_mail;
+				$subject = $mail->title;
+				$message = $mail->content_admin;
+				$array1 = array('%fname%','%lname%', '%fullnames%');
+				$array2 = array($user->user_firstname,$user->user_lastname,$user->user_firstname.' '.$user->user_lastname);
+				$message = str_replace($array1, $array2, $message);
+				$dukagate_mail->send_mail($to, $subject, $message); //notify admin
+
+				$message = $mail->content_user;
+				$array1 = array('%fname%','%lname%', '%fullnames%','%username%','%password%','%shop%');
+				$array2 = array($user->user_firstname,$user->user_lastname,$user->user_firstname.' '.$user->user_lastname, $user_name, $random_password, $shop);
+				$dukagate_mail->send_mail($email, $subject, $message); //notify user
+
 			} else {
 				$random_password = __('User already exists.  Password inherited.');
 			}

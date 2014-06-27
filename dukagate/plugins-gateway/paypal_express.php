@@ -61,7 +61,7 @@ class DukaGate_GateWay_PayPalExpress extends DukaGate_GateWay_API{
 	//Register Plugin
 	function register(){
 		//Register Plugin
-		dg_register_gateway_plugin('DukaGate_GateWay_PayPalExpress', $this->plugin_name, $this->plugin_slug, $this->required_fields, $this->currencies);
+		dg_register_gateway_plugin('DukaGate_GateWay_PayPalExpress', $this->plugin_name, $this->plugin_slug, $this->required_fields, $this->currencies, false);
 	}
 	
 	
@@ -89,28 +89,11 @@ class DukaGate_GateWay_PayPalExpress extends DukaGate_GateWay_API{
 	/**
 	 * Set Up Payment gateway options
 	 */
-	function set_up_options($plugin_slug){
+	function set_up_options($plugin_slug, $settings){
 		global $dukagate;
-		if(@$_POST[$plugin_slug]){
-			$required_fields = array(
-									'username' => '',
-									'password' => '',
-									'signature' => '',
-									'email' => '',
-									'currency' => '');
-			$required_fields['currency'] = $_POST[$plugin_slug.'_currency'];
-			$required_fields['username'] = $_POST[$plugin_slug.'_username'];
-			$required_fields['password'] = $_POST[$plugin_slug.'_password'];
-			$required_fields['signature'] = $_POST[$plugin_slug.'_signature'];
-			$required_fields['email'] = $_POST[$plugin_slug.'_email'];
-			$enabled = ($_POST[$plugin_slug.'_enable'] == 'checked') ? 1 : 0;
-			$dukagate->dg_save_gateway_options($plugin_slug ,DukaGate::array_to_json($required_fields), $enabled);
-		}
-		$options = DukaGate::json_to_array($dukagate->dg_get_gateway_options($plugin_slug));
+		
 		$currencies = DukaGate::json_to_array($dukagate->dg_get_gateway_currencies($plugin_slug));
-		$enabled = $dukagate->dg_get_enabled_status($plugin_slug);
 		?>
-		<form method="POST" action="">
 			<table class="form-table">
 				<tr>
 				    <th scope="row"><?php _e('PayPal Express Checkout Settings') ?></th>
@@ -118,7 +101,7 @@ class DukaGate_GateWay_PayPalExpress extends DukaGate_GateWay_API{
 						<span class="description"><?php _e('Express Checkout is PayPal\'s premier checkout solution, which streamlines the checkout process for buyers and keeps them on your site after making a purchase. Unlike PayPal Pro, there are no additional fees to use Express Checkout, though you may need to do a free upgrade to a business account. <a target="_blank" href="https://cms.paypal.com/us/cgi-bin/?&cmd=_render-content&content_ID=developer/e_howto_api_ECGettingStarted">More Info &raquo;</a>'); ?></span>
 						<p>
 							<label><?php _e('PayPal Merchant E-mail') ?><br />
-							  <input value="<?php echo $options['email']; ?>" size="30" name="<?php echo $plugin_slug; ?>_email" type="text" />
+							  <input value="<?php echo $settings[$plugin_slug]['email']; ?>" size="30" name="dg[<?php echo $plugin_slug; ?>][email]" type="text" />
 							</label>
 						</p>
 				    </td>
@@ -129,17 +112,17 @@ class DukaGate_GateWay_PayPalExpress extends DukaGate_GateWay_API{
 						<span class="description"><?php print _e('You must login to PayPal and create an API signature to get your credentials. <a target="_blank" href="https://cms.paypal.com/us/cgi-bin/?cmd=_render-content&content_ID=developer/e_howto_api_NVPAPIBasics#id084DN0AK0HS">Instructions &raquo;</a>'); ?></span>
 						<p>
 							<label><?php _e('API Username') ?><br />
-							  <input value="<?php echo $options['username']; ?>" size="30" name="<?php echo $plugin_slug; ?>_username" type="text" />
+							  <input value="<?php echo $settings[$plugin_slug]['username']; ?>" size="30" name="dg[<?php echo $plugin_slug; ?>][username]" type="text" />
 							</label>
 						</p>
 						<p>
 							<label><?php _e('API Password') ?><br />
-							  <input value="<?php echo $options['password']; ?>" size="30" name="<?php echo $plugin_slug; ?>_password" type="text" />
+							  <input value="<?php echo $settings[$plugin_slug]['password']; ?>" size="30" name="dg[<?php echo $plugin_slug; ?>][password]" type="text" />
 							</label>
 						</p>
 						<p>
 							<label><?php _e('Signature') ?><br />
-							  <input value="<?php echo $options['signature']; ?>" size="30" name="<?php echo $plugin_slug; ?>_signature" type="text" />
+							  <input value="<?php echo $settings[$plugin_slug]['signature']; ?>" size="30" name="dg[<?php echo $plugin_slug; ?>][signature]" type="text" />
 							</label>
 						</p>
 				    </td>
@@ -147,9 +130,9 @@ class DukaGate_GateWay_PayPalExpress extends DukaGate_GateWay_API{
 				<tr valign="top">
 					<th scope="row"><?php _e('Paypal Currency') ?></th>
 					<td>
-						<select name="<?php echo $plugin_slug; ?>_currency">
+						<select name="dg[<?php echo $plugin_slug; ?>][currency]">
 							<?php
-							$sel_currency = $options['currency'];
+							$sel_currency = $settings[$plugin_slug]['currency'];
 							foreach ($currencies as $k => $v) {
 								echo '<option value="' . $k . '"' . ($k == $sel_currency ? ' selected' : '') . '>' . wp_specialchars($v, true) . '</option>' . "\n";
 							}
@@ -157,21 +140,9 @@ class DukaGate_GateWay_PayPalExpress extends DukaGate_GateWay_API{
 						</select>
 					</td>
 				</tr>
-				<tr>
-				    <th scope="row"><?php _e('Enable') ?></th>
-				    <td>
-						<p>
-							<label><?php _e('Select To enable or disable') ?><br />
-							  <input value="checked" name="<?php echo $plugin_slug; ?>_enable" type="checkbox" <?php echo (intval($enabled) == 1) ? "checked='checked'": ""; ?> />
-							</label>
-						</p>
-						<p>
-							<input type="submit" name="<?php echo $plugin_slug; ?>" value="<?php _e('Save Settings') ?>" />
-						</p>
-				    </td>
-				</tr>
+				
 			</table>
-		</form>
+		
 		<?php
 	}
 	

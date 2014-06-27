@@ -18,6 +18,7 @@ Class DG_CURRENCYCONVERTER {
     }
 
     function convert($amt=NULL, $to="", $from="") {
+		$conversion_rate = 1;
         if ($amt == 0) {
             return 0;
         }
@@ -28,63 +29,36 @@ Class DG_CURRENCYCONVERTER {
         if (!empty($from))
             $this->_from = $from;
 
-        //$host="www.iraqidinar.org";
-        $host = "www.xe.com";
-        $fp = @fsockopen($host, 80, $errno, $errstr, 30);
-        if (!$fp) {
-            $this->_error = "$errstr ($errno)<br />\n";
-            return false;
-        } else {
-            $data = '';
-            $file = "/ucc/convert/";
-			$str = "?Amount=" . $this->_amt . "&To=" . $this->_from . "&From=" . $this->_to; 
-            $out = "GET " . $file . $str . " HTTP/1.0\r\n";
-            $out .= "Host: $host\r\n";
-            $out .= "Connection: Close\r\n\r\n";
-
-            @fputs($fp, $out);
-            while (!@feof($fp)) {
-                $data.= @ fgets($fp, 128);
-            }
-            @fclose($fp);
+        $host = "http://rate-exchange.appspot.com/currency?from=".$this->_from."&to=".$this->_to;
+        $response = "";
+		$hCURL = curl_init();
+		if($hCURL){
+			curl_setopt( $hCURL, CURLOPT_HEADER, false);
+			curl_setopt( $hCURL, CURLOPT_RETURNTRANSFER, true);
 			
-            @preg_match("/^(.*?)\r?\n\r?\n(.*)/s", $data, $match);
-            $data = $match[2];
-            $search = array("'<script[^>]*?>.*?</script>'si", // Strip out javascript
-                "'<[\/\!]*?[^<>]*?>'si", // Strip out HTML tags
-                "'([\r\n])[\s]+'", // Strip out white space
-                "'&(quot|#34);'i", // Replace HTML entities
-                "'&(amp|#38);'i",
-                "'&(lt|#60);'i",
-                "'&(gt|#62);'i",
-                "'&(nbsp|#160);'i",
-                "'&(iexcl|#161);'i",
-                "'&(cent|#162);'i",
-                "'&(pound|#163);'i",
-                "'&(copy|#169);'i",
-                "'&#(\d+);'e");                    // evaluate as php
-
-            $replace = array("",
-                "",
-                "\\1",
-                "\"",
-                "&",
-                "<",
-                ">",
-                " ",
-                chr(161),
-                chr(162),
-                chr(163),
-                chr(169),
-                "chr(\\1)");
-
-            $data = @preg_replace($search, $replace, $data);
+			curl_setopt( $hCURL, CURLOPT_TIMEOUT, 30 );
+			curl_setopt( $hCURL, CURLOPT_URL, $host);
+			curl_setopt( $hCURL, CURLOPT_SSL_VERIFYPEER, false);
+			$response = curl_exec($hCURL);
+			curl_close($hCURL);
+		}
+		$dg_currencies = get_option('dukagate_currency_conversions');
+		if (!empty($response)) {
+			$j_response = json_decode($response, true);
+			if(intval($j_response['rate']) > 0){
+				$dg_currencies[$this->_from.''.$this->_to] = $response;
+				update_option('dukagate_currency_conversions', $dg_currencies);
+				$conversion_rate =  (double) $j_response['rate'];
+			}
 			
-            @preg_match_all("/(\d[^\.]*(\.\d+)?)/", $data, $mathces);
-            //$return = preg_replace("/[^0-9]/", "", $mathces[0][4]);
-			$return = explode('=', $mathces[0][4]);
-            return (double) $return[1];
-        }
+		}else{
+			$saved_rate = $dg_currencies[$this->_from.''.$this->_to];
+			if(!empty($saved_rate)){
+				$j_response = json_decode($saved_rate, true);
+				$conversion_rate =  (double) $j_response['rate'];
+			}
+		}
+		return $conversion_rate;
     }
 
 }
