@@ -81,10 +81,10 @@ class DukaGate_GateWay_PayPal extends DukaGate_GateWay_API{
 			$value = urlencode(stripslashes($value));
 			$req .= "&$key=$value";
 		}
-		$options = DukaGate::json_to_array($dukagate->dg_get_gateway_options($this->plugin_slug));
+		$settings = get_option('dukagate_gateway_settings');
 		//Set up return url
 		$dg_form_action = $this->post_url;
-		if($options['sandbox'] == 'checked'){
+		if($settings[$this->plugin_slug]['sandbox'] == 'checked'){
 			$dg_form_action = $this->sandbox_url;
 		}
 		$ch = curl_init($dg_form_action);
@@ -132,48 +132,40 @@ class DukaGate_GateWay_PayPal extends DukaGate_GateWay_API{
 	/**
 	 * Set Up Payment gateway options
 	 */
-	function set_up_options($plugin_slug){
+	function set_up_options($plugin_slug, $settings){
 		global $dukagate;
-		if(@$_POST[$plugin_slug]){
-			$required_fields = array(
-									'sandbox' => '',
-									'paypal_id' => '',
-									'currency' => '');
-			$required_fields['currency'] = $_POST[$plugin_slug.'_currency'];
-			$required_fields['paypal_id'] = $_POST[$plugin_slug.'_paypal_id'];
-			$required_fields['sandbox'] = $_POST[$plugin_slug.'_sandbox'];
-			$enabled = ($_POST[$plugin_slug.'_enable'] == 'checked') ? 1 : 0;
-			$dukagate->dg_save_gateway_options($plugin_slug ,DukaGate::array_to_json($required_fields), $enabled);
-		}
-		$options = DukaGate::json_to_array($dukagate->dg_get_gateway_options($plugin_slug));
 		$currencies = DukaGate::json_to_array($dukagate->dg_get_gateway_currencies($plugin_slug));
-		$enabled = $dukagate->dg_get_enabled_status($plugin_slug);
 		?>
-		<form method="POST" action="">
 			<table class="form-table">
 				<tr>
 				    <th scope="row"><?php _e('PayPal Settings') ?></th>
 				    <td>
 						<p>
 							<label><?php _e('Use PayPal Sandbox') ?><br />
-							  <input value="checked" name="<?php echo $plugin_slug; ?>_sandbox" type="checkbox" <?php echo ($options['sandbox'] == 'checked') ? "checked='checked'": ""; ?> />
+							  <input value="checked" name="dg[<?php echo $plugin_slug; ?>][sandbox]" type="checkbox" <?php echo ($settings[$plugin_slug]['sandbox'] == 'checked') ? "checked='checked'": ""; ?> />
 							</label>
 						</p>
 				    </td>
 				</tr>
+				
 				<tr>
 				    <th scope="row"><?php _e('PayPal Credentials') ?></th>
 				    <td>
 						<p>
+							<label><?php _e('Custom Checkout Name'); ?><br />
+							  <input value="<?php echo $settings[$plugin_slug]['custom_name']; ?>" size="30" name="dg[<?php echo $plugin_slug; ?>][custom_name]" type="text" />
+							</label>
+						</p>
+						<p>
 							<label><?php _e('PayPal ID') ?><br />
-							  <input value="<?php echo $options['paypal_id']; ?>" size="30" name="<?php echo $plugin_slug; ?>_paypal_id" type="text" />
+							  <input value="<?php echo $settings[$plugin_slug]['paypal_id']; ?>" size="30" name="dg[<?php echo $plugin_slug; ?>][paypal_id]" type="text" />
 							</label>
 						</p>
 						<p>
 							<label><?php _e('PayPal Currency') ?><br />
-								<select name="<?php echo $plugin_slug; ?>_currency">
+								<select name="dg[<?php echo $plugin_slug; ?>][currency]">
 									<?php
-									$sel_currency = $options['currency'];
+									$sel_currency = $settings[$plugin_slug]['currency'];
 									foreach ($currencies as $k => $v) {
 										echo '<option value="' . $k . '"' . ($k == $sel_currency ? ' selected' : '') . '>' . wp_specialchars($v, true) . '</option>' . "\n";
 									}
@@ -183,21 +175,8 @@ class DukaGate_GateWay_PayPal extends DukaGate_GateWay_API{
 						</p>
 				    </td>
 				</tr>
-				<tr>
-				    <th scope="row"><?php _e('Enable') ?></th>
-				    <td>
-						<p>
-							<label><?php _e('Select To enable or disable') ?><br />
-							  <input value="checked" name="<?php echo $plugin_slug; ?>_enable" type="checkbox" <?php echo (intval($enabled) == 1) ? "checked='checked'": ""; ?> />
-							</label>
-						</p>
-						<p>
-							<input type="submit" name="<?php echo $plugin_slug; ?>" value="<?php _e('Save Settings') ?>" />
-						</p>
-				    </td>
-				</tr>
+				
 			</table>
-		</form>
 		<?php
 	}
 	
@@ -211,24 +190,25 @@ class DukaGate_GateWay_PayPal extends DukaGate_GateWay_API{
 		$dg_cart = $_SESSION['dg_cart'];
 		$dg_shop_settings = get_option('dukagate_shop_settings');
 		$shop_currency = $dg_shop_settings['currency'];
-		$options = DukaGate::json_to_array($dukagate->dg_get_gateway_options($this->plugin_slug));
+		
+		$settings = get_option('dukagate_gateway_settings');
 		
 		$return_path = get_page_link($dg_shop_settings['thankyou_page']);
-        $check_return_path = explode('?', $return_path);
+        $check_return_path = explode('?', $cancel_path);
         if (count($check_return_path) > 1) {
-            $return_path .= '&id=' . $invoice_id;
+            $cancel_path .= '&id=' . $invoice_id;
         } else {
-            $return_path .= '?id=' . $invoice_id;
+            $cancel_path .= '?id=' . $invoice_id;
         }
 		$conversion_rate = 1;
-        if ($shop_currency != $options['currency']) {
+        if ($shop_currency != $settings[$this->plugin_slug]['currency']) {
 			$curr = new DG_CURRENCYCONVERTER();
-            $conversion_rate = $curr->convert(1, $options['currency'], $shop_currency);
+            $conversion_rate = $curr->convert(1, $settings[$this->plugin_slug]['currency'], $shop_currency);
 		}
 		
 		//Set up return url
 		$action_url = $this->post_url;
-		if($options['sandbox'] == 'checked'){
+		if($settings[$this->plugin_slug]['sandbox'] == 'checked'){
 			$action_url = $this->sandbox_url;
 		}
 		$output = '<form name="dg_paypal_form" id="dg_payment_form" action="' . $action_url . '" method="post">';
@@ -236,11 +216,11 @@ class DukaGate_GateWay_PayPal extends DukaGate_GateWay_API{
                      <input type="hidden" name="cmd" value="_ext-enter" />
                      <input type="hidden" name="notify_url" value="' . $this->ipn_url . '"/>
                      <input type="hidden" name="redirect_cmd" value="_cart" />
-                     <input type="hidden" name="business" value="' . $options['paypal_id'] . '"/>
+                     <input type="hidden" name="business" value="' . $settings[$this->plugin_slug]['paypal_id'] . '"/>
                      <input type="hidden" name="cancel_return" value="' . $return_path . '&status=cancel"/>
                      <input type="hidden" name="rm" value="2" />
                      <input type="hidden" name="upload" value="1" />
-                     <input type="hidden" name="currency_code" value="' . $options['currency'] . '"/>
+                     <input type="hidden" name="currency_code" value="' . $settings[$this->plugin_slug]['currency'] . '"/>
                      <input type="hidden" name="no_note" value="1" />
                      <input type="hidden" name="invoice" value="' . $invoice_id . '">';
 					 

@@ -1,11 +1,10 @@
 <?php
-	
 /**
  * DukaGate Payment Gateway
- * Cash On Delivery Gateway Plugin
+ * Check Gateway Plugin
  */
-class DukaGate_GateWay_CashOnDelivery extends DukaGate_GateWay_API{
-
+class DukaGate_GateWay_Check extends DukaGate_GateWay_API{
+	
 	//private gateway slug. Lowercase alpha (a-z) and dashes (-) only please!
 	var $plugin_name;
 	
@@ -23,21 +22,19 @@ class DukaGate_GateWay_CashOnDelivery extends DukaGate_GateWay_API{
 	
 	//Determine if to use form submit or other method
 	var $form_submit = false;
-
-
 	
 	//Default method called on create
 	function on_create(){
-		$this->plugin_name = __('Cash On Delivery');
-		$this->plugin_slug = __('cash_on_delivery');
-		$this->required_fields = array('none' =>'');
+		$this->plugin_name = __('Check');
+		$this->plugin_slug = __('check');
+		$this->required_fields = array('instructions' =>'');
 		$this->currencies = array();
 	}
 	
 	//Register Plugin
 	function register(){
 		//Register Plugin
-		dg_register_gateway_plugin('DukaGate_GateWay_CashOnDelivery', $this->plugin_name, $this->plugin_slug, $this->required_fields, $this->currencies);
+		dg_register_gateway_plugin('DukaGate_GateWay_Check', $this->plugin_name, $this->plugin_slug, $this->required_fields, $this->currencies);
 	}
 	
 	/**
@@ -81,7 +78,6 @@ class DukaGate_GateWay_CashOnDelivery extends DukaGate_GateWay_API{
 		<?php
 	}
 	
-	
 	/**
 	 * Process Payment
 	 */
@@ -104,14 +100,13 @@ class DukaGate_GateWay_CashOnDelivery extends DukaGate_GateWay_API{
 		
 		$output = $settings[$this->plugin_slug]['instructions'];
 		$output .= '<br/>';
-		$output .= '<button class="bank_continue_btn" onclick="cash_continue();">Continue</button>';
+		$output .= '<button class="bank_continue_btn" onclick="check_continue();">Continue</button>';
 		$output .= '<script type="text/javascript">';
-        $output .= 'function cash_continue(){
+        $output .= 'function check_continue(){
 					window.location.href="'.$return_path.'"
 					};
                      </script>';
 		return $output;
 	}
 }
-
 ?>
