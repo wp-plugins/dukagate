@@ -147,9 +147,15 @@ class DukaGate_GateWay_PayPal extends DukaGate_GateWay_API{
 						</p>
 				    </td>
 				</tr>
+				
 				<tr>
 				    <th scope="row"><?php _e('PayPal Credentials') ?></th>
 				    <td>
+						<p>
+							<label><?php _e('Custom Checkout Name'); ?><br />
+							  <input value="<?php echo $settings[$plugin_slug]['custom_name']; ?>" size="30" name="dg[<?php echo $plugin_slug; ?>][custom_name]" type="text" />
+							</label>
+						</p>
 						<p>
 							<label><?php _e('PayPal ID') ?><br />
 							  <input value="<?php echo $settings[$plugin_slug]['paypal_id']; ?>" size="30" name="dg[<?php echo $plugin_slug; ?>][paypal_id]" type="text" />

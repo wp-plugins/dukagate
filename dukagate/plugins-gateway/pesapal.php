@@ -111,15 +111,15 @@ class DukaGate_GateWay_PesaPal extends DukaGate_GateWay_API{
 	private function ipn_request($transaction_tracking_id , $payment_notification, $invoice, $consumer_key, $consumer_secret, $statusrequestAPI){
 		global $dukagate;
 		
-		if($pesapalNotification=="CHANGE" && $pesapalTrackingId!=''){
+		if($payment_notification=="CHANGE" && $transaction_tracking_id!=''){
 			$token = $params = NULL;
 			$consumer = new OAuthConsumer($consumer_key, $consumer_secret);
 			$signature_method = new OAuthSignatureMethod_HMAC_SHA1();
 
 			//get transaction status
 			$request_status = OAuthRequest::from_consumer_and_token($consumer, $token, "GET", $statusrequestAPI, $params);
-			$request_status->set_parameter("pesapal_merchant_reference", $pesapal_merchant_reference);
-			$request_status->set_parameter("pesapal_transaction_tracking_id",$invoice);
+			$request_status->set_parameter("pesapal_merchant_reference", $invoice);
+			$request_status->set_parameter("pesapal_transaction_tracking_id",$transaction_tracking_id);
 			$request_status->sign_request($signature_method, $consumer, $token);
 			$ch = curl_init();
 			curl_setopt($ch, CURLOPT_URL, $request_status);
