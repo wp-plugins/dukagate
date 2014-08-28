@@ -94,6 +94,8 @@ if(!class_exists('DukaGate')) {
 			
 			//Dashboard Widget
 			add_action('wp_dashboard_setup', array(&$this,'revenue_graph'), 1);
+			
+			add_action( 'template_redirect', array(&$this, 'product_templates') );
 		}
 		
 		
@@ -534,6 +536,24 @@ if(!class_exists('DukaGate')) {
 		  ));
 		  
 		  register_taxonomy_for_object_type('grouped_product', 'dg_product');
+		}
+		
+		/**
+		 * Load content for the custom posts
+		 *
+		 */
+		function product_templates(){
+			global $wp;
+			if ($wp->query_vars["post_type"] == 'dg_product') {
+				add_filter( 'the_content', array(&$this, 'product_template'), 99 );
+			}
+		}
+		
+		/** 
+		 * Product Template
+		 */
+		function product_template(){
+			echo DukaGate_Products::product_details(get_the_ID());
 		}
 		
 		
@@ -2082,7 +2102,7 @@ if(!class_exists('DukaGate')) {
 				}else{
 					foreach ($dg_gateways as $dg_gateway) {
 						$gw_name = $this->dg_get_gateway_name($dg_gateway);
-						$cnt .= '<label for="dg_gateway" class="dg_gateway '.$dg_gateway.'"><input type="radio" class="required dg_gateway_select '.$dg_gateway.'" name="dg_gateway_action" value="'.$dg_gateway.'"/>'.$gw_name.'</label>';
+						$cnt .= '<label for="dg_gateway" class="dg_gateway '.$dg_gateway.'"><input type="hidden" class="dg_gateway_select '.$dg_gateway.'" name="dg_gateway_action" value="'.$dg_gateway.'"/>'.$gw_name.'</label>';
 						$active += 1;
 					}
 				}

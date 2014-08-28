@@ -15,6 +15,7 @@ Dukagate is an open source e-commerce solution built for Wordpress.
 
 Dukagate is open source software that can be used to build online shops quickly and easily. Dukagate is built on top of Wordpress, a world class content management system. Dukagate is built to be both simple and elegant yet powerful and scalable.
 
+
 Main Features:
 
 * Everything is customizable
