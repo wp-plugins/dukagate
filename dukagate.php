@@ -2,9 +2,9 @@
 /*
 Plugin Name: DukaGate Shopping Cart
 Description: DukaGate Shopping Cart
-Version: 3.7.2.8
+Version: 3.7.2.9
 Author: rixeo
-Author URI: http://dukagate.info/
+Author URI: http://www.shumipress.com/
 Plugin URI: http://dukagate.info/
 Domain Path: /dukagate/lang/
 */
