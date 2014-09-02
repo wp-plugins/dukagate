@@ -193,7 +193,7 @@ class DukaGate_GateWay_AuthorizeNet extends DukaGate_GateWay_API{
             $fingerprint = bin2hex(mhash(MHASH_MD5, $dg_shop_settings['authorize_api'] . "^" . $sequence . "^" . $timeStamp . "^" . $dg_total . "^", $settings[$plugin_slug]['authorize_transaction_key']));
         }
 		
-		$output .= '<form name="dpsc_authorize_form" id="dpsc_payment_form" action="' . $action_url . '" method="post">';
+		$output .= '<form name="dg_authorize_form" id="dg_payment_form" action="' . $action_url . '" method="post">';
         $output .= '<input type="hidden" name="x_login" value="' . $settings[$plugin_slug]['authorize_api'] . '" />';
         $output .= '<input type="hidden" name="x_version" value="3.1" />';
         $output .= '<input type="hidden" name="x_method" value="CC" />';
