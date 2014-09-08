@@ -16,7 +16,7 @@ var dukagate ={
 			});
 			var form_values = jQuery("#"+formid).serialize();
 			var btn = jQuery('.dg_make_payment', jQuery(this));
-			btn.val('Processing....');
+			btn.val(dg_js.processing + "......");
 			jQuery.ajax({
 				type: "POST",
 				url: dg_js.ajaxurl,
@@ -24,14 +24,14 @@ var dukagate ={
 				success: function(response){
 					if(response.success == 'true'){
 						if(ajax_cart == 'true'){
-							btn.val('Added To Cart');
+							btn.val(dg_js.added_to_cart);
 							if(jQuery('#mini_cart_total').length > 0){
 								jQuery('#mini_cart_total').html(response.total);
 							}
 							if(jQuery('#dukagate_cart_widget').length > 0){
 								jQuery('#dukagate_cart_widget').html(response.html);
 							}
-							btn.val('Add To Cart');
+							btn.val(dg_js.add_to_cart);
 						}
 						else{
 							window.location.href = response.url;
@@ -46,7 +46,7 @@ var dukagate ={
 	update_cart : function(formid, ajax_cart){
 		jQuery("#"+formid).submit(function() {
 			var btn = jQuery('.dg_make_payment', jQuery(this));
-			btn.val('Processing....');
+			btn.val(dg_js.processing + "......");
 			var form_values = jQuery(this).serialize();
 			jQuery.ajax({
 				type: "POST",
@@ -55,14 +55,14 @@ var dukagate ={
 				success: function(response){
 					if(response.success == 'true'){
 						if(ajax_cart == 'true'){
-							btn.val('Added To Cart');
+							btn.val(dg_js.added_to_cart);
 							if(jQuery('#mini_cart_total').length > 0){
 								jQuery('#mini_cart_total').html(response.total);
 							}
 							if(jQuery('#dukagate_cart_widget').length > 0){
 								jQuery('#dukagate_cart_widget').html(response.html);
 							}
-							btn.val('Add To Cart');
+							btn.val(dg_js.add_to_cart);
 						}
 						else{
 							window.location.href = response.url;
@@ -89,7 +89,7 @@ var dukagate ={
 	process_shipping : function(formid){
 		jQuery("#"+formid).submit(function() {
 			var form_values = jQuery(this).serialize();
-			jQuery('#shipping_submit_input').val("Processing......");
+			jQuery('#shipping_submit_input').val(dg_js.processing + "......");
 			jQuery.post(dg_js.ajaxurl+'/index.php', form_values, function(data){
 				window.location.reload();
 			});
@@ -99,7 +99,7 @@ var dukagate ={
 	
 	checkout : function(form){
 		var form_values = jQuery(form).serialize();
-		jQuery('#dg_process_payment_form').val("Processing......");
+		jQuery('#dg_process_payment_form').val(dg_js.processing + "......");
 		jQuery.post(dg_js.ajaxurl+'/index.php', form_values, function(data){
             eval(data);
         });
