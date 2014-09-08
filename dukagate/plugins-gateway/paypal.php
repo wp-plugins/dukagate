@@ -247,7 +247,10 @@ class DukaGate_GateWay_PayPal extends DukaGate_GateWay_API{
 				if($cart['discount'] > 0){	
 					$output .= '<input type="hidden" name="discount_rate_' . $count_product . '" value="' . $cart['discount'] . '" />';
 				}
-			}			
+			}	
+			if(!empty($dg_shop_settings['tax_rate'])){
+				$output .= '<input type="hidden" name="tax_rate_' . $count_product . '" value="' . $dg_shop_settings['tax_rate'] . '" />';
+			}
 			$count_product++;
 		}
 		$output .= '<input type="hidden" name="handling_cart" value="' . number_format($total_shipping, 2) . '"/></form>';

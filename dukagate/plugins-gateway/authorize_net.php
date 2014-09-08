@@ -188,13 +188,17 @@ class DukaGate_GateWay_AuthorizeNet extends DukaGate_GateWay_API{
 			$dg_total +=  $price * $cart['quantity'];
 		}
 		if (phpversion() >= '5.1.2') {
-            $fingerprint = hash_hmac("md5", $dg_shop_settings['authorize_api'] . "^" . $sequence . "^" . $timeStamp . "^" . $dg_total . "^", $settings[$plugin_slug]['authorize_transaction_key']);
+            $fingerprint = hash_hmac("md5", $settings[$this->plugin_slug]['authorize_api'] . "^" . $sequence . "^" . $timeStamp . "^" . $dg_total . "^", $settings[$this->plugin_slug]['authorize_transaction_key']);
         } else {
-            $fingerprint = bin2hex(mhash(MHASH_MD5, $dg_shop_settings['authorize_api'] . "^" . $sequence . "^" . $timeStamp . "^" . $dg_total . "^", $settings[$plugin_slug]['authorize_transaction_key']));
+            $fingerprint = bin2hex(mhash(MHASH_MD5, $settings[$this->plugin_slug]['authorize_api'] . "^" . $sequence . "^" . $timeStamp . "^" . $dg_total . "^", $settings[$this->plugin_slug]['authorize_transaction_key']));
         }
-		
+		if(!empty($dg_shop_settings['tax_rate'])){
+			$tax_rate = $dg_shop_settings['tax'];
+            $total_tax = $dg_total * $tax_rate / 100;
+			$dg_total = $dg_total + $total_tax;
+		}
 		$output .= '<form name="dg_authorize_form" id="dg_payment_form" action="' . $action_url . '" method="post">';
-        $output .= '<input type="hidden" name="x_login" value="' . $settings[$plugin_slug]['authorize_api'] . '" />';
+        $output .= '<input type="hidden" name="x_login" value="' . $settings[$this->plugin_slug]['authorize_api'] . '" />';
         $output .= '<input type="hidden" name="x_version" value="3.1" />';
         $output .= '<input type="hidden" name="x_method" value="CC" />';
         $output .= '<input type="hidden" name="x_type" value="AUTH_CAPTURE" />';

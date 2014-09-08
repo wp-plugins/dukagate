@@ -253,6 +253,11 @@ class DukaGate_GateWay_PesaPal extends DukaGate_GateWay_API{
 			$curr = new DG_CURRENCYCONVERTER();
             $conversion_rate = $curr->convert(1, $allowed_currency, $shop_currency);
 		}
+		if(!empty($dg_shop_settings['tax_rate'])){
+			$tax_rate = $dg_shop_settings['tax'];
+            $total_tax = $amount * $tax_rate / 100;
+			$amount = $amount + $total_tax;
+		}
 		$amount = $amount * $conversion_rate;
 		
 		$token = $params = NULL;
