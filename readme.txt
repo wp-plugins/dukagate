@@ -4,8 +4,8 @@ Donate link: http://dukagate.info/
 Tags: shopping cart, web shop, cart, shop,Paypal,paypal,Pesapal, e-commerce, ecommerce, worldpay, mpesa, bank, kopokopo, KopoKopo
 
 Requires at least: 3.0
-Tested up to: 3.9.1
-Stable tag: 3.7.2.8
+Tested up to: 4.0
+Stable tag: 3.7.4.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -14,6 +14,7 @@ Dukagate is an open source e-commerce solution built for Wordpress.
 == Description ==
 
 Dukagate is open source software that can be used to build online shops quickly and easily. Dukagate is built on top of Wordpress, a world class content management system. Dukagate is built to be both simple and elegant yet powerful and scalable.
+
 
 Main Features:
 
@@ -69,6 +70,20 @@ We test Dukagate on a large number of different server set-ups and envrionments 
 
 == Changelog ==
 
+= 3.7.4.1 =
+* There was an issue with product templates. Reverted for now
+* Added shortcode to show total items in cart
+
+= 3.7.4 =
+* Added tax. You can now set global product taxes
+* Javascript internalization.
+* CSV Order Export with date range picker
+
+= 3.7.3 =
+Fixes to Authorize.net gateway
+
+= 3.7.2.9 =
+Product content templates. No need to use a shortcode to display product details. Yo can also define your own product theme template.
 
 = 3.7.2.8 =
 Pesapal Call Back fix

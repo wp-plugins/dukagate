@@ -180,6 +180,11 @@ class DukaGate_GateWay_WorldPay extends DukaGate_GateWay_API{
 				$total += $cart['total'];
 			}
 		}
+		
+		if(!empty($dg_shop_settings['tax_rate'])){
+			$tax_rate = $dg_shop_settings['tax'];
+            $total_tax = $dg_total * $tax_rate / 100;
+		}
 		$installation_id = $settings[$this->plugin_slug]['installation_id'];
 		$total_amount = ($total + $total_tax + $total_shipping - $total_discount) * $conversion_rate;
         $total_amount = number_format($total_amount, 2, '.', '');

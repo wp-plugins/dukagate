@@ -167,6 +167,9 @@ function dg_dukagate_order_log(){
 	if(@$_REQUEST['order_id']){
 		dg_dukagate_order_log_info($_REQUEST['order_id']);
 	}else{
+	?>
+	<div class="wrap">
+	<?php
 		if(@$_REQUEST['delete']){
 			$order_id = $_REQUEST['id'];
 			$dukagate->dg_delete_order_log($order_id);
@@ -176,11 +179,75 @@ function dg_dukagate_order_log(){
 			</div>
 			<?php
 		}
+		if (! empty( $_POST['dg_order_export'] ) && check_admin_referer('dg_order_export','dg_order_export_nounce') ){
+			$from = DukaGate::to_timestamp(sanitize_text_field($_POST['from_date']));
+			$to = DukaGate::to_timestamp(sanitize_text_field($_POST['to_date']));
+			$orders = $dukagate->dg_filter_order_logs($from ,$to);
+			if(is_array($orders) && (count($orders) > 0)){
+				$header = array();
+				$csv_array = array();
+				$count = 0;
+				foreach($orders as $order_log => $log){
+					$order_info =  DukaGate::json_to_array($log->order_info);
+					$csv_array[$count]['email'] = $log->email;
+					$csv_array[$count]['names'] = $log->names;
+					foreach ($order_info as $order_in => $order) {
+						foreach ($order as $key => $value) {
+							$csv_array[$count][$key] = $value;
+						}
+					}
+					$csv_array[$count]['invoice'] = $log->invoice;
+					$csv_array[$count]['payment_status'] = $log->payment_status;
+					$csv_array[$count]['date'] = date("d-m-Y", strtotime($log->date));
+					$csv_array[$count]['mode'] = $log->payment_gateway;
+					$csv_array[$count]['price'] = number_format($log->total,2);
+					$count++;
+				}
+				
+				$file_name = 'dukagate_order_export_'.date(dHis);
+				$output_path = DG_DUKAGATE_CONTENT_URL.'/report/'.$file_name.'.csv';
+				$dukagate->create_csv($file_name, $csv_array, $header);
+				?>
+				<div class="updated fade">
+					<p><a href="<?php echo $output_path; ?>" target="_blank"><?php _e("Click here to download the exported file"); ?><a></p>
+				</div>
+				<?php
+			}else{
+				?>
+				<div class="error fade">
+					<p><?php _e("No records found to export"); ?></p>
+				</div>
+				<?php
+			}
+		}
 		$order_logs = $dukagate->dg_list_order_logs();
 	?>
-	<div class="wrap">
+	
 		<h2><?php _e("Dukagate Order Log"); ?></h2>
 		<?php if (is_array($order_logs) && count($order_logs) > 0) { ?>
+			<form method="POST" action="<?php echo esc_url($_SERVER['REQUEST_URI']); ?>">
+				<?php wp_nonce_field('dg_order_export','dg_order_export_nounce'); ?>
+				<?php _e("Export Order Log"); ?>
+				<table width="100%" border="0" class="widefat">
+					<tr>
+						<td align="left" scope="row"><?php _e("From"); ?></td>
+						<td><input type="text" id="f_datepicker" name="from_date" /></td>
+						<td align="left" scope="row"><?php _e("To"); ?></td>
+						<td><input type="text" id="t_datepicker" name="to_date" /></td>
+					</tr>
+					<tr>
+						<th align="left" scope="row" colspan="4">
+							<input class="button button-primary" name="dg_order_export" type="submit" value="<?php _e("Download"); ?>" />
+						</th>
+					</tr>
+				</table>
+				<script type="text/javascript">
+					jQuery(document).ready(function(){
+						jQuery('#f_datepicker').datepicker();	
+						jQuery('#t_datepicker').datepicker();	
+					});
+				</script>
+			</form>
 			<table width="100%" border="0" class="widefat">
 				<thead>
 					<tr>
@@ -233,6 +300,11 @@ function dg_dukagate_order_log(){
 	<?php
 	}
 }
+
+if (@$_REQUEST['action'] === 'dg_export_orders') {
+	add_action( 'init', 'dg_export_orders');
+}
+
 
 //Get Order Log detail
 function dg_dukagate_order_log_info($id){
@@ -288,6 +360,10 @@ function dg_dukagate_order_log_info($id){
 			<tr>
 				<td><strong><?php _e("Total Shipping", "dukagate"); ?></strong></td>
 				<td><?php echo $order_log->shipping; ?></td>
+			</tr>
+			<tr>
+				<td><strong><?php _e("Total Tax", "dukagate"); ?></strong></td>
+				<td><?php echo $order_log->tax; ?></td>
 			</tr>
 			<tr>
 				<td><strong><?php _e("Total", "dukagate"); ?></strong></td>
@@ -888,6 +964,7 @@ function dg_dukagate_settings(){
 		$register_user = $_POST['register_user'];
 		$checkout_page = $_POST['checkout_page'];
 		$thankyou_page = $_POST['thankyou_page'];
+		$tax_rate = $_POST['tax_rate'];
 		$discounts = ($_POST['discounts'] == 'checked') ? "true": "false";
 		$shipping = ($_POST['shipping'] == 'checked') ? "true": "false";
 		
@@ -906,7 +983,8 @@ function dg_dukagate_settings(){
 						'checkout_page' => $checkout_page,
 						'thankyou_page' => $thankyou_page,
 						'discounts' => $discounts,
-						'shipping' => $shipping);
+						'shipping' => $shipping,
+						'tax_rate' => $tax_rate);
 		update_option('dukagate_shop_settings', $opts);
 		
 		
@@ -964,6 +1042,12 @@ function dg_dukagate_settings(){
 							</td>
 						</tr>
 						<tr valign="top">
+							<th scope="row"><label for="tax_rate"><?php _e("Tax Rate"); ?>: </label></th>
+							<td>
+								<input id="tax_rate" type="text" name="tax_rate" value="<?php echo $dg_shop_settings['tax_rate']; ?>" class="regular-text" size="2"/> %
+							</td>
+						</tr>
+						<tr valign="top">
 							<th scope="row"><label for="currency"><?php _e("Currency "); ?>: </label></th>
 							<td>
 								<select name="currency">
@@ -977,6 +1061,7 @@ function dg_dukagate_settings(){
 								</select>
 							</td>
 						</tr>
+
 						<tr valign="top">
 							<th scope="row"><label for="currency_symbol"><?php _e("Currency Symbol"); ?>: </label></th>
 							<td><input id="currency_symbol" type="text" name="currency_symbol" value="<?php echo $dg_shop_settings['currency_symbol']; ?>" class="regular-text" /></td>

@@ -45,7 +45,7 @@ if(!class_exists('DukaGate')) {
 			$this->dukagate_db();
 			add_action( 'dg_delete_files_daily', array(&$this, 'delete_files_daily') );
 			$this->set_up_directories_and_file_info();
-			update_option('dg_version_info', 3.728);
+			update_option('dg_version_info', 3.8);
 		}
 		
 		
@@ -94,6 +94,8 @@ if(!class_exists('DukaGate')) {
 			
 			//Dashboard Widget
 			add_action('wp_dashboard_setup', array(&$this,'revenue_graph'), 1);
+			
+			//add_action( 'template_redirect', array(&$this, 'product_templates') );
 		}
 		
 		
@@ -213,6 +215,9 @@ if(!class_exists('DukaGate')) {
 			wp_enqueue_script('js_class', DG_DUKAGATE_URL.'/js/graph/js-class.js',__FILE__);
 			wp_enqueue_script('excanvas', DG_DUKAGATE_URL.'/js/graph/excanvas.js',__FILE__);
 			wp_enqueue_script('bluff_min', DG_DUKAGATE_URL.'/js/graph/bluff-min.js',__FILE__);
+			wp_enqueue_script( 'jquery-ui-datepicker', array( 'jquery' ) );
+			wp_register_style('jquery-ui', 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css');
+			wp_enqueue_style( 'jquery-ui' );
 			wp_enqueue_script("dukagate_admin");
 			wp_enqueue_script("wysiwyg_js");
 			wp_enqueue_script("js_class");
@@ -229,7 +234,13 @@ if(!class_exists('DukaGate')) {
 			wp_enqueue_script("jquery_validate");
 			wp_enqueue_script("jquery_form");
 			wp_enqueue_script("dukagate_js");
-			wp_localize_script('dukagate_js', 'dg_js', array( 'dg_url' => get_bloginfo('url') , 'ajaxurl' => admin_url('admin-ajax.php')) );
+			wp_localize_script('dukagate_js', 'dg_js', array( 
+				'dg_url' => get_bloginfo('url') , 
+				'ajaxurl' => admin_url('admin-ajax.php'),
+				'added_to_cart' => __( 'Added To Cart' ),
+				'add_to_cart' => __( 'Add To Cart' ),
+				'processing' => __( 'Processing' )
+				) );
 			
 		}
 		
@@ -536,6 +547,24 @@ if(!class_exists('DukaGate')) {
 		  register_taxonomy_for_object_type('grouped_product', 'dg_product');
 		}
 		
+		/**
+		 * Load content for the custom posts
+		 *
+		 */
+		function product_templates(){
+			global $wp;
+			if ($wp->query_vars["post_type"] == 'dg_product') {
+				add_filter( 'the_content', array(&$this, 'product_template'), 99 );
+			}
+		}
+		
+		/** 
+		 * Product Template
+		 */
+		function product_template(){
+			echo DukaGate_Products::product_details(get_the_ID());
+		}
+		
 		
 		/** 
 		 * Custom image meta box add
@@ -755,6 +784,16 @@ if(!class_exists('DukaGate')) {
 		}
 		
 		/**
+		 * Convert to mysql timestamp
+		 *
+		 */
+		static function to_timestamp($input){
+			$time = strtotime($input);
+			$newformat = date('Y-m-d H:i:s',$time);
+			return $newformat;
+		}
+		
+		/**
 		 * Make a blank file
 		 */
 		static function blank_file($destination){
@@ -957,6 +996,7 @@ if(!class_exists('DukaGate')) {
 				`is_widget_product` bigint(5) unsigned NOT NULL DEFAULT '0',
                 `payment_gateway` VARCHAR(100) NOT NULL,
                 `discount` FLOAT NOT NULL,
+				`tax` FLOAT NOT NULL DEFAULT '0',
                 `total` FLOAT NOT NULL,
                 `payment_status` ENUM ('Pending', 'Paid', 'Canceled'),
                 UNIQUE (`invoice`),
@@ -965,6 +1005,16 @@ if(!class_exists('DukaGate')) {
 				require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 				dbDelta($sql);
 				$db_setup = true;
+				update_option('dg_database_update', 1);
+			}
+			
+			if($wpdb->get_var("show tables like '$table_name'") == $table_name) {
+				$dg_database_update = get_option('dg_database_update');
+				if(empty($dg_database_update)){
+					$alter_sql = "ALTER TABLE `$table_name` ADD `tax` FLOAT NOT NULL DEFAULT '0' AFTER `discount`";
+					$wpdb->query($alter_sql);
+					update_option('dg_database_update', 1);
+				}
 			}
 			
 			//Download Temp files
@@ -1273,7 +1323,7 @@ if(!class_exists('DukaGate')) {
 		 * @param header - an array of headers
 		 */
 		function create_csv($file_name, $data, $header = array()){
-			$filepath = DG_PLUGIN_DIR.'/report/'.$file_name.'.csv';
+			$filepath = DG_DUKAGATE_CONTENT_DIR.'/report/'.$file_name.'.csv';
 			if ( $fp = fopen($filepath, 'w') ) { 
 				$show_header = true; 
 				if ( empty($header) ) { 
@@ -1390,6 +1440,7 @@ if(!class_exists('DukaGate')) {
 					$total += $cart['total'];
 				}
 			}
+			
 			$products = self::array_to_json($products);
 			$shipping_info = '';
 			$shipping_info_array = $_SESSION['delivery_options'];
@@ -1417,6 +1468,11 @@ if(!class_exists('DukaGate')) {
 			if($total < 0){
 				$total = 0.00;
 			}
+			$total_tax = 0;
+			if(!empty($dg_shop_settings['tax_rate'])){
+				$total_tax = $total * $dg_shop_settings['tax_rate'] / 100;
+				$total = $total + $total_tax;
+			}
 			$count = 20;
 			$dg_form_elem = get_option('dukagate_checkout_options');
 			$order_form_info = array();
@@ -1434,8 +1490,8 @@ if(!class_exists('DukaGate')) {
 			
 			$order_info = self::array_to_json($order_form_info);
 			$table_name = $databases['transactions'];
-			$sql = "INSERT INTO `$table_name`(`invoice`,`products`, `shipping_info`, `names`, `email`,`order_info`,`payment_gateway`,`discount`,`total`, `shipping`,`payment_status`) 
-					VALUES('$invoice', '$products', '$shipping_info' ,'$name', '$email', '$order_info' ,'$payment_gateway', $discount, $total, $total_shipping, '$payment_status')";
+			$sql = "INSERT INTO `$table_name`(`invoice`,`products`, `shipping_info`, `names`, `email`,`order_info`,`payment_gateway`,`discount`,`total`, `shipping`,`tax`,`payment_status`) 
+					VALUES('$invoice', '$products', '$shipping_info' ,'$name', '$email', '$order_info' ,'$payment_gateway', $discount, $total, $total_shipping, $total_tax, '$payment_status')";
 			$wpdb->query($sql);
 						
 			$sql = "SELECT `id` FROM `$table_name` WHERE `invoice` = '$invoice'";
@@ -1494,7 +1550,14 @@ if(!class_exists('DukaGate')) {
 			$info .= '<td>&nbsp;</td>';
 			$info .= '<td class="total amount">'.$dg_shop_settings['currency_symbol'].' '.number_format($total_shipping,2).'</td>';
 			$info .= '</tr>';
-			$info .= '<tr>';
+			if(!empty($dg_shop_settings['tax_rate'])){
+				$info .= '<tr>';
+				$info .= '<td class="tax">'.__("Total Tax",'dukagate').'</td>';
+				$info .= '<td>&nbsp;</td>';
+				$info .= '<td>&nbsp;</td>';
+				$info .= '<td class="total tax">'.$dg_shop_settings['currency_symbol'].' '.number_format($total_tax,2).'</td>';
+				$info .= '</tr>';
+			}
 			$info .= '<tr>';
 			$info .= '<td>'.__("Total",'dukagate').'</td>';
 			$info .= '<td>&nbsp;</td>';
@@ -1512,7 +1575,7 @@ if(!class_exists('DukaGate')) {
 			
 			
 			$transaction_url = admin_url("edit.php?post_type=dg_product&page=dukagate-order-log&order_id=".$order_id);
-			$user_transaction_url = admin_url("admin.php?page=dukagate-order-log&order_id=".$order_id);
+			$user_transaction_url = admin_url("admin.php?post_type=dg_product&page=dukagate-order-log&order_id=".$order_id);
 			$message = $mail->content_admin;
 			
 			$array1 = array('%siteurl%', '%info%', '%shop%', '%order-log-transaction%','%fname%','%lname%','%fullnames%','%invoice-link%');
@@ -2082,7 +2145,7 @@ if(!class_exists('DukaGate')) {
 				}else{
 					foreach ($dg_gateways as $dg_gateway) {
 						$gw_name = $this->dg_get_gateway_name($dg_gateway);
-						$cnt .= '<label for="dg_gateway" class="dg_gateway '.$dg_gateway.'"><input type="radio" class="required dg_gateway_select '.$dg_gateway.'" name="dg_gateway_action" value="'.$dg_gateway.'"/>'.$gw_name.'</label>';
+						$cnt .= '<label for="dg_gateway" class="dg_gateway '.$dg_gateway.'"><input type="hidden" class="dg_gateway_select '.$dg_gateway.'" name="dg_gateway_action" value="'.$dg_gateway.'"/>'.$gw_name.'</label>';
 						$active += 1;
 					}
 				}

@@ -126,6 +126,11 @@ function dg_get_cart($atts){
 				}
 				
 				$total_value = $total_value + $total_shipping;
+				$total_tax = 0;
+				if(!empty($dg_shop_settings['tax_rate'])){
+					$total_tax = $total_value * $dg_shop_settings['tax_rate'] / 100;
+					$total_value = $total_value + $total_tax;
+				}
 				if(isset($_SESSION['dg_discount_value'])){
 					$total_discount = $_SESSION['dg_discount_value'];
 					$percentage_discount = $total_discount;
@@ -160,11 +165,26 @@ function dg_get_cart($atts){
 					$cnt .= '<td>&nbsp;</td>';
 					$cnt .= '<td class="shipping amount">'.$dg_shop_settings['currency_symbol'].' '.number_format($total_shipping,2).'</td>';
 					$cnt .= '</tr>';
-					$cnt .= '<tr>';
+					
 				}
+				if(!empty($dg_shop_settings['tax_rate'])){
+					
+					$cnt .= '<tr>';
+					if($dg_shop_settings['checkout_prod_image'] == 'true'){
+						$cnt .= '<td>&nbsp;</td>';
+					}
+					$cnt .= '<td class="shipping">'.__("Total Tax").'</td>';
+					$cnt .= '<td>&nbsp;</td>';
+					$cnt .= '<td>&nbsp;</td>';
+					$cnt .= '<td class="tax amount">'.$dg_shop_settings['currency_symbol'].' '.number_format($total_tax,2).'</td>';
+					$cnt .= '</tr>';
+				}
+				
+				$cnt .= '<tr>';
 				if(@$dg_shop_settings['checkout_prod_image'] == 'true'){
 					$cnt .= '<td>&nbsp;</td>';
 				}
+				
 				$cnt .= '<td class="total">'.__("Total").'</td>';
 				$cnt .= '<td>&nbsp;</td>';
 				$cnt .= '<td>&nbsp;</td>';
@@ -266,9 +286,17 @@ function dg_cart_min($echo = 'false'){
 		}
 		if($total < 0){
 			$total = 0;
+			$total_tax = 0;
+			if(!empty($dg_shop_settings['tax_rate'])){
+				$total_tax = $total * $dg_shop_settings['tax_rate'] / 100;
+				$total = $total + $total_tax;
+			}
 		}
 		$url = get_page_link($dg_shop_settings['checkout_page']);
 		$cnt .= '</table>';
+		if(!empty($dg_shop_settings['tax_rate'])){
+			$cnt .= '<p class="total tax">'.__("Total Tax").' : '.$dg_shop_settings['currency_symbol'].' '.number_format($total_tax,2).'</p>';
+		}
 		$cnt .= '<p class="total">'.__("Total").' : '.$dg_shop_settings['currency_symbol'].' '.number_format($total,2).'</p>';
 		$cnt .= '<div class="dg_empty_cart"><span class="dg_empty">'.__("Empty Cart").'</span></div>';
 		$cnt .= '<p class="checkout"><a href="'.$url.'" class="go_checkout">'.__("Go to Checkout").'</a></p>';
@@ -319,6 +347,18 @@ function dg_mini_cart($echo = 'false', $imgurl = 'false'){
 		echo $cnt;
 	else
 		return $cnt;
+}
+
+//Total items in cart
+function dg_total_cart_items(){
+	$total = 0;
+	if(isset($_SESSION['dg_cart']) && !empty($_SESSION['dg_cart'])) {
+		$dg_cart = $_SESSION['dg_cart'];
+	}
+	if (is_array($dg_cart)) {
+		$total = count($dg_cart);
+	}
+	return $total;
 }
 
 add_action( 'wp_ajax_nopriv_shipping_submit', 'dg_shipping_submit');
