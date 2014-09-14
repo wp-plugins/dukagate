@@ -85,6 +85,10 @@ function dg_display_cart($atts){
 }
 
 
+//Show total items in cart
+add_shortcode('dg_display_cart_items_total', 'dg_total_cart_items');
+
+
 //Diplay links
 add_shortcode('dg_display_checkout_link', 'dg_display_checkout_link');
 function dg_display_checkout_link($atts){

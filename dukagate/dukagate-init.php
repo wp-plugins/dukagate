@@ -95,7 +95,7 @@ if(!class_exists('DukaGate')) {
 			//Dashboard Widget
 			add_action('wp_dashboard_setup', array(&$this,'revenue_graph'), 1);
 			
-			add_action( 'template_redirect', array(&$this, 'product_templates') );
+			//add_action( 'template_redirect', array(&$this, 'product_templates') );
 		}
 		
 		

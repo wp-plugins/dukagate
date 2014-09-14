@@ -349,6 +349,18 @@ function dg_mini_cart($echo = 'false', $imgurl = 'false'){
 		return $cnt;
 }
 
+//Total items in cart
+function dg_total_cart_items(){
+	$total = 0;
+	if(isset($_SESSION['dg_cart']) && !empty($_SESSION['dg_cart'])) {
+		$dg_cart = $_SESSION['dg_cart'];
+	}
+	if (is_array($dg_cart)) {
+		$total = count($dg_cart);
+	}
+	return $total;
+}
+
 add_action( 'wp_ajax_nopriv_shipping_submit', 'dg_shipping_submit');
 add_action( 'wp_ajax_shipping_submit', 'dg_shipping_submit');
 
