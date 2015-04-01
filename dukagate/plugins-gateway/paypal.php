@@ -193,13 +193,14 @@ class DukaGate_GateWay_PayPal extends DukaGate_GateWay_API{
 		
 		$settings = get_option('dukagate_gateway_settings');
 		
-		$return_path = get_page_link($dg_shop_settings['thankyou_page']);
-        $check_return_path = explode('?', $cancel_path);
+		$return_path = admin_url('admin-ajax.php?action=dg_handle_payment_return_'.$this->plugin_slug);
+		//$return_path = get_page_link($dg_shop_settings['thankyou_page']);
+        /*$check_return_path = explode('?', $cancel_path);
         if (count($check_return_path) > 1) {
-            $cancel_path .= '&id=' . $invoice_id;
+            $cancel_path .= '&dgid=' . $invoice_id;
         } else {
-            $cancel_path .= '?id=' . $invoice_id;
-        }
+            $cancel_path .= '?dgid=' . $invoice_id;
+        }*/
 		$conversion_rate = 1;
         if ($shop_currency != $settings[$this->plugin_slug]['currency']) {
 			$curr = new DG_CURRENCYCONVERTER();
