@@ -2,7 +2,7 @@
 /*
 Plugin Name: DukaGate Shopping Cart
 Description: DukaGate Shopping Cart
-Version: 3.7.4.1
+Version: 3.7.4.4
 Author: rixeo
 Author URI: http://www.shumipress.com/
 Plugin URI: http://dukagate.info/
@@ -11,7 +11,7 @@ Domain Path: /dukagate/lang/
 
 define('DG_PLUGIN_BASENAME',plugin_basename(__FILE__));
 
-define('DG_PLUGIN_URL', WP_PLUGIN_URL.'/'.dirname(plugin_basename(__FILE__)));
+define('DG_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('DG_PLUGIN_DIR', WP_PLUGIN_DIR.'/'.dirname(plugin_basename(__FILE__)));
 
 
