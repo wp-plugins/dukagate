@@ -1070,8 +1070,8 @@ if(!class_exists('DukaGate')) {
 			$table_name = $databases['meta'];
 			if($wpdb->get_var("show tables like '$table_name'") != $table_name) {
 				$sql = "CREATE TABLE `$table_name` (
-							`meta_id` bigint(20) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-							`taxonomy_id` bigint(20) unsigned NOT NULL default '0',
+							`meta_id` bigint(5) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+							`taxonomy_id` bigint(5) unsigned NOT NULL default '0',
 							`meta_key` varchar(255) default NULL,
 							`meta_value` longtext,
 							UNIQUE KEY `taxonomy` (`taxonomy_id`, `meta_key`)
