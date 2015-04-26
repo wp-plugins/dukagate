@@ -62,6 +62,7 @@ if(!class_exists('DukaGate')) {
 			require_once(DG_DUKAGATE_DIR.'/dukagate-products.php');
 			require_once(DG_DUKAGATE_DIR.'/dukagate-cart.php');
 			require_once(DG_DUKAGATE_DIR.'/dukagate-shortcodes.php');
+			require_once(DG_DUKAGATE_DIR.'/dukagate-install.php');
 			
 			add_filter( 'cron_schedules', array(__CLASS__, 'custom_cron_schedules'));
 			
