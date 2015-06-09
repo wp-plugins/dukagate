@@ -35,7 +35,6 @@ class DukaGate_Shipping_Area_Delivery extends DukaGate_Shipping_API{
 		if (@$_REQUEST['action'] === 'dg_sel_area_delivery') {
 			$this->select_rate_id();
 		}
-
 	}
 	
 	//Register Plugin
@@ -56,7 +55,7 @@ class DukaGate_Shipping_Area_Delivery extends DukaGate_Shipping_API{
 		$cnt .= '<thead>';
 		$cnt .= '<tr>';
 		$cnt .= '<th scope="row" align="left"><strong>'.__('Area', 'dg-lang').'</strong></th>';
-		$cnt .= '<th scope="row" align="left"><strong>'.__('Rate', 'dg-lang').'</strong></th>';
+		$cnt .= '<th scope="row" align="left"><strong>'.__('Cost', 'dg-lang').'</strong></th>';
 		$cnt .= '<th scope="row"></th>';
 		$cnt .= '</tr>';
 		$cnt .= '</thead>';
@@ -106,7 +105,7 @@ class DukaGate_Shipping_Area_Delivery extends DukaGate_Shipping_API{
 						<label><?php _e('Area', 'dg-lang') ?><br />
 						  <input value="" name="<?php echo $plugin_slug; ?>_area"  id="<?php echo $plugin_slug; ?>_area" type="text" />
 						</label><br/>
-						<label><?php _e('Rate', 'dg-lang') ?><br />
+						<label><?php _e('Cost', 'dg-lang') ?><br />
 						  <input value="" size="30" name="<?php echo $plugin_slug; ?>_rate" id="<?php echo $plugin_slug; ?>_rate" type="text" />
 						</label><br/>
 						<button onclick="area_delivery.save('<?php echo $plugin_slug; ?>_area', '<?php echo $plugin_slug; ?>_rate', '<?php echo $plugin_slug; ?>_div');"><?php _e('Save', 'dg-lang') ?></button>
@@ -120,14 +119,14 @@ class DukaGate_Shipping_Area_Delivery extends DukaGate_Shipping_API{
 						<thead>
 							<tr>
 								<th scope="row"><strong><?php _e('Area', 'dg-lang') ?></strong></th>
-								<th scope="row"><strong><?php _e('Rate', 'dg-lang') ?></strong></th>
+								<th scope="row"><strong><?php _e('Cost', 'dg-lang') ?></strong></th>
 								<th scope="row">&nbsp;</th>
 							</tr>
 						</thead>
 						<tfoot>
 							<tr>
 								<th scope="row"><strong><?php _e('Area', 'dg-lang') ?></strong></th>
-								<th scope="row"><strong><?php _e('Rate', 'dg-lang') ?></strong></th>
+								<th scope="row"><strong><?php _e('Cost', 'dg-lang') ?></strong></th>
 								<th scope="row">&nbsp;</th>
 							</tr>
 						</tfoot>
