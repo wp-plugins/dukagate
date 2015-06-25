@@ -108,6 +108,9 @@ class DukaGate_Products{
 			if($term)
 				$args['grouped_product'] = $term->name;
 		}
+		if(empty($total)){
+			$total = count(get_posts('post_type=dg_product' . $grouped_id));
+		}
 		if (!empty($per_page)) {
 			$pagenum = isset($_GET['dp_page']) ? $_GET['dp_page'] : 1;
 			$count = count(get_posts('numberposts=' . $total . '&post_type=dg_product' . $grouped_id));
