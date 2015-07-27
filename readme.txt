@@ -4,8 +4,8 @@ Donate link: http://dukagate.info/
 Tags: shopping cart, web shop, cart, shop,Paypal,paypal,Pesapal, e-commerce, ecommerce, worldpay, mpesa, bank, kopokopo, KopoKopo
 
 Requires at least: 3.0
-Tested up to: 4.2.2
-Stable tag: 3.7.7
+Tested up to: 4.2.3
+Stable tag: 3.7.8
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -69,6 +69,9 @@ We test Dukagate on a large number of different server set-ups and envrionments 
 8. Sample product with a widget product
 
 == Changelog ==
+
+= 3.7.8 =
+Fix on product quantity on cart
 
 = 3.7.7 =
 Javascript fix
