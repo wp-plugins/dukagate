@@ -9,7 +9,7 @@ if(!class_exists('DukaGate_Product_Widget')) {
 	class DukaGate_Product_Widget extends WP_Widget {
 		
 		
-		function DukaGate_Product_Widget() {
+		function __construct() {
 			$widget_ops = array( 'classname' => 'dukagate_product_widget', 'description' => __('DukaGate Product Widget', "dg-lang") ); // Widget Settings
 			$control_ops = array( 'id_base' => 'dukagate_product_widget' ); // Widget Control Settings
 			$this->WP_Widget( 'dukagate_product_widget', __('DukaGate Product', "dg-lang"), $widget_ops, $control_ops ); //

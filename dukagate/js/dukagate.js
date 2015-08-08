@@ -90,7 +90,7 @@ var dukagate ={
 		jQuery("#"+formid).submit(function() {
 			var form_values = jQuery(this).serialize();
 			jQuery('#shipping_submit_input').val(dg_js.processing + "......");
-			jQuery.post(dg_js.ajaxurl+'/index.php', form_values, function(data){
+			jQuery.post(dg_js.ajaxurl, form_values, function(data){
 				window.location.reload();
 			});
 			return false;
@@ -100,7 +100,7 @@ var dukagate ={
 	checkout : function(form){
 		var form_values = jQuery(form).serialize();
 		jQuery('#dg_process_payment_form').val(dg_js.processing + "......");
-		jQuery.post(dg_js.ajaxurl+'/index.php', form_values, function(data){
+		jQuery.post(dg_js.ajaxurl, form_values, function(data){
             eval(data);
         });
 	},

@@ -5,7 +5,7 @@ add_shortcode('dg_display_products', 'dg_display_products');
 function dg_display_products($atts){
 	extract(shortcode_atts(array(
                 'layout' => 'grid',
-				'total' => '12',
+				'total' => '',
 				'top' => '',
 				'per_page' => '',
 				'order' => 'DESC',

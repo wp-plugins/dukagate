@@ -45,7 +45,7 @@ if(!class_exists('DukaGate')) {
 			$this->dukagate_db();
 			add_action( 'dg_delete_files_daily', array(&$this, 'delete_files_daily') );
 			$this->set_up_directories_and_file_info();
-			update_option('dg_version_info', 3.8);
+			update_option('dg_version_info', 3.76);
 		}
 		
 		
@@ -62,6 +62,7 @@ if(!class_exists('DukaGate')) {
 			require_once(DG_DUKAGATE_DIR.'/dukagate-products.php');
 			require_once(DG_DUKAGATE_DIR.'/dukagate-cart.php');
 			require_once(DG_DUKAGATE_DIR.'/dukagate-shortcodes.php');
+			require_once(DG_DUKAGATE_DIR.'/dukagate-install.php');
 			
 			add_filter( 'cron_schedules', array(__CLASS__, 'custom_cron_schedules'));
 			
@@ -1069,8 +1070,8 @@ if(!class_exists('DukaGate')) {
 			$table_name = $databases['meta'];
 			if($wpdb->get_var("show tables like '$table_name'") != $table_name) {
 				$sql = "CREATE TABLE `$table_name` (
-							`meta_id` bigint(20) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-							`taxonomy_id` bigint(20) unsigned NOT NULL default '0',
+							`meta_id` bigint(5) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+							`taxonomy_id` bigint(5) unsigned NOT NULL default '0',
 							`meta_key` varchar(255) default NULL,
 							`meta_value` longtext,
 							UNIQUE KEY `taxonomy` (`taxonomy_id`, `meta_key`)

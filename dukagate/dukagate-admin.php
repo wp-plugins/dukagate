@@ -55,6 +55,14 @@ function dg_admin_settings(){
 			<?php
 			if ( $pagenow == 'edit.php' && $_GET['page'] == 'dukagate-settings' ){ 
 				$tab = 'settings';
+				$sample_data = $_GET['sample_data'];
+				if(isset ( $sample_data )){
+					if($sample_data === 'true'){
+						dukagate_create_pages();
+					}else{
+						update_option('dukagate_sample_data', 'done');
+					}
+				}
 				if ( isset ( $_GET['tab'] ) ) $tab = $_GET['tab']; 
 				switch ( $tab ){
 					case 'settings' :
