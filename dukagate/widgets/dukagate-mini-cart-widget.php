@@ -6,7 +6,7 @@ add_action('widgets_init', create_function('', 'return register_widget("DukaGate
 if(!class_exists('DukaGate_Mini_Cart_Widget')) {
 	class DukaGate_Mini_Cart_Widget extends WP_Widget {
 		
-		function DukaGate_Mini_Cart_Widget(){
+		function __construct(){
 			$widget_ops = array( 'classname' => 'dukagate_mini_cart_widget', 'description' => __('DukaGate Mini Cart Widget only shows the total number in the cart and a checkout link') ); // Widget Settings
 			$control_ops = array( 'id_base' => 'dukagate_mini_cart_widget' ); // Widget Control Settings
 			$this->WP_Widget( 'dukagate_mini_cart_widget', __('DukaGate Mini Cart'), $widget_ops, $control_ops ); //

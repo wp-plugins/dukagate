@@ -6,7 +6,7 @@ add_action('widgets_init', create_function('', 'return register_widget("DukaGate
 if(!class_exists('DukaGate_Cart_Widget')) {
 	class DukaGate_Cart_Widget extends WP_Widget {
 		
-		function DukaGate_Cart_Widget(){
+		function __construct(){
 			$widget_ops = array( 'classname' => 'dukagate_cart_widget', 'description' => __('DukaGate Cart Widget') ); // Widget Settings
 			$control_ops = array( 'id_base' => 'dukagate_cart_widget' ); // Widget Control Settings
 			$this->WP_Widget( 'dukagate_cart_widget', __('DukaGate Cart'), $widget_ops, $control_ops ); //
